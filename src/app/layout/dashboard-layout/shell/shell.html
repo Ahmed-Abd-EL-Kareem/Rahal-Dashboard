@@ -1,0 +1,28 @@
+<div class="flex h-screen overflow-hidden bg-background text-on-surface font-body-md antialiased">
+  <!-- Mobile Overlay -->
+  @if (mobileOpen()) {
+    <div class="fixed inset-0 z-30 lg:hidden bg-on-surface/50 backdrop-blur-sm" (click)="mobileOpen.set(false)"></div>
+  }
+
+  <!-- Sidebar Container -->
+  <!-- Desktop: always visible -->
+  <div class="hidden lg:block shrink-0 transition-all duration-250 z-40" [style.width]="collapsed() ? '80px' : '260px'">
+    <app-sidebar [collapsed]="collapsed()" (collapseChange)="collapsed.set($event)"></app-sidebar>
+  </div>
+
+  <!-- Mobile: slide-in drawer -->
+  <div class="fixed lg:hidden inset-y-0 left-0 z-40 w-[260px] transition-transform duration-300 ease-out"
+       [style.transform]="mobileOpen() ? 'translateX(0)' : 'translateX(-100%)'">
+    <app-sidebar [collapsed]="false" (collapseChange)="mobileOpen.set(false)"></app-sidebar>
+  </div>
+
+  <!-- Main Area -->
+  <div class="flex-1 flex flex-col overflow-hidden min-w-0 relative">
+    <app-topbar (menuClick)="onMenuClick()"></app-topbar>
+    
+    <!-- Canvas / Main Content -->
+    <main class="mt-6 px-6 flex-1 overflow-y-auto w-full  mx-auto pb-24 md:pb-container-margin bg-surface">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

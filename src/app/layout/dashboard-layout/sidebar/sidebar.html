@@ -1,0 +1,106 @@
+<nav
+  class="bg-surface-light left-0 top-0 h-screen fixed overflow-y-auto [&::-webkit-scrollbar]:hidden border-r border-border-subtle flex flex-col gap-base p-4 z-40 transition-all duration-250 ease-out"
+  [style.width]="collapsed() ? '80px' : '260px'"
+>
+  <div class="mb-8 flex" [class]="collapsed() ? 'flex-col items-center gap-6 pt-2' : 'items-center justify-between px-4 gap-3'">
+    @if (!collapsed()) {
+      <div class="flex items-center gap-3 ">
+        <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden border border-border-subtle shrink-0 shadow-sm">
+          <img alt="Rahal Admin" class="w-full h-full object-cover" src="/logo.png" />
+        </div>
+        <div class="overflow-hidden whitespace-nowrap">
+          <h2 class="font-headline-sm text-headline-sm font-bold text-primary">Rahal Admin</h2>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">Enterprise Suite</p>
+        </div>
+      </div>
+      <button (click)="toggleCollapse()" class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-150 text-on-surface-variant hover:bg-surface-container-low focus:outline-none" title="Collapse sidebar">
+        <ng-icon name="matMenuOpenOutline" size="20px"></ng-icon>
+      </button>
+    } @else {
+      <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden border border-border-subtle shrink-0 shadow-sm">
+        <img alt="Rahal Admin" class="w-full h-full object-cover" src="/logo.png" />
+      </div>
+      <button (click)="toggleCollapse()" class="shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-150 text-on-surface-variant hover:bg-surface-container-low focus:outline-none border border-border-subtle bg-white shadow-sm" title="Expand sidebar">
+        <ng-icon name="matMenuOutline" size="20px"></ng-icon>
+      </button>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1 flex-1">
+    @for (section of navSections; track section.title) {
+      @if (!collapsed()) {
+        <div
+          class="px-4 mb-1 mt-5 first:mt-0 font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider"
+        >
+          {{ section.title }}
+        </div>
+      } @else {
+        <div class="mx-3 my-3 border-t border-border-subtle"></div>
+      }
+
+      @for (item of section.items; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer group relative transition-all duration-200"
+          [class.bg-primary-container]="rla.isActive"
+          [class.dark:bg-primary]="rla.isActive"
+          [class.text-on-primary-container]="rla.isActive"
+          [class.dark:text-on-primary]="rla.isActive"
+          [class.font-bold]="rla.isActive"
+          [class.pointer-events-none]="rla.isActive"
+          [class.text-on-surface-variant]="!rla.isActive"
+          [class.dark:text-outline]="!rla.isActive"
+          [class.hover:bg-surface-container-low]="!rla.isActive"
+          [class.dark:hover:bg-surface-container-high]="!rla.isActive"
+          [class.hover:translate-x-1]="!rla.isActive"
+          [title]="collapsed() ? item.label : ''"
+        >
+          <ng-icon [name]="item.icon" size="24px" class="shrink-0"></ng-icon>
+          <span
+            class="font-label-md text-label-md truncate transition-all duration-200"
+            [class.hidden]="collapsed()"
+            >{{ item.label }}</span
+          >
+
+          @if (item.badge && !collapsed()) {
+            <span
+              class="ml-auto shrink-0 flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold bg-warning text-on-surface"
+            >
+              {{ item.badge }}
+            </span>
+          }
+        </a>
+      }
+    }
+  </div>
+
+  <div class="mt-auto pt-4 border-t border-border-subtle flex flex-col gap-1">
+    <a
+      [routerLink]="'/dashboard/settings'"
+      class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-colors cursor-pointer group"
+      [title]="collapsed() ? 'Support' : ''"
+    >
+      <ng-icon name="matHelpOutline" size="24px" class="shrink-0"></ng-icon>
+      <span
+        class="font-label-md text-label-md transition-all duration-200"
+        [class.hidden]="collapsed()"
+        >Support</span
+      >
+    </a>
+    <a
+      (click)="logout()"
+      class="flex items-center gap-3 px-4 py-2 rounded-lg text-danger hover:bg-error-container transition-colors cursor-pointer group"
+      [title]="collapsed() ? 'Logout' : ''"
+    >
+      <ng-icon name="matLogoutOutline" size="24px" class="shrink-0"></ng-icon>
+      <span
+        class="font-label-md text-label-md transition-all duration-200"
+        [class.hidden]="collapsed()"
+        >Logout</span
+      >
+    </a>
+  </div>
+</nav>

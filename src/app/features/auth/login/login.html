@@ -1,0 +1,119 @@
+<main class="flex h-screen w-full">
+<!-- Left Side: Hero Image & Branding -->
+<section class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-bg-dark">
+<img class="absolute inset-0 w-full h-full object-cover grayscale-[20%] brightness-75" src="/login_hero.jpg"/>
+<div class="absolute inset-0 bg-gradient-to-r from-slate-900/40 to-slate-900/10"></div>
+<!-- Branding Content -->
+<div class="relative z-10 flex flex-col justify-between h-full w-full p-12">
+<div class="flex items-center gap-3">
+<img alt="Rahal Logo" class="h-12 w-12 rounded-lg shadow-lg" src="/logo.png"/>
+<span class="font-display-lg text-headline-sm font-bold text-white tracking-tight">Rahal</span>
+</div>
+<div class="max-w-md">
+<h1 class="font-headline-lg text-headline-lg text-white mb-4">
+                        Precision travel logistics for the modern enterprise.
+                    </h1>
+<p class="font-body-lg text-body-lg text-white/80 leading-relaxed">
+                        Access the Rahal dashboard to manage global fleet movements, hotel integrations, and AI-powered route optimization.
+                    </p>
+</div>
+<div class="flex gap-6 items-center">
+<div class="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-xl flex items-center gap-3">
+<ng-icon name="matPublicOutline" class="text-primary-fixed" size="24px"></ng-icon>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-white">Global Reach</span>
+<span class="font-label-sm text-label-sm text-white/60">50+ Active Markets</span>
+</div>
+</div>
+<div class="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-xl flex items-center gap-3">
+<ng-icon name="matAutoAwesomeOutline" class="text-primary-fixed" size="24px"></ng-icon>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-white">AI Driven</span>
+<span class="font-label-sm text-label-sm text-white/60">Predictive Analytics</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Side: Login Form -->
+<section class="w-full lg:w-1/2 flex items-center justify-center bg-surface-light px-8 lg:px-20 relative overflow-y-auto">
+<div class="w-full max-w-md py-8">
+<!-- Mobile Logo -->
+<div class="lg:hidden flex justify-center mb-8">
+<img alt="Rahal Logo" class="h-12 w-12 rounded-lg shadow-md" src="/logo.png"/>
+</div>
+<header class="mb-10 text-center lg:text-left">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Welcome Back</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Enter your enterprise credentials to access Rahal Admin.</p>
+</header>
+
+@if (errorMessage()) {
+  <div class="flex items-start gap-3 p-4 rounded-xl mb-6 bg-error-container border border-error/20">
+    <ng-icon name="matErrorOutline" class="text-error" size="24px"></ng-icon>
+    <p class="text-sm font-medium text-error mt-0.5">
+      {{ errorMessage() }}
+    </p>
+  </div>
+}
+
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="space-y-6">
+<!-- Email Input -->
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface-variant" for="email">Email Address</label>
+<div class="relative">
+<ng-icon name="matMailOutline" class="absolute left-3 top-1/2 -translate-y-1/2 text-outline" size="20px"></ng-icon>
+<input formControlName="email" class="w-full pl-10 pr-4 py-3 bg-white border border-border-subtle rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all outline-none text-on-surface font-body-md" id="email" placeholder="name@company.com" required type="email" [class.border-error]="emailInvalid()"/>
+</div>
+@if (emailInvalid()) {
+  <p class="text-error text-xs">
+    @if (loginForm.get('email')?.errors?.['required']) {
+      Email is required.
+    } @else {
+      Please enter a valid email address.
+    }
+  </p>
+}
+</div>
+<!-- Password Input -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label class="block font-label-md text-label-md text-on-surface-variant" for="password">Password</label>
+<a class="font-label-md text-label-md text-primary hover:underline transition-all" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<ng-icon name="matLockOutline" class="absolute left-3 top-1/2 -translate-y-1/2 text-outline" size="20px"></ng-icon>
+<input formControlName="password" class="w-full pl-10 pr-12 py-3 bg-white border border-border-subtle rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all outline-none text-on-surface font-body-md" id="password" placeholder="••••••••" required [type]="showPassword() ? 'text' : 'password'" [class.border-error]="passwordInvalid()"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors cursor-pointer" (click)="showPassword.set(!showPassword())" type="button">
+<ng-icon [name]="showPassword() ? 'matVisibilityOffOutline' : 'matVisibilityOutline'" size="20px"></ng-icon>
+</button>
+</div>
+@if (passwordInvalid()) {
+  <p class="text-error text-xs">Password is required.</p>
+}
+</div>
+<!-- Remember Me -->
+<div class="flex items-center">
+<input class="w-4 h-4 text-primary border-border-subtle rounded focus:ring-primary-container cursor-pointer" id="remember" type="checkbox"/>
+<label class="ml-2 font-label-md text-label-md text-on-surface-variant cursor-pointer select-none" for="remember">Remember this device for 30 days</label>
+</div>
+<!-- Sign In Button -->
+<button class="w-full bg-primary-container text-white py-3.5 rounded-lg font-title-lg text-title-lg shadow-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" type="submit" [disabled]="loading()">
+@if (loading()) {
+  <ng-icon name="matRefreshOutline" class="animate-spin" size="20px"></ng-icon>
+  Signing in...
+} @else {
+  Sign In
+  <ng-icon name="matArrowForwardOutline" size="20px"></ng-icon>
+}
+</button>
+</form>
+
+<!-- Footer Links -->
+<footer class="mt-12 text-center">
+<p class="font-label-md text-label-md text-on-surface-variant">
+                        Need assistance? <a class="text-primary hover:underline" href="#">Contact System Administrator</a>
+</p>
+</footer>
+</div>
+</section>
+</main>
