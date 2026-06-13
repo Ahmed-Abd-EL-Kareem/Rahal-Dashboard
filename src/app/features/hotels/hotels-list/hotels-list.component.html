@@ -1,0 +1,356 @@
+<div class="p-6 bg-[#f8f9ff] min-h-screen">
+
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-[28px] font-bold text-slate-900 tracking-tight">Hotel Management</h1>
+      <p class="text-[13.5px] text-slate-500 mt-1">
+        Manage inventory, pricing, and availability across destinations.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Export Button -->
+      <button 
+        (click)="exportHotels()" 
+        class="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-[13px] shadow-sm transition-all duration-150 cursor-pointer active:scale-95 focus:outline-none"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-500">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+        Export
+      </button>
+
+      <!-- Add Hotel Button -->
+      <button 
+        (click)="createHotel()" 
+        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#005c55] hover:bg-[#0f766e] text-white font-semibold text-[13px] shadow-sm transition-all duration-150 cursor-pointer active:scale-95 focus:outline-none"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        Add Hotel
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Card -->
+  <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 items-end">
+      
+      <!-- City / Destination -->
+      <div>
+        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">City / Destination</label>
+        <div class="relative">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+            </svg>
+          </span>
+          <select
+            [(ngModel)]="cityFilter"
+            (change)="applyFilters()"
+            class="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-[13px] font-medium text-slate-700 appearance-none focus:outline-none focus:border-[#005c55] focus:ring-1 focus:ring-[#005c55] cursor-pointer transition-all"
+          >
+            <option value="">All Destinations</option>
+            <option *ngFor="let c of cities()" [value]="c">{{ c }}</option>
+          </select>
+          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <!-- Star Rating -->
+      <div>
+        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Star Rating</label>
+        <div class="relative">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499c.196-.607 1.056-.607 1.252 0l1.98 6.096a1 1 0 0 0 .95.69h6.462c.643 0 .91.822.392 1.22l-5.22 3.829a1 1 0 0 0-.364 1.118l1.98 6.096c.196.607-.551 1.152-1.077.721l-5.22-3.83a1 1 0 0 0-1.177 0l-5.22 3.83c-.526.43-1.273-.115-1.077-.721l1.98-6.096a1 1 0 0 0-.364-1.118L2.247 11.51c-.518-.397-.251-1.22.392-1.22h6.462a1 1 0 0 0 .95-.69l1.98-6.096Z" />
+            </svg>
+          </span>
+          <select
+            [(ngModel)]="starsFilter"
+            (change)="applyFilters()"
+            class="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-[13px] font-medium text-slate-700 appearance-none focus:outline-none focus:border-[#005c55] focus:ring-1 focus:ring-[#005c55] cursor-pointer transition-all"
+          >
+            <option value="">Any Rating</option>
+            <option *ngFor="let s of availableStars()" [value]="s">{{ s.toFixed(1) }} Stars</option>
+          </select>
+          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <!-- Price Range -->
+      <div>
+        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Price Range (Avg/Night)</label>
+        <div class="relative">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+            </svg>
+          </span>
+          <select
+            [(ngModel)]="priceFilter"
+            (change)="applyFilters()"
+            class="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-[13px] font-medium text-slate-700 appearance-none focus:outline-none focus:border-[#005c55] focus:ring-1 focus:ring-[#005c55] cursor-pointer transition-all"
+          >
+            <option value="">All Prices</option>
+            <option value="low">Under $150 / EGP 3,000</option>
+            <option value="mid">$150 - $250 / EGP 3,000 - 10,000</option>
+            <option value="high">Over $250 / EGP 10,000</option>
+          </select>
+          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div>
+        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Status</label>
+        <div class="relative">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+          </span>
+          <select
+            [(ngModel)]="statusFilter"
+            (change)="applyFilters()"
+            class="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-[13px] font-medium text-slate-700 appearance-none focus:outline-none focus:border-[#005c55] focus:ring-1 focus:ring-[#005c55] cursor-pointer transition-all"
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <!-- Clear Button -->
+      <div class="flex justify-end md:justify-start">
+        <button
+          (click)="clearFilters()"
+          class="text-[#005c55] hover:text-[#0f766e] hover:underline text-[13.5px] font-semibold transition-all py-2.5 cursor-pointer focus:outline-none"
+        >
+          Clear Filters
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="bg-white border border-slate-200 rounded-2xl p-16 text-center shadow-xs">
+    <div class="inline-block animate-spin w-8 h-8 border-4 border-slate-200 border-t-[#005c55] rounded-full mb-3"></div>
+    <p class="text-slate-500 font-medium text-sm">Loading hotels database...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && hotels().length === 0" class="bg-white border border-slate-200 rounded-2xl p-16 text-center shadow-xs">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-slate-300 mx-auto mb-4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+    </svg>
+    <h3 class="text-slate-800 font-semibold text-[16px] mb-1">No Hotels Found</h3>
+    <p class="text-slate-400 text-[13px] max-w-sm mx-auto">We couldn't find any hotel listings matching your criteria. Try adjusting your search query or filters.</p>
+  </div>
+
+  <!-- Hotels Table Card -->
+  <div *ngIf="!loading() && hotels().length > 0" class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-left">
+        <thead>
+          <tr class="bg-slate-50/70 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+            <th class="py-4 px-6 font-semibold">Hotel Name</th>
+            <th class="py-4 px-6 font-semibold">City</th>
+            <th class="py-4 px-6 font-semibold">Rating</th>
+            <th class="py-4 px-6 font-semibold">Avg Nightly</th>
+            <th class="py-4 px-6 font-semibold">Availability</th>
+            <th class="py-4 px-6 font-semibold">Status</th>
+            <th class="py-4 px-6 font-semibold w-[120px] text-right pr-8">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr 
+            *ngFor="let hotel of hotels()" 
+            (click)="viewHotel(hotel._id)"
+            class="group hover:bg-[#f8f9ff]/50 transition-colors duration-150 cursor-pointer align-middle"
+          >
+            <!-- Hotel Name & Photo -->
+            <td class="py-4 px-6">
+              <div class="flex items-center gap-4">
+                <img 
+                  [src]="hotel.coverImage || (hotel.images && hotel.images[0]) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=120&auto=format&fit=crop&q=60'" 
+                  alt="Hotel cover"
+                  class="w-[56px] h-[38px] object-cover rounded-lg shadow-xs border border-slate-100 shrink-0"
+                  onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=120&auto=format&fit=crop&q=60'"
+                />
+                <div class="flex flex-col">
+                  <span class="font-semibold text-slate-800 text-[13.5px] tracking-tight group-hover:text-[#005c55] transition-colors flex items-center gap-1.5">
+                    {{ hotel.name.en }}
+                    <!-- AI Sparkle Icon for special hotels like Sofitel Winter Palace -->
+                    <span *ngIf="hotel.name.en.toLowerCase().includes('sofitel') || hotel.stars === 5" class="text-cyan-500 flex items-center" title="AI Featured Hotel">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                        <path fill-rule="evenodd" d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 0 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813A3.75 3.75 0 0 0 7.466 7.93L8.28 5.084A.75.75 0 0 1 9 4.5ZM18.75 16.5a.75.75 0 0 1 .721.544l.354 1.238a1.875 1.875 0 0 0 1.288 1.288l1.238.354a.75.75 0 0 1 0 1.442l-1.238.354a1.875 1.875 0 0 0-1.288 1.288l-.354 1.238a.75.75 0 0 1-1.442 0l-.354-1.238a1.875 1.875 0 0 0-1.288-1.288l-1.238-.354a.75.75 0 0 1 0-1.442l1.238-.354a1.875 1.875 0 0 0 1.288-1.288l.354-1.238a.75.75 0 0 1 .721-.544Z" clip-rule="evenodd" />
+                      </svg>
+                    </span>
+                  </span>
+                  <span class="text-[10.5px] text-slate-400 font-mono mt-0.5">ID: {{ getShortId(hotel._id) }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- City -->
+            <td class="py-4 px-6 text-slate-600 text-[13px] font-medium">
+              {{ hotel.city }}
+            </td>
+
+            <!-- Rating (Gold Star + Value) -->
+            <td class="py-4 px-6">
+              <div class="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-amber-400">
+                  <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
+                </svg>
+                <span class="font-semibold text-slate-800 text-[13px]">{{ hotel.stars.toFixed(1) }}</span>
+              </div>
+            </td>
+
+            <!-- Price Avg Nightly -->
+            <td class="py-4 px-6">
+              <span 
+                [ngClass]="{
+                  'text-emerald-600 font-bold': hotel.averagePricePerNight < 200 && hotel.currency === 'USD',
+                  'text-slate-800 font-bold': !(hotel.averagePricePerNight < 200 && hotel.currency === 'USD')
+                }"
+                class="text-[14px]"
+              >
+                {{ formatPrice(hotel) }}
+              </span>
+            </td>
+
+            <!-- Availability Badge -->
+            <td class="py-4 px-6">
+              <span 
+                [ngClass]="{
+                  'bg-emerald-50 text-emerald-600 border border-emerald-100': availabilityLabel(hotel) === 'High',
+                  'bg-amber-50 text-amber-600 border border-amber-100': availabilityLabel(hotel) === 'Medium',
+                  'bg-red-50 text-red-600 border border-red-100': availabilityLabel(hotel) === 'Low',
+                  'bg-slate-100 text-slate-400 border border-slate-200': availabilityLabel(hotel) === 'N/A'
+                }"
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-tight"
+              >
+                {{ availabilityLabel(hotel) }}
+              </span>
+            </td>
+
+            <!-- Status Dot -->
+            <td class="py-4 px-6">
+              <div class="flex items-center">
+                <span 
+                  [ngClass]="{
+                    'bg-emerald-500 ring-4 ring-emerald-50': hotel.isActive,
+                    'bg-slate-300 ring-4 ring-slate-100': !hotel.isActive
+                  }"
+                  class="w-2 h-2 rounded-full inline-block"
+                ></span>
+              </div>
+            </td>
+
+            <!-- Actions (Hover Actions Group to maintain clean look) -->
+            <td class="py-4 px-6 text-right pr-8" (click)="$event.stopPropagation()">
+              <div class="flex items-center justify-end gap-2.5 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <!-- View -->
+                <button 
+                  (click)="viewHotel(hotel._id)" 
+                  class="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
+                  title="View Details"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4.5 h-4.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                </button>
+
+                <!-- Edit -->
+                <button 
+                  (click)="editHotel(hotel._id)" 
+                  class="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-[#005c55] transition-colors focus:outline-none"
+                  title="Edit Hotel"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4.5 h-4.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.013a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                  </svg>
+                </button>
+
+                <!-- Delete -->
+                <button 
+                  (click)="deleteHotel(hotel._id, $event)" 
+                  class="p-1.5 hover:bg-red-50 rounded-lg text-slate-300 hover:text-red-600 transition-colors focus:outline-none"
+                  title="Delete Hotel"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4.5 h-4.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div class="bg-white px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-[13px] text-slate-500">
+        Showing 
+        <span class="font-semibold text-slate-800">{{ ((filters.page ?? 1) - 1) * (filters.limit ?? 10) + 1 }}</span>
+        to 
+        <span class="font-semibold text-slate-800">{{ Math.min((filters.page ?? 1) * (filters.limit ?? 10), total()) }}</span>
+        of 
+        <span class="font-semibold text-slate-800">{{ total() }}</span> 
+        hotels
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <!-- Previous Page -->
+        <button 
+          (click)="goToPage((filters.page ?? 1) - 1)" 
+          [disabled]="(filters.page ?? 1) === 1"
+          class="p-2 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 disabled:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 transition-all cursor-pointer focus:outline-none"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        <!-- Next Page -->
+        <button 
+          (click)="goToPage((filters.page ?? 1) + 1)" 
+          [disabled]="(filters.page ?? 1) === totalPages()"
+          class="p-2 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 disabled:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 transition-all cursor-pointer focus:outline-none"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>

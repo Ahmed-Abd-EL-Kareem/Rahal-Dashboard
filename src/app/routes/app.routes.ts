@@ -29,10 +29,12 @@ export const routes: Routes = [
         path: 'destinations',
         loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
       },
-      {
-        path: 'hotels',
-        loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
-      },
+ {
+  path: 'hotels',
+  loadChildren: () =>
+    import('../features/hotels/hotels.routes')
+      .then(r => r.HOTELS_ROUTES)
+},
       {
         path: 'trips',
         loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
