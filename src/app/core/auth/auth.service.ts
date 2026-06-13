@@ -68,6 +68,33 @@ export class AuthService {
     );
   }
 
+  forgotPassword(email: string) {
+    return this.http.post(`${environment.apiUrl}/auth/forgot-password`, { email }).pipe(
+      catchError((err) => {
+        const msg = err.error?.message ?? 'Could not send reset link. Please try again.';
+        return throwError(() => new Error(msg));
+      })
+    );
+  }
+
+  verifyOtp(email: string, otp: string) {
+    return this.http.post(`${environment.apiUrl}/auth/verify-otp`, { email, otp }).pipe(
+      catchError((err) => {
+        const msg = err.error?.message ?? 'Invalid or expired OTP. Please try again.';
+        return throwError(() => new Error(msg));
+      })
+    );
+  }
+
+  resetPassword(data: { email: string; newPassword: string; otp: string }) {
+    return this.http.post(`${environment.apiUrl}/auth/reset-password`, data).pipe(
+      catchError((err) => {
+        const msg = err.error?.message ?? 'Failed to reset password. Please check the OTP and try again.';
+        return throwError(() => new Error(msg));
+      })
+    );
+  }
+
   logout(): void {
     this.token.set(null);
     this.currentUser.set(null);

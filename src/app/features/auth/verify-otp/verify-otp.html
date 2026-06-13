@@ -1,0 +1,81 @@
+<div class="bg-bg-light flex items-center justify-center min-h-screen p-container-margin w-full relative overflow-hidden">
+  <!-- Atmospheric Background Elements -->
+  <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+  <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+  <!-- Verify OTP Container -->
+  <div class="w-full max-w-md animate-in fade-in zoom-in duration-500 z-10">
+    <!-- Brand Header -->
+    <div class="flex flex-col items-center mb-8">
+      <h1 class="font-display-lg text-headline-md font-bold text-primary tracking-tight select-none">Rahal</h1>
+      <p class="font-label-md text-label-md text-outline uppercase tracking-widest mt-1 select-none">Enterprise Suite</p>
+    </div>
+
+    <!-- Auth Card -->
+    <app-auth-card title="Verify Your Identity" description="Please enter the 6-digit verification code sent to your email.">
+      
+      <!-- Feedback Notifications -->
+      @if (infoMessage()) {
+        <div class="flex items-start gap-3 p-4 rounded-xl mb-6 bg-success/10 border border-success/20 animate-in fade-in duration-200">
+          <span class="material-symbols-outlined text-success !text-xl">check_circle</span>
+          <p class="text-sm font-medium text-success mt-0.5">{{ infoMessage() }}</p>
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <div class="flex items-start gap-3 p-4 rounded-xl mb-6 bg-error-container border border-error/20 animate-in fade-in duration-200">
+          <span class="material-symbols-outlined text-error !text-xl">error</span>
+          <p class="text-sm font-medium text-error mt-0.5">{{ errorMessage() }}</p>
+        </div>
+      }
+
+      <div class="space-y-6">
+        <!-- Display Email -->
+        <div class="text-center bg-surface-container-low border border-border-subtle rounded-lg py-2.5 px-4 font-body-md text-on-surface-variant select-none">
+          Code sent to: <span class="font-semibold text-on-surface">{{ email() }}</span>
+        </div>
+
+        <!-- Reusable OTPInput -->
+        <app-otp-input (codeChange)="onOtpChange($event)"></app-otp-input>
+
+        <!-- Action Area -->
+        <div class="space-y-4 pt-2">
+          <app-button 
+            type="button" 
+            [disabled]="disableVerify()" 
+            [loading]="loading()"
+            (btnClick)="verifyCode()"
+          >
+            <span class="material-symbols-outlined text-body-lg">verified</span>
+            <span>Verify OTP</span>
+          </app-button>
+          
+          <div class="flex justify-between items-center text-xs px-1 select-none mt-4">
+            <span class="text-on-surface-variant/70">Didn't receive the code?</span>
+            <button 
+              type="button" 
+              (click)="resendCode()"
+              [disabled]="!canResend() || loading()"
+              class="font-semibold transition-colors flex items-center gap-1 uppercase tracking-wide cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              [ngClass]="canResend() ? 'text-primary hover:text-secondary-container' : 'text-on-surface-variant/50'"
+            >
+              @if (canResend()) {
+                <span>Resend Code</span>
+                <span class="material-symbols-outlined text-[14px]">refresh</span>
+              } @else {
+                <span>Resend in {{ resendCountdown() }}s</span>
+              }
+            </button>
+          </div>
+
+          <div class="text-center border-t border-border-subtle/40 pt-4">
+            <a class="inline-flex items-center justify-center gap-2 text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors group select-none" routerLink="/forgot-password">
+              <span class="material-symbols-outlined !text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+              <span>Back to Step 1</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </app-auth-card>
+  </div>
+</div>

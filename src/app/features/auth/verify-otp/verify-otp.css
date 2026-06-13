@@ -1,0 +1,4 @@
+/* Verify OTP Custom styles */
+.success-glow {
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.1);
+}

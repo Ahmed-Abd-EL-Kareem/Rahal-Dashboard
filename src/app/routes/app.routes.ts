@@ -9,6 +9,21 @@ export const routes: Routes = [
     canActivate: [noAuthGuard]
   },
   {
+    path: 'forgot-password',
+    loadComponent: () => import('../features/auth/forgot-password/forgot-password').then(c => c.ForgotPassword),
+    canActivate: [noAuthGuard]
+  },
+  {
+    path: 'verify-otp',
+    loadComponent: () => import('../features/auth/verify-otp/verify-otp').then(c => c.VerifyOtp),
+    canActivate: [noAuthGuard]
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('../features/auth/reset-password/reset-password').then(c => c.ResetPassword),
+    canActivate: [noAuthGuard]
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('../layout/dashboard-layout/shell/shell').then(c => c.Shell),
     canActivate: [authGuard],
