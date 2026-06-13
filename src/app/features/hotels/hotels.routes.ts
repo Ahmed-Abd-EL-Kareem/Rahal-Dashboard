@@ -60,4 +60,5 @@ export const HOTELS_ROUTES: Routes = [
     loadComponent: () =>
       import('./hotel-detail/hotel-detail').then(m => m.HotelDetailComponent),
   },
+  
 ];

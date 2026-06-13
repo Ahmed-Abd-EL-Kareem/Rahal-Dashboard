@@ -1,16 +1,27 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { matPublicOutline, matAutoAwesomeOutline, matErrorOutline, matMailOutline, matLockOutline, matVisibilityOutline, matVisibilityOffOutline, matRefreshOutline, matArrowForwardOutline } from '@ng-icons/material-icons/outline';
+import {
+  matPublicOutline,
+  matAutoAwesomeOutline,
+  matErrorOutline,
+  matMailOutline,
+  matLockOutline,
+  matVisibilityOutline,
+  matVisibilityOffOutline,
+  matRefreshOutline,
+  matArrowForwardOutline,
+} from '@ng-icons/material-icons/outline';
 
 @Component({
   selector: 'app-login',
   imports: [CommonModule, ReactiveFormsModule, NgIconComponent],
   templateUrl: './login.html',
   styleUrl: './login.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   viewProviders: [
     provideIcons({
       matPublicOutline,
@@ -21,11 +32,10 @@ import { matPublicOutline, matAutoAwesomeOutline, matErrorOutline, matMailOutlin
       matVisibilityOutline,
       matVisibilityOffOutline,
       matRefreshOutline,
-      matArrowForwardOutline
-    })
-  ]
+      matArrowForwardOutline,
+    }),
+  ],
 })
-
 export class Login {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
@@ -81,5 +91,4 @@ export class Login {
       },
     });
   }
-
 }

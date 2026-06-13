@@ -39,10 +39,10 @@ export const routes: Routes = [
         path: 'trips',
         loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
       },
-      {
-        path: 'bookings',
-        loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
-      },
+  {
+  path: 'bookings',
+  loadComponent: () => import('../features/hotels/hotel-bookings/hotel-bookings').then(m => m.HotelBookingsComponent),
+},
       {
         path: 'ai-usage',
         loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)

@@ -1,4 +1,11 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -23,7 +30,7 @@ import {
   matVisibilityOutline,
 } from '@ng-icons/material-icons/outline';
 
-import { HotelsService } from '../shared/hotels'
+import { HotelsService } from '../shared/hotels';
 import { Hotel, HotelFilters } from '../shared/hotel.model';
 import { forkJoin } from 'rxjs';
 
@@ -33,36 +40,44 @@ import { forkJoin } from 'rxjs';
   imports: [CommonModule, RouterModule, FormsModule],
   viewProviders: [
     provideIcons({
-      matSearchOutline, matFilterListOutline, matAddOutline,
-      matFileDownloadOutline, matLocationOnOutline, matStarOutline,
-       matChevronLeftOutline, matChevronRightOutline,
-      matDeleteOutline, matEditOutline, matVisibilityOutline,
+      matSearchOutline,
+      matFilterListOutline,
+      matAddOutline,
+      matFileDownloadOutline,
+      matLocationOnOutline,
+      matStarOutline,
+      matChevronLeftOutline,
+      matChevronRightOutline,
+      matDeleteOutline,
+      matEditOutline,
+      matVisibilityOutline,
     }),
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './hotels-list.component.html',
 })
 export class HotelsListComponent implements OnInit {
   private hotelsService = inject(HotelsService);
   private router = inject(Router);
 
-  hotels   = signal<Hotel[]>([]);
-  loading  = signal(false);
-  total    = signal(0);
+  hotels = signal<Hotel[]>([]);
+  loading = signal(false);
+  total = signal(0);
 
   // ── Dynamic from API ──────────────────────────────────────────────
-  cities           = signal<string[]>([]);
-  availableStars   = signal<number[]>([]);
-  loadingFilters   = signal(false);
+  cities = signal<string[]>([]);
+  availableStars = signal<number[]>([]);
+  loadingFilters = signal(false);
 
   filters: HotelFilters = { page: 1, limit: 10, sort: '-createdAt' };
-  searchQuery  = '';
-  cityFilter   = '';
-  starsFilter  = '';
-  priceFilter  = '';
+  searchQuery = '';
+  cityFilter = '';
+  starsFilter = '';
+  priceFilter = '';
   statusFilter = '';
 
   totalPages = computed(() => Math.ceil(this.total() / (this.filters.limit ?? 10)));
-  pages      = computed(() => Array.from({ length: Math.min(this.totalPages(), 5) }, (_, i) => i + 1));
+  pages = computed(() => Array.from({ length: Math.min(this.totalPages(), 5) }, (_, i) => i + 1));
 
   readonly Math = Math;
 
@@ -71,7 +86,7 @@ export class HotelsListComponent implements OnInit {
     this.loadingFilters.set(true);
     forkJoin({
       cities: this.hotelsService.getCities(),
-      stars:  this.hotelsService.getAvailableStars(),
+      stars: this.hotelsService.getAvailableStars(),
     }).subscribe({
       next: ({ cities, stars }) => {
         this.cities.set(cities);
@@ -87,15 +102,23 @@ export class HotelsListComponent implements OnInit {
   loadHotels() {
     this.loading.set(true);
     const f: HotelFilters = { ...this.filters };
-    if (this.cityFilter)  f.city   = this.cityFilter;
-    if (this.starsFilter) f.stars  = +this.starsFilter;
+    if (this.cityFilter) f.city = this.cityFilter;
+    if (this.starsFilter) f.stars = +this.starsFilter;
     if (this.searchQuery) f.search = this.searchQuery;
-    if (this.priceFilter === 'low')  { f.minPrice = 0;     f.maxPrice = 3000; }
-    if (this.priceFilter === 'mid')  { f.minPrice = 3000;  f.maxPrice = 10000; }
-    if (this.priceFilter === 'high') { f.minPrice = 10000; }
+    if (this.priceFilter === 'low') {
+      f.minPrice = 0;
+      f.maxPrice = 3000;
+    }
+    if (this.priceFilter === 'mid') {
+      f.minPrice = 3000;
+      f.maxPrice = 10000;
+    }
+    if (this.priceFilter === 'high') {
+      f.minPrice = 10000;
+    }
 
     this.hotelsService.getHotels(f).subscribe({
-      next: res => {
+      next: (res) => {
         this.hotels.set(res.data);
         this.total.set(res.pagination?.total ?? res.length);
         this.loading.set(false);
@@ -104,11 +127,16 @@ export class HotelsListComponent implements OnInit {
     });
   }
 
-  applyFilters() { this.filters.page = 1; this.loadHotels(); }
+  applyFilters() {
+    this.filters.page = 1;
+    this.loadHotels();
+  }
 
   clearFilters() {
-    this.cityFilter = ''; this.starsFilter = '';
-    this.priceFilter = ''; this.statusFilter = '';
+    this.cityFilter = '';
+    this.starsFilter = '';
+    this.priceFilter = '';
+    this.statusFilter = '';
     this.searchQuery = '';
     this.applyFilters();
   }
@@ -119,9 +147,15 @@ export class HotelsListComponent implements OnInit {
     this.loadHotels();
   }
 
-  viewHotel(id: string)  { this.router.navigate(['/dashboard/hotels', id]); }
-  editHotel(id: string)  { this.router.navigate(['/dashboard/hotels', id, 'edit']); }
-  createHotel()          { this.router.navigate(['/dashboard/hotels/create']); }
+  viewHotel(id: string) {
+    this.router.navigate(['/dashboard/hotels', id]);
+  }
+editHotel(id: string) {
+  this.router.navigate(['/dashboard/hotels', id], { queryParams: { edit: true } });
+}
+  createHotel() {
+    this.router.navigate(['/dashboard/hotels/create']);
+  }
 
   exportHotels() {
     const data = this.hotels();
@@ -129,8 +163,17 @@ export class HotelsListComponent implements OnInit {
       alert('No data to export');
       return;
     }
-    const headers = ['Hotel ID', 'Hotel Name', 'City', 'Rating', 'Avg Price Per Night', 'Currency', 'Availability', 'Status'];
-    const rows = data.map(hotel => [
+    const headers = [
+      'Hotel ID',
+      'Hotel Name',
+      'City',
+      'Rating',
+      'Avg Price Per Night',
+      'Currency',
+      'Availability',
+      'Status',
+    ];
+    const rows = data.map((hotel) => [
       this.getShortId(hotel._id),
       hotel.name.en,
       hotel.city,
@@ -138,11 +181,13 @@ export class HotelsListComponent implements OnInit {
       hotel.averagePricePerNight,
       hotel.currency,
       this.availabilityLabel(hotel),
-      hotel.isActive ? 'Active' : 'Inactive'
+      hotel.isActive ? 'Active' : 'Inactive',
     ]);
-    const csvContent = "\ufeff" + [headers, ...rows]
-      .map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+    const csvContent =
+      '\ufeff' +
+      [headers, ...rows]
+        .map((e) => e.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -160,8 +205,12 @@ export class HotelsListComponent implements OnInit {
     this.hotelsService.deleteHotel(id).subscribe(() => this.loadHotels());
   }
 
-  starsArray(n: number)  { return Array(n).fill(0); }
-  emptyStars(n: number)  { return Array(5 - n).fill(0); }
+  starsArray(n: number) {
+    return Array(n).fill(0);
+  }
+  emptyStars(n: number) {
+    return Array(5 - n).fill(0);
+  }
 
   getShortId(mongoId: string): string {
     if (!mongoId) return 'HTL-00000';
@@ -170,7 +219,7 @@ export class HotelsListComponent implements OnInit {
 
   availabilityLabel(hotel: Hotel): string {
     if (!hotel.isActive) return 'N/A';
-    
+
     const price = hotel.averagePricePerNight;
     if (hotel.currency === 'USD') {
       if (price >= 250) return 'High';

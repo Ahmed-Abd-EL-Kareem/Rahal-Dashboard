@@ -1,11 +1,24 @@
-import { Component, signal, computed, inject, input, output } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  inject,
+  input,
+  output,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router, RouterLink, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter, map } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth/auth.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { matSettingsOutline, matPersonOutline, matLogoutOutline, matMenuOutline } from '@ng-icons/material-icons/outline';
+import {
+  matSettingsOutline,
+  matPersonOutline,
+  matLogoutOutline,
+  matMenuOutline,
+} from '@ng-icons/material-icons/outline';
 
 interface Crumb {
   label: string;
@@ -17,14 +30,15 @@ interface Crumb {
   imports: [CommonModule, RouterLink, NgIconComponent],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   viewProviders: [
     provideIcons({
       matSettingsOutline,
       matPersonOutline,
       matLogoutOutline,
-      matMenuOutline
-    })
-  ]
+      matMenuOutline,
+    }),
+  ],
 })
 export class TopBar {
   menuClick = output<void>();
