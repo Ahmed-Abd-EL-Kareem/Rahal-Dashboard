@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard, noAuthGuard } from '../core/guards/auth.guard';
+import { UsersComponent } from '../shared/components/user/user';
+import { UserDetailsComponent } from '../shared/components/user-details/user-details';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -23,7 +25,13 @@ export const routes: Routes = [
       },
       {
         path: 'users',
-        loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
+        // loadComponent: () => import('../shared/components/user/user').then(c => c.UsersComponent)
+        component: UsersComponent
+      },
+      {
+        path: 'users/:id',
+        loadComponent: () => import('../shared/components/user-details/user-details').then(c => c.UserDetailsComponent),
+        // component:UserDetailsComponent
       },
       {
         path: 'destinations',

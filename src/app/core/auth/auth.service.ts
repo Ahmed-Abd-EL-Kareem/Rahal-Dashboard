@@ -12,13 +12,13 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private cookieService = inject(CookieService);
-  
+
   private TOKEN_KEY = 'token';
   private USER_KEY = 'rahal_user';
 
   token = signal<string | null>(this.cookieService.get(this.TOKEN_KEY) || null);
   currentUser = signal<User | null>(this._loadUser());
-  
+
   isAuthenticated = computed(() => !!this.token() || !!this.currentUser());
   isAdmin = computed(() => this.currentUser()?.role === 'admin');
 
@@ -50,13 +50,13 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest) {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials,{ withCredentials: true }).pipe(
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials, { withCredentials: true }).pipe(
       tap((res) => {
         // Read the token from the response body and set it in memory
         const tokenVal = res.token;
         this.token.set(tokenVal);
         this.currentUser.set(res.data.user);
-        
+
         // Save user details to cookies (expire in 7 days, path '/')
         // We do NOT write the token cookie from JS to avoid conflicting with the backend's HttpOnly cookie
         this.cookieService.set(this.USER_KEY, JSON.stringify(res.data.user), 7, '/');

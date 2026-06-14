@@ -1,0 +1,41 @@
+.ag-grid-cell {
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+}
+
+.ag-grid-header {
+  height: 40px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+}
+
+.ag-grid-row {
+  border-bottom: 1px solid var(--color-border-subtle);
+  background-color: var(--color-surface-light);
+}
+
+.ag-grid-row:hover {
+  background-color: var(--color-surface-container-low);
+}
+
+/* Modal and toast animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
