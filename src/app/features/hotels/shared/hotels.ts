@@ -63,11 +63,9 @@ export class HotelsService {
       { params }
     );
   }
-
-  updateBookingStatus(id: string, status: any) {
-    return this.http.patch(`${this.base}/bookings/admin/${id}/status`, { status });
-  }
-
+updateBookingStatus(id: string, body: { status?: string; paymentStatus?: string }) {
+  return this.http.patch(`${this.base}/bookings/admin/${id}/status`, body);
+}
   // ✅ FIXED: getCities
   getCities(): Observable<string[]> {
     return this.http

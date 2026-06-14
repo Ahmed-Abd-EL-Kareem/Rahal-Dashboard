@@ -138,11 +138,18 @@ export class HotelBookingsComponent implements OnInit {
     this.goToPage(this.page() - 1);
   }
 
-  updateBookingStatus(id: string, status: string): void {
-    this.hotelsService.updateBookingStatus(id, status).subscribe({
-      next: () => this.loadBookings(),
-    });
-  }
+  updatePaymentStatus(id: string, paymentStatus: string): void {
+  this.hotelsService.updateBookingStatus(id, { paymentStatus }).subscribe({
+    next: () => this.loadBookings(),
+  });
+}
+
+
+updateBookingStatus(id: string, status: string): void {
+  this.hotelsService.updateBookingStatus(id, { status }).subscribe({
+    next: () => this.loadBookings(),
+  });
+}
 
   // ─── Display helpers ───────────────────────────────────────────────────────
   hotelName(b: any): string {
