@@ -1,0 +1,231 @@
+<div class="min-h-screen bg-[#f8f9ff] py-6 px-8 flex flex-col gap-6">
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="min-h-[50vh] flex flex-col items-center justify-center gap-3">
+    <span class="w-10 h-10 border-4 border-[#005c55] border-t-transparent rounded-full animate-spin"></span>
+    <span class="text-sm text-slate-500 font-medium">Loading destination details...</span>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="errorMessage()" class="min-h-[50vh] flex flex-col items-center justify-center">
+    <div
+      class="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm max-w-xl w-full">
+      <ng-icon name="matInfoOutline" class="text-lg flex-shrink-0 text-red-500"></ng-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <ng-container *ngIf="!loading() && !errorMessage() && destination()">
+    <!-- Top Nav / Breadcrumbs -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex flex-col gap-2">
+        <!-- Breadcrumb link -->
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <a routerLink="/dashboard/destinations" class="hover:text-[#005c55] transition">Destinations</a>
+          <span class="text-slate-300">/</span>
+          <span class="text-slate-600">{{ destination().name?.en }}</span>
+        </div>
+
+        <h1 class="text-3xl font-bold text-[#0b1c30]">{{ destination().name?.en }} Details</h1>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <!-- Edit Button -->
+        <a [routerLink]="['/dashboard/destinations/edit', destination()._id]"
+          class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm transition duration-150 cursor-pointer">
+          <ng-icon name="matEditOutline" class="text-base"></ng-icon>
+          Edit
+        </a>
+
+        <!-- Add Activity Button -->
+        <!-- <button type="button"
+                class="bg-[#005c55] hover:bg-[#0f766e] text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm hover:shadow transition duration-150">
+          <ng-icon name="matAddOutline" class="text-base"></ng-icon>
+          Add Activity
+        </button> -->
+      </div>
+    </div>
+
+    <!-- Layout Grid -->
+    <div class="grid grid-cols-1 gap-6">
+
+      <!-- Top Card: Banner & Overview -->
+      <div class="bg-white border border-[#E2E8F0] rounded-2xl overflow-hidden shadow-sm flex flex-col">
+        <!-- Hero Cover Image -->
+        <div class="relative w-full h-[350px] bg-slate-900 overflow-hidden flex items-end">
+          <img [src]="destination().coverImage || '/assets/placeholder-destination.jpg'" [alt]="destination().name?.en"
+            class="absolute inset-0 w-full h-full object-cover opacity-85">
+          <!-- Dark overlay gradient -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+          <!-- Overlay badges and texts -->
+          <div class="relative z-10 p-8 w-full flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+              <span
+                class="bg-[#005c55] text-white px-2.5 py-1 rounded text-[10px] font-bold tracking-wider uppercase shadow-sm">
+                PREMIUM
+              </span>
+              <span class="px-2.5 py-1 rounded text-[10px] font-bold tracking-wider uppercase text-white shadow-sm"
+                [ngClass]="destination().isActive ? 'bg-emerald-600' : 'bg-red-600'">
+                {{ destination().isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+
+            <h2 class="text-5xl font-black text-white tracking-tight leading-none">
+              {{ destination().name?.en }}
+            </h2>
+
+            <div class="flex items-center gap-1.5 text-slate-300 text-sm font-medium mt-1">
+              <ng-icon name="matLocationOnOutline" class="text-base text-[#005c55]"></ng-icon>
+              <span>{{ destination().city }}, {{ destination().region }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Details details row -->
+        <div class="p-8 md:p-10 flex flex-col gap-8">
+          <div>
+            <p class="text-slate-600 text-base leading-relaxed">
+              {{ destination().description?.en || 'No description provided.' }}
+            </p>
+          </div>
+
+          <!-- Divider line -->
+          <div class="border-t border-slate-100 pt-6 flex flex-wrap gap-8 items-center">
+            <!-- Best Time to Visit (Dynamic) -->
+            <div class="flex items-center gap-4">
+              <div
+                class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[#005c55]">
+                <ng-icon name="matScheduleOutline" class="text-2xl"></ng-icon>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Best Time to
+                  Visit</span>
+                <span class="text-slate-800 font-extrabold text-base mt-0.5">
+                  {{ getBestMonthsText() }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Average Budget Tag -->
+            <div class="flex items-center gap-4">
+              <div
+                class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[#005c55]">
+                <ng-icon name="matLocalAtmOutline" class="text-2xl"></ng-icon>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Average Daily
+                  Budget</span>
+                <span class="text-slate-800 font-extrabold text-base mt-0.5">
+                  {{ destination().averageBudgetPerDay }} {{ destination().currency }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Grid: Attractions and Hotels (2 Columns) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Left: Top Attractions -->
+        <div class="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm flex flex-col overflow-hidden">
+          <div class="border-b border-slate-100 px-6 py-5 flex items-center justify-between bg-slate-50/50">
+            <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+              <ng-icon name="matMapOutline" class="text-xl text-[#005c55]"></ng-icon>
+              Top Attractions
+            </h3>
+            <span class="bg-[#005c55]/10 text-[#005c55] text-xs font-bold px-2 py-0.5 rounded-full">
+              {{ destination().attractions?.length || 0 }} Total
+            </span>
+          </div>
+
+          <div class="p-6 flex flex-col gap-4">
+            <!-- Dynamic Attractions Mapping -->
+            <ng-container *ngIf="destination().attractions && destination().attractions.length > 0; else noAttractions">
+              <div *ngFor="let att of destination().attractions"
+                class="flex items-center gap-4 border border-slate-100 rounded-xl p-4 hover:bg-slate-50/50 transition">
+                <!-- Fallback Attraction Icon container -->
+                <div
+                  class="w-14 h-14 rounded-xl bg-[#005c55]/5 border border-[#005c55]/10 flex items-center justify-center text-[#005c55] shrink-0">
+                  <ng-icon name="matLocationOnOutline" class="text-2xl"></ng-icon>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-bold text-slate-800 text-sm truncate">{{ att.name?.en }}</h4>
+                  <p class="text-slate-400 text-xs mt-0.5">{{ att.type || 'Point of Interest' }}</p>
+                </div>
+
+                <!-- Attraction details -->
+                <div class="text-right shrink-0 flex flex-col gap-0.5">
+                  <span class="text-xs font-bold text-slate-600">Entry Fee</span>
+                  <span class="text-xs text-[#005c55] font-semibold">{{ att.entryFee > 0 ? (att.entryFee + ' ' +
+                    destination().currency) : 'Free' }}</span>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-template #noAttractions>
+              <div
+                class="py-12 border border-dashed border-slate-200 rounded-xl bg-slate-50/20 flex flex-col items-center justify-center text-slate-400 gap-2">
+                <ng-icon name="matMapOutline" class="text-3xl text-slate-300"></ng-icon>
+                <span class="text-xs font-medium">No local attractions mapped to this destination yet.</span>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Right: Premier Hotels -->
+        <div class="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm flex flex-col overflow-hidden">
+          <div class="border-b border-slate-100 px-6 py-5 flex items-center justify-between bg-slate-50/50">
+            <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+              <ng-icon name="matHotelOutline" class="text-xl text-[#005c55]"></ng-icon>
+              Premier Hotels
+            </h3>
+            <span class="bg-[#005c55]/10 text-[#005c55] text-xs font-bold px-2 py-0.5 rounded-full">
+              {{ filteredHotels().length }} in City
+            </span>
+          </div>
+
+          <div class="p-6 flex flex-col gap-4">
+            <!-- Dynamic Hotels Mapping -->
+            <ng-container *ngIf="filteredHotels().length > 0; else noHotels">
+              <div *ngFor="let hotel of filteredHotels()"
+                class="flex items-center gap-4 border border-slate-100 rounded-xl p-4 hover:bg-slate-50/50 transition">
+
+                <!-- Hotel Image -->
+                <img [src]="hotel.coverImage || hotel.images?.[0] || hotel.image || '/assets/placeholder-hotel.jpg'"
+                  [alt]="hotel.name?.en || hotel.name"
+                  class="w-14 h-14 object-cover rounded-xl shrink-0 border border-slate-100 bg-slate-100">
+
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-bold text-slate-800 text-sm truncate">{{ hotel.name?.en || hotel.name }}</h4>
+                  <p class="text-slate-400 text-xs mt-0.5 truncate">{{ hotel.address || hotel.location?.address ||
+                    'City Center' }}</p>
+                </div>
+
+                <!-- Rating -->
+                <div
+                  class="shrink-0 flex items-center gap-1 bg-amber-50 border border-amber-100 text-amber-700 px-2 py-1 rounded-lg text-xs font-bold">
+                  <ng-icon name="matStarOutline" class="text-amber-500"></ng-icon>
+                  <span>{{ hotel.rating || hotel.stars || 5.0 }}</span>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-template #noHotels>
+              <div
+                class="py-12 border border-dashed border-slate-200 rounded-xl bg-slate-50/20 flex flex-col items-center justify-center text-slate-400 gap-2">
+                <ng-icon name="matHotelOutline" class="text-3xl text-slate-300"></ng-icon>
+                <span class="text-xs font-medium">No hotels registered in this city yet.</span>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </ng-container>
+</div>

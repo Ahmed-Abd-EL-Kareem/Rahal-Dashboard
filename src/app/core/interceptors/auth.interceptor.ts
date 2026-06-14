@@ -9,10 +9,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   let clonedReq = req;
   if (req.url.startsWith(environment.apiUrl)) {
     clonedReq = req.clone({ withCredentials: true });
-  }
-
-  if (token) {
-    clonedReq = clonedReq.clone({ headers: clonedReq.headers.set('Authorization', `Bearer ${token}`) });
+    if (token) {
+      clonedReq = clonedReq.clone({ headers: clonedReq.headers.set('Authorization', `Bearer ${token}`) });
+    }
   }
   
   return next(clonedReq);
