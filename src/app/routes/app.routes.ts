@@ -51,7 +51,11 @@ export const routes: Routes = [
       },
       {
         path: 'payments',
-        loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
+        loadComponent: () => import('../features/payments/payments').then(c => c.Payments)
+      },
+      {
+        path: 'payments/:id',
+loadComponent: () => import('../features/payments/payment-details/payment-details').then(c => c.PaymentDetailsComponent)
       },
       {
         path: 'stripe',

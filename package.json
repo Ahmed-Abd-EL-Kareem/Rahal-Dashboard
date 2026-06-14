@@ -19,6 +19,8 @@
     "@angular/router": "^21.2.0",
     "@ng-icons/core": "^33.2.3",
     "@ng-icons/material-icons": "^33.2.3",
+    "chart.js": "^4.5.1",
+    "ng2-charts": "^10.0.0",
     "ngx-cookie-service": "^22.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
