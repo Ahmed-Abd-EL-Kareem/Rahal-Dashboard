@@ -79,10 +79,6 @@
     <!-- Density Settings -->
     <div class="ml-auto flex items-center gap-2">
       <span class="font-label-md text-label-md text-on-surface-variant">Density:</span>
-      <button (click)="setDensity('compact')"
-        [class]="'p-1.5 rounded transition-colors border cursor-pointer ' + (density() === 'compact' ? 'bg-surface-container-high border-border-subtle text-primary' : 'bg-transparent border-transparent text-on-surface-variant hover:bg-surface-container-low')">
-        <ng-icon name="matDensitySmallOutline" class="text-[18px]"></ng-icon>
-      </button>
       <button (click)="setDensity('normal')"
         [class]="'p-1.5 rounded transition-colors border cursor-pointer ' + (density() === 'normal' ? 'bg-surface-container-high border-border-subtle text-primary' : 'bg-transparent border-transparent text-on-surface-variant hover:bg-surface-container-low')">
         <ng-icon name="matDensityMediumOutline" class="text-[18px]"></ng-icon>
@@ -116,7 +112,7 @@
   } @else {
   <!-- Data Table (AG Grid Style) -->
   <div
-    class="flex-1 bg-surface-light border border-border-subtle rounded-lg overflow-hidden flex flex-col shadow-sm relative min-h-[400px]">
+    class="flex-1 bg-surface-light border border-border-subtle rounded-lg overflow-hidden flex flex-col shadow-sm relative min-h-[500px]">
     <!-- AI Intelligence indicator for smart sorting/filtering -->
     <div
       class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-secondary-container via-primary-container to-secondary-container">
@@ -147,8 +143,7 @@
 
         <!-- Grid Rows -->
         @for (user of users(); track user._id) {
-        <div (click)="viewUserDetails(user._id)"
-          class="flex w-full ag-grid-row group items-center relative transition-colors cursor-pointer"
+        <div (click)="viewUserDetails(user)"  class="flex w-full ag-grid-row group items-center relative transition-colors cursor-pointer"
           [style.height]="density() === 'compact' ? '48px' : '64px'">
           <!-- User Profile -->
           <div class="w-64 ag-grid-cell gap-3">
@@ -210,18 +205,18 @@
             <span
               class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20 text-xs">
               <ng-icon name="matTravelExploreOutline" class="text-[14px]"></ng-icon>
-              {{ getUserTripsCount(user._id, user) }} Trips
+              {{ getUserTripsCount(user) }} Trips
             </span>
           </div>
 
-          <!-- Creation Date -->
+          <!-- Created Date -->
           <div class="w-40 ag-grid-cell font-body-md text-body-md text-on-surface-variant">
-            {{ user.provider === 'google' ? 'Google OAuth' : 'Email/Pass' }}
+            {{ formatDate(user.createdAt) }}
           </div>
 
           <!-- Actions cell with view details eye icon and delete button -->
           <div class="w-24 ag-grid-cell justify-center gap-2">
-            <button (click)="viewUserDetails(user._id); $event.stopPropagation()"
+            <button (click)="viewUserDetails(user); $event.stopPropagation()"
               class="p-1.5 rounded-full text-primary hover:bg-primary/10 transition-colors cursor-pointer focus:outline-none"
               title="View User Details">
               <ng-icon name="matVisibilityOutline" class="text-[20px]"></ng-icon>
@@ -234,6 +229,25 @@
           </div>
         </div>
         }
+      </div>
+    </div>
+    <!-- Pagination Footer -->
+    <div
+      class="flex items-center justify-between px-6 py-4 bg-surface-container-low border-t border-border-subtle shrink-0">
+      <div class="text-sm text-on-surface-variant font-body-md">
+        Showing page <span class="font-semibold text-primary">{{ page() }}</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button (click)="prevPage()" [disabled]="page() === 1 || isLoading()"
+          class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface-light border border-border-subtle rounded-lg text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm">
+          <ng-icon name="matChevronLeftOutline" class="text-[18px]"></ng-icon>
+          Previous
+        </button>
+        <button (click)="nextPage()" [disabled]="users().length < limit() || isLoading()"
+          class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface-light border border-border-subtle rounded-lg text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm">
+          Next
+          <ng-icon name="matChevronRightOutline" class="text-[18px]"></ng-icon>
+        </button>
       </div>
     </div>
   </div>

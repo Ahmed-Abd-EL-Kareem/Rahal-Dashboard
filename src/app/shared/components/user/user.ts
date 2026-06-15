@@ -1,10 +1,11 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { Subject, forkJoin, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { UsersService } from '../../../core/users/users.service';
 import { User } from '../../../models/auth.models';
 
@@ -13,17 +14,12 @@ import {
   matSearchOutline,
   matDownloadOutline,
   matAddOutline,
-  matFilterListOutline,
-  matDateRangeOutline,
   matCheckCircleOutline,
-  matDensitySmallOutline,
   matDensityMediumOutline,
   matStarOutline,
-  matMoreVertOutline,
   matChevronLeftOutline,
   matChevronRightOutline,
   matCloseOutline,
-  matEditOutline,
   matDeleteOutline,
   matCardMembershipOutline,
   matSettingsOutline,
@@ -33,6 +29,8 @@ import {
   matVisibilityOutline,
   matTravelExploreOutline
 } from '@ng-icons/material-icons/outline';
+
+const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
 
 @Component({
   selector: 'app-user',
@@ -45,17 +43,12 @@ import {
       matSearchOutline,
       matDownloadOutline,
       matAddOutline,
-      matFilterListOutline,
-      matDateRangeOutline,
       matCheckCircleOutline,
-      matDensitySmallOutline,
       matDensityMediumOutline,
       matStarOutline,
-      matMoreVertOutline,
       matChevronLeftOutline,
       matChevronRightOutline,
       matCloseOutline,
-      matEditOutline,
       matDeleteOutline,
       matCardMembershipOutline,
       matSettingsOutline,
@@ -68,94 +61,64 @@ import {
   ]
 })
 export class UsersComponent implements OnInit {
+  private readonly usersService = inject(UsersService);
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  // --- Signals for Data & State ---
   users = signal<User[]>([]);
-  allTrips = signal<any[]>([]);
-  isLoading = signal<boolean>(false);
+  isLoading = signal(false);
   density = signal<'compact' | 'normal'>('compact');
 
-  // --- Filters ---
-  limit = signal<number>(20);
-  searchQuery = signal<string>('');
-  roleFilter = signal<string>('all');
-  sortFilter = signal<string>('-createdAt');
+  limit = signal(10);
+  page = signal(1);
+  searchQuery = signal('');
+  roleFilter = signal('all');
+  sortFilter = signal('-createdAt');
 
-  // --- UI Action Modals ---
   selectedUser = signal<User | null>(null);
-  showAddModal = signal<boolean>(false);
-  showDeleteModal = signal<boolean>(false);
-
-  // --- Forms ---
-  addForm!: FormGroup;
-
-  // --- Search Input Debouncing ---
-  public searchSubject = new Subject<string>();
-
-  // --- Toast Notifications ---
+  showAddModal = signal(false);
+  showDeleteModal = signal(false);
   toast = signal<{ message: string; type: 'success' | 'danger' | 'warning' } | null>(null);
 
-  constructor(
-    private usersService: UsersService,
-    private fb: FormBuilder,
-    private router: Router
-  ) {
-    this.initForms();
-  }
+  addForm: FormGroup = this.fb.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(PASSWORD_PATTERN)]]
+  });
+
+  private readonly searchSubject = new Subject<string>();
 
   ngOnInit(): void {
     this.loadUsers();
 
-    // Set up search debouncing
     this.searchSubject.pipe(
       debounceTime(400),
-      distinctUntilChanged()
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(value => {
       this.searchQuery.set(value);
+      this.page.set(1);
       this.loadUsers();
     });
   }
 
-  private initForms(): void {
-    this.addForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(8),
-          Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/)
-        ]
-      ],
-    });
-  }
-
-  // // --- API Actions ---
   loadUsers(): void {
     this.isLoading.set(true);
-    forkJoin({
-      usersRes: this.usersService.getUsers({
-        search: this.searchQuery(),
-        role: this.roleFilter(),
-        sort: this.sortFilter(),
-        limit: this.limit()
-      }),
-      tripsRes: this.usersService.getTrips().pipe(
-        catchError(err => {
-          console.error('Error loading trips for user list:', err);
-          return of({ data: { trips: [] } });
-        })
-      )
+
+    this.usersService.getUsers({
+      search: this.searchQuery(),
+      role: this.roleFilter(),
+      sort: this.sortFilter(),
+      limit: this.limit(),
+      page: this.page()
     }).subscribe({
-      next: ({ usersRes, tripsRes }) => {
-        this.users.set(usersRes.data.users || []);
-        this.allTrips.set(tripsRes?.data?.trips || []);
+      next: res => {
+        this.users.set(res.data.users ?? []);
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Error loading users:', err);
-        this.showToast('Failed to load users from server', 'danger');
+      error: () => {
+        this.showToast('Failed to load users', 'danger');
         this.isLoading.set(false);
       }
     });
@@ -168,20 +131,34 @@ export class UsersComponent implements OnInit {
 
   setRoleFilter(role: string): void {
     this.roleFilter.set(role);
+    this.page.set(1);
     this.loadUsers();
   }
 
   setSortFilter(sort: string): void {
     this.sortFilter.set(sort);
+    this.page.set(1);
     this.loadUsers();
+  }
+
+  nextPage(): void {
+    this.page.update(current => current + 1);
+    this.loadUsers();
+  }
+
+  prevPage(): void {
+    if (this.page() > 1) {
+      this.page.update(current => current - 1);
+      this.loadUsers();
+    }
   }
 
   setDensity(density: 'compact' | 'normal'): void {
     this.density.set(density);
   }
 
-  // --- Modal Control Functions ---
   openAddModal(): void {
+    this.addForm.reset();
     this.showAddModal.set(true);
   }
 
@@ -196,7 +173,6 @@ export class UsersComponent implements OnInit {
     this.selectedUser.set(null);
   }
 
-  // --- Form Submit Operations ---
   onSubmitAdd(): void {
     if (this.addForm.invalid) return;
 
@@ -207,8 +183,7 @@ export class UsersComponent implements OnInit {
         this.closeAllModals();
         this.loadUsers();
       },
-      error: (err) => {
-        console.error(err);
+      error: err => {
         const errorMsg = err.error?.message ?? 'Failed to create user';
         this.showToast(errorMsg, 'danger');
         this.isLoading.set(false);
@@ -217,19 +192,17 @@ export class UsersComponent implements OnInit {
   }
 
   onConfirmDelete(): void {
-    if (!this.selectedUser()) return;
+    const user = this.selectedUser();
+    if (!user) return;
 
     this.isLoading.set(true);
-    const userId = this.selectedUser()?._id!;
-
-    this.usersService.deleteUser(userId).subscribe({
+    this.usersService.deleteUser(user._id).subscribe({
       next: () => {
         this.showToast('User deleted successfully', 'success');
         this.closeAllModals();
         this.loadUsers();
       },
-      error: (err) => {
-        console.error(err);
+      error: err => {
         const errorMsg = err.error?.message ?? 'Failed to delete user';
         this.showToast(errorMsg, 'danger');
         this.isLoading.set(false);
@@ -237,47 +210,57 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  // --- Export Table Data ---
   onExport(): void {
-    const csvContent = "data:text/csv;charset=utf-8,"
-      + ["Name,Email,Role,Subscription"].join(",") + "\n"
-      + this.users().map(u => `"${u.name}","${u.email}","${u.role}","${u.subscription || 'free'}"`).join("\n");
+    const header = 'Name,Email,Role,Subscription,Saved Trips';
+    const rows = this.users().map(user =>
+      `"${user.name}","${user.email}","${user.role}","${user.subscription ?? 'free'}","${this.getUserTripsCount(user)}"`
+    );
+    const csvContent = `data:text/csv;charset=utf-8,${header}\n${rows.join('\n')}`;
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `users_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    const link = document.createElement('a');
+    link.href = encodeURI(csvContent);
+    link.download = `users_export_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
     this.showToast('CSV export downloaded successfully', 'success');
   }
 
-  // --- Notification Toast Helpers ---
-  private showToast(message: string, type: 'success' | 'danger' | 'warning'): void {
-    this.toast.set({ message, type });
-    setTimeout(() => {
-      this.toast.set(null);
-    }, 4000);
+  viewUserDetails(user: User): void {
+    void this.router.navigate(['/dashboard/users', user._id]);
   }
 
   getInitials(name: string): string {
     if (!name) return 'U';
+
     return name
       .split(' ')
-      .map(n => n[0])
+      .map(part => part[0])
       .join('')
       .slice(0, 2)
       .toUpperCase();
   }
 
-  viewUserDetails(userId: string): void {
-    this.router.navigate(['/dashboard/users', userId]);
+  getUserTripsCount(user: User): number {
+    return user.savedTrips?.length ?? 0;
   }
 
-  getUserTripsCount(userId: string, user: User): number {
-    const savedCount = (user as any).savedTrips?.length ?? 0;
-    const fetchedCount = this.allTrips().filter(t => t.user === userId || t.user?._id === userId).length;
-    return Math.max(savedCount, fetchedCount);
+  formatDate(dateStr?: string): string {
+    if (!dateStr) return '—';
+
+    const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return '—';
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  private showToast(message: string, type: 'success' | 'danger' | 'warning'): void {
+    this.toast.set({ message, type });
+    setTimeout(() => this.toast.set(null), 4000);
   }
 }

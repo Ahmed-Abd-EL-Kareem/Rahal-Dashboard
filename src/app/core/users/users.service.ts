@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { User } from '../../models/auth.models';
+import { Booking, Trip, User, UserSubscription } from '../../models/auth.models';
 import { environment } from '../../../environments/environment';
 
 export interface UsersResponse {
@@ -16,32 +16,50 @@ export interface UserResponse {
   };
 }
 
+export interface TripsResponse {
+  data: Trip[];
+}
+
+export interface BookingsResponse {
+  data: Booking[];
+}
+
+export interface SubscriptionsResponse {
+  subscriptions: UserSubscription[];
+}
+
+export interface UserQueryParams {
+  search?: string;
+  limit?: number;
+  page?: number;
+  role?: string;
+  sort?: string;
+}
+
+export interface UserScopedQueryParams {
+  user?: string;
+  limit?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
-  constructor(private http: HttpClient) {}
-  private baseUrl = `${environment.apiUrl}/users`;
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/users`;
 
-  /**
-   * Get all users (filtered)
-   */
-  getUsers(params: {
-    search?: string;
-    limit?: number;
-    role?: string;
-    sort?: string;
-  } = {}): Observable<UsersResponse> {
+  getUsers(params: UserQueryParams = {}): Observable<UsersResponse> {
     let httpParams = new HttpParams();
 
     if (params.search) {
       httpParams = httpParams.set('search', params.search);
     }
-    
     if (params.limit) {
       httpParams = httpParams.set('limit', params.limit.toString());
     }
-
+    if (params.page) {
+      httpParams = httpParams.set('page', params.page.toString());
+    }
     if (params.role && params.role !== 'all') {
       httpParams = httpParams.set('role', params.role);
     }
@@ -52,52 +70,50 @@ export class UsersService {
     return this.http.get<UsersResponse>(this.baseUrl, { params: httpParams });
   }
 
-  /**
-   * Create an admin user
-   */
   createUser(userData: Partial<User> & { password?: string }): Observable<UserResponse> {
     return this.http.post<UserResponse>(this.baseUrl, userData);
   }
 
-  /**
-   * Delete a user
-   */
   deleteUser(id: string): Observable<{ status: string; message: string }> {
     return this.http.delete<{ status: string; message: string }>(`${this.baseUrl}/${id}`);
   }
 
-  /**
-   * Get user by ID
-   */
   getUserById(id: string): Observable<UserResponse> {
     return this.http.get<UserResponse>(`${this.baseUrl}/${id}`);
   }
 
-  /**
-   * Update user details
-   */
   updateUser(id: string, userData: Partial<User>): Observable<UserResponse> {
     return this.http.patch<UserResponse>(`${this.baseUrl}/${id}`, userData);
   }
 
-  /**
-   * Get all trips (admin view)
-   */
-  getTrips(): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/trips/admin/all`);
+  getTrips(params: UserScopedQueryParams = {}): Observable<TripsResponse> {
+    return this.http.get<TripsResponse>(`${environment.apiUrl}/trips/admin/all`, {
+      params: this.buildScopedParams(params)
+    });
   }
 
-  /**
-   * Get all bookings (admin view)
-   */
-  getBookings(): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/bookings/admin/all`);
+  getBookings(params: UserScopedQueryParams = {}): Observable<BookingsResponse> {
+    return this.http.get<BookingsResponse>(`${environment.apiUrl}/bookings/admin/all`, {
+      params: this.buildScopedParams(params)
+    });
   }
 
-  /**
-   * Get all subscriptions (admin view)
-   */
-  getSubscriptions(): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/subscriptions/admin/all`);
+  getSubscriptions(params: UserScopedQueryParams = {}): Observable<SubscriptionsResponse> {
+    return this.http.get<SubscriptionsResponse>(`${environment.apiUrl}/subscriptions/admin/all`, {
+      params: this.buildScopedParams(params)
+    });
+  }
+
+  private buildScopedParams(params: UserScopedQueryParams): HttpParams {
+    let httpParams = new HttpParams();
+
+    if (params.user) {
+      httpParams = httpParams.set('user', params.user);
+    }
+    if (params.limit) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+
+    return httpParams;
   }
 }
