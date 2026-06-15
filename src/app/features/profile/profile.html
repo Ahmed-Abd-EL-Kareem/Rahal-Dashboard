@@ -1,0 +1,321 @@
+@if (toast(); as t) {
+<div
+  class="fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl transition-all duration-300"
+  [class.bg-emerald-50]="t.type === 'success'" [class.border-emerald-200]="t.type === 'success'"
+  [class.text-emerald-800]="t.type === 'success'" [class.bg-rose-50]="t.type === 'danger'"
+  [class.border-rose-200]="t.type === 'danger'" [class.text-rose-800]="t.type === 'danger'"
+  [class.bg-amber-50]="t.type === 'warning'" [class.border-amber-200]="t.type === 'warning'"
+  [class.text-amber-800]="t.type === 'warning'">
+  <ng-icon [name]="t.type === 'success' ? 'matCheckCircleOutline' : 'matSettingsOutline'" class="w-5 h-5"></ng-icon>
+  <span class="font-body-md font-semibold">{{ t.message }}</span>
+  <button (click)="toast.set(null)" class="text-slate-400 hover:text-slate-600 ml-2 focus:outline-none">
+    <ng-icon name="matCloseOutline" class="w-4 h-4"></ng-icon>
+  </button>
+</div>
+}
+
+<main class="max-w-5xl mx-auto w-full p-4 md:p-8 flex flex-col gap-6">
+  @if (isLoading()) {
+  <div
+    class="flex flex-col items-center justify-center p-24 bg-surface-light border border-border-subtle rounded-xl shadow-sm">
+    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+    <p class="text-body-md text-on-surface-variant mt-4 font-semibold">Loading your profile...</p>
+  </div>
+  } @else if (user(); as profile) {
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="font-headline-md text-headline-md text-on-surface">My Profile</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+        Manage your account information and security settings.
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      @if (!showEditForm() && !showPasswordForm()) {
+      <button (click)="openEditForm()"
+        class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-container text-white rounded-lg font-label-md text-label-md shadow-sm hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer">
+        <ng-icon name="matEditOutline" size="18px"></ng-icon>
+        Edit Profile
+      </button>
+      @if (isLocalProvider()) {
+      <button (click)="openPasswordForm()"
+        class="inline-flex items-center gap-2 px-4 py-2.5 bg-surface-light border border-border-subtle text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-all cursor-pointer">
+        <ng-icon name="matVpnKeyOutline" size="18px"></ng-icon>
+        Change Password
+      </button>
+      }
+      }
+    </div>
+  </header>
+
+  @if (showEditForm()) {
+  <section class="bg-surface-light border border-primary/20 rounded-xl p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
+        <ng-icon name="matEditOutline" class="text-primary"></ng-icon>
+        Update Profile
+      </h2>
+      <button (click)="closeEditForm()" class="p-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors cursor-pointer">
+        <ng-icon name="matCloseOutline" size="20px"></ng-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="submitProfile()" class="space-y-6" novalidate>
+      <div class="flex flex-col sm:flex-row items-center gap-6">
+        <div class="relative shrink-0">
+          @if (imagePreview()) {
+          <img [src]="imagePreview()" alt="Profile preview"
+            class="w-24 h-24 rounded-full border-4 border-surface object-cover" />
+          } @else {
+          <div
+            class="w-24 h-24 rounded-full border-4 border-surface bg-primary/10 text-primary flex items-center justify-center font-bold text-3xl">
+            {{ getInitials(profileForm.get('name')?.value || profile.name) }}
+          </div>
+          }
+          <label
+            class="absolute bottom-0 right-0 w-8 h-8 bg-primary-container text-white rounded-full flex items-center justify-center cursor-pointer hover:brightness-110 transition-all shadow-sm">
+            <ng-icon name="matPhotoCameraOutline" size="16px"></ng-icon>
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden"
+              (change)="onImageSelected($event)" />
+          </label>
+        </div>
+        <div class="text-center sm:text-left">
+          <p class="font-body-md text-body-md text-on-surface font-semibold">Profile Photo</p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">
+            JPG, PNG, WEBP or GIF. Max 5MB.
+          </p>
+          @if (isUploadingImage()) {
+          <p class="font-label-sm text-label-sm text-primary mt-2 flex items-center gap-1.5 justify-center sm:justify-start">
+            <ng-icon name="matRefreshOutline" class="animate-spin" size="14px"></ng-icon>
+            Uploading image...
+          </p>
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="space-y-2">
+          <label class="block font-label-md text-label-md text-on-surface-variant" for="profile-name">Full Name</label>
+          <div class="relative">
+            <ng-icon name="matPersonOutline" class="absolute left-3 top-1/2 -translate-y-1/2 text-outline" size="20px"></ng-icon>
+            <input formControlName="name" id="profile-name"
+              class="w-full pl-10 pr-4 py-3 bg-white border border-border-subtle rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all outline-none text-on-surface font-body-md"
+              placeholder="Your name" [class.border-error]="isInvalid('name')" />
+          </div>
+          @if (isInvalid('name')) {
+          <p class="text-error text-xs">
+            @if (profileForm.get('name')?.errors?.['required']) {
+            Name is required.
+            } @else if (profileForm.get('name')?.errors?.['minlength']) {
+            Name must be at least 2 characters.
+            } @else {
+            Name must not exceed 80 characters.
+            }
+          </p>
+          }
+        </div>
+
+        <div class="space-y-2">
+          <label class="block font-label-md text-label-md text-on-surface-variant" for="profile-language">Preferred Language</label>
+          <div class="relative">
+            <ng-icon name="matLanguageOutline" class="absolute left-3 top-1/2 -translate-y-1/2 text-outline" size="20px"></ng-icon>
+            <select formControlName="preferredLanguage" id="profile-language"
+              class="w-full pl-10 pr-4 py-3 bg-white border border-border-subtle rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all outline-none text-on-surface font-body-md appearance-none cursor-pointer"
+              [class.border-error]="isInvalid('preferredLanguage')">
+              <option value="en">English</option>
+              <option value="ar">Arabic</option>
+            </select>
+          </div>
+          @if (isInvalid('preferredLanguage')) {
+          <p class="text-error text-xs">Please select a language.</p>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-3 pt-2">
+        <button type="submit"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white rounded-lg font-label-md text-label-md shadow-sm hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          [disabled]="isSavingProfile() || isUploadingImage()">
+          @if (isSavingProfile()) {
+          <ng-icon name="matRefreshOutline" class="animate-spin" size="18px"></ng-icon>
+          Saving...
+          } @else {
+          <ng-icon name="matSaveOutline" size="18px"></ng-icon>
+          Save Changes
+          }
+        </button>
+        <button type="button" (click)="closeEditForm()"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-light border border-border-subtle text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-all cursor-pointer">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </section>
+  }
+
+  @if (showPasswordForm()) {
+  <section class="bg-surface-light border border-border-subtle rounded-xl p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
+        <ng-icon name="matVpnKeyOutline" class="text-primary"></ng-icon>
+        Change Password
+      </h2>
+      <button (click)="closePasswordForm()" class="p-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors cursor-pointer">
+        <ng-icon name="matCloseOutline" size="20px"></ng-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="passwordForm" (ngSubmit)="submitPassword()" class="space-y-5 max-w-xl" novalidate>
+      <div class="space-y-2">
+        <label class="block font-label-md text-label-md text-on-surface-variant" for="current-password">Current Password</label>
+        <div class="relative">
+          <ng-icon name="matLockOutline" class="absolute left-3 top-1/2 -translate-y-1/2 text-outline" size="20px"></ng-icon>
+          <input formControlName="passwordCurrent" id="current-password"
+            class="w-full pl-10 pr-12 py-3 bg-white border border-border-subtle rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all outline-none text-on-surface font-body-md"
+            placeholder="Enter current password" [type]="showCurrentPassword() ? 'text' : 'password'"
+            [class.border-error]="isPasswordInvalid('passwordCurrent')" />
+          <button type="button" (click)="showCurrentPassword.set(!showCurrentPassword())"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors cursor-pointer">
+            <ng-icon [name]="showCurrentPassword() ? 'matVisibilityOffOutline' : 'matVisibilityOutline'" size="20px"></ng-icon>
+          </button>
+        </div>
+        @if (isPasswordInvalid('passwordCurrent')) {
+        <p class="text-error text-xs">Current password is required.</p>
+        }
+      </div>
+
+      <div class="space-y-2">
+        <label class="block font-label-md text-label-md text-on-surface-variant" for="new-password">New Password</label>
+        <div class="relative">
+          <ng-icon name="matLockOutline" class="absolute left-3 top-1/2 -translate-y-1/2 text-outline" size="20px"></ng-icon>
+          <input formControlName="password" id="new-password"
+            class="w-full pl-10 pr-12 py-3 bg-white border border-border-subtle rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all outline-none text-on-surface font-body-md"
+            placeholder="Enter new password" [type]="showNewPassword() ? 'text' : 'password'"
+            [class.border-error]="isPasswordInvalid('password')" />
+          <button type="button" (click)="showNewPassword.set(!showNewPassword())"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors cursor-pointer">
+            <ng-icon [name]="showNewPassword() ? 'matVisibilityOffOutline' : 'matVisibilityOutline'" size="20px"></ng-icon>
+          </button>
+        </div>
+        @if (isPasswordInvalid('password')) {
+        <p class="text-error text-xs">
+          @if (passwordForm.get('password')?.errors?.['required']) {
+          New password is required.
+          } @else if (passwordForm.get('password')?.errors?.['minlength']) {
+          Password must be at least 8 characters.
+          } @else {
+          Must include uppercase, lowercase, number, and special character.
+          }
+        </p>
+        }
+      </div>
+
+      <div class="space-y-2">
+        <label class="block font-label-md text-label-md text-on-surface-variant" for="confirm-password">Confirm New Password</label>
+        <div class="relative">
+          <ng-icon name="matLockOutline" class="absolute left-3 top-1/2 -translate-y-1/2 text-outline" size="20px"></ng-icon>
+          <input formControlName="passwordConfirm" id="confirm-password"
+            class="w-full pl-10 pr-12 py-3 bg-white border border-border-subtle rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all outline-none text-on-surface font-body-md"
+            placeholder="Confirm new password" [type]="showConfirmPassword() ? 'text' : 'password'"
+            [class.border-error]="isPasswordInvalid('passwordConfirm') || passwordMismatch()" />
+          <button type="button" (click)="showConfirmPassword.set(!showConfirmPassword())"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors cursor-pointer">
+            <ng-icon [name]="showConfirmPassword() ? 'matVisibilityOffOutline' : 'matVisibilityOutline'" size="20px"></ng-icon>
+          </button>
+        </div>
+        @if (isPasswordInvalid('passwordConfirm') && !passwordMismatch()) {
+        <p class="text-error text-xs">Please confirm your new password.</p>
+        }
+        @if (passwordMismatch()) {
+        <p class="text-error text-xs">Passwords do not match.</p>
+        }
+      </div>
+
+      <div class="flex flex-wrap gap-3 pt-2">
+        <button type="submit"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white rounded-lg font-label-md text-label-md shadow-sm hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          [disabled]="isSavingPassword()">
+          @if (isSavingPassword()) {
+          <ng-icon name="matRefreshOutline" class="animate-spin" size="18px"></ng-icon>
+          Updating...
+          } @else {
+          <ng-icon name="matSaveOutline" size="18px"></ng-icon>
+          Update Password
+          }
+        </button>
+        <button type="button" (click)="closePasswordForm()"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-light border border-border-subtle text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-all cursor-pointer">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </section>
+  }
+
+  <section class="bg-surface-light border border-border-subtle rounded-xl overflow-hidden shadow-sm">
+    <div class="p-6 border-b border-border-subtle flex flex-col sm:flex-row sm:items-center gap-6">
+      <div class="relative shrink-0 mx-auto sm:mx-0">
+        @if (profile.image) {
+        <img [src]="profile.image" [alt]="profile.name"
+          class="w-28 h-28 rounded-full border-4 border-surface object-cover" />
+        } @else {
+        <div
+          class="w-28 h-28 rounded-full border-4 border-surface bg-primary/10 text-primary flex items-center justify-center font-bold text-4xl">
+          {{ getInitials(profile.name) }}
+        </div>
+        }
+        <div class="absolute bottom-1 right-1 w-4 h-4 bg-success rounded-full border-2 border-surface-light"></div>
+      </div>
+
+      <div class="text-center sm:text-left flex-1">
+        <h2 class="font-headline-md text-headline-md text-on-surface">{{ profile.name }}</h2>
+        <p class="font-body-md text-body-md text-on-surface-variant mt-1 flex items-center justify-center sm:justify-start gap-2">
+          <ng-icon name="matMailOutline" size="16px"></ng-icon>
+          {{ profile.email }}
+        </p>
+        <div class="flex flex-wrap justify-center sm:justify-start gap-2 mt-4">
+          <span class="px-3 py-1 bg-primary-container/10 text-primary font-label-sm text-label-sm rounded-full flex items-center gap-1">
+            <ng-icon name="matCheckCircleOutline" size="14px"></ng-icon>
+            {{ formatRole(profile.role) }}
+          </span>
+          <span class="px-3 py-1 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full uppercase">
+            {{ profile.provider || 'local' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="rounded-xl border border-border-subtle bg-surface p-4">
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">User ID</p>
+        <p class="font-body-md text-body-md text-on-surface break-all">{{ profile._id }}</p>
+      </div>
+      <div class="rounded-xl border border-border-subtle bg-surface p-4">
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Member Since</p>
+        <p class="font-body-md text-body-md text-on-surface">{{ formatDate(profile.createdAt) }}</p>
+      </div>
+      <div class="rounded-xl border border-border-subtle bg-surface p-4">
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Preferred Language</p>
+        <p class="font-body-md text-body-md text-on-surface">{{ formatLanguage(profile.preferredLanguage) }}</p>
+      </div>
+      <div class="rounded-xl border border-border-subtle bg-surface p-4">
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Preferred Currency</p>
+        <p class="font-body-md text-body-md text-on-surface">{{ profile.preferredCurrency || 'EGP' }}</p>
+      </div>
+      <div class="rounded-xl border border-border-subtle bg-surface p-4">
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Account Provider</p>
+        <p class="font-body-md text-body-md text-on-surface capitalize">{{ profile.provider || 'local' }}</p>
+      </div>
+      <div class="rounded-xl border border-border-subtle bg-surface p-4">
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Email Address</p>
+        <p class="font-body-md text-body-md text-on-surface break-all">{{ profile.email }}</p>
+      </div>
+    </div>
+  </section>
+
+  @if (!isLocalProvider()) {
+  <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 font-body-md text-sm">
+    Password changes are managed through your Google account because you signed in with Google.
+  </div>
+  }
+  }
+</main>

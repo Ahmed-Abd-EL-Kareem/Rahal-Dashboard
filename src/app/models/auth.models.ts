@@ -10,6 +10,19 @@ export interface User {
   subscription?: SubscriptionPlan | string;
   createdAt?: string;
   savedTrips?: string[];
+  preferredLanguage?: 'en' | 'ar';
+  preferredCurrency?: 'USD' | 'EGP';
+}
+
+export interface UpdateProfileRequest {
+  name?: string;
+  image?: string;
+  preferredLanguage?: 'en' | 'ar';
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
 }
 
 export interface SubscriptionUsage {

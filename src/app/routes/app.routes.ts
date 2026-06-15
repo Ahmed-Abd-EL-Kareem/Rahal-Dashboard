@@ -60,6 +60,10 @@ export const routes: Routes = [
       {
         path: 'stripe',
         loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('../features/profile/profile').then(c => c.ProfileComponent)
       }
     ]
   },
