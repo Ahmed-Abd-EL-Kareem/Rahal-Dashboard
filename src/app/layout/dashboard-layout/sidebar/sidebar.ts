@@ -1,24 +1,32 @@
-import { Component, signal, computed, inject, output, input } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  inject,
+  output,
+  input,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/auth/auth.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { 
-  matDashboardOutline, 
-  matAnalyticsOutline, 
-  matGroupOutline, 
-  matMapOutline, 
-  matHotelOutline, 
-  matTravelExploreOutline, 
-  matBookOnlineOutline, 
-  matAutoAwesomeOutline, 
-  matCardMembershipOutline, 
-  matPaymentsOutline, 
+import {
+  matDashboardOutline,
+  matAnalyticsOutline,
+  matGroupOutline,
+  matMapOutline,
+  matHotelOutline,
+  matTravelExploreOutline,
+  matBookOnlineOutline,
+  matAutoAwesomeOutline,
+  matCardMembershipOutline,
+  matPaymentsOutline,
   matRateReviewOutline,
   matHelpOutline,
   matLogoutOutline,
   matMenuOutline,
-  matMenuOpenOutline
+  matMenuOpenOutline,
 } from '@ng-icons/material-icons/outline';
 
 interface NavItem {
@@ -37,6 +45,7 @@ interface NavSection {
   imports: [CommonModule, RouterLink, RouterLinkActive, NgIconComponent],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   viewProviders: [
     provideIcons({
       matDashboardOutline,
@@ -53,9 +62,9 @@ interface NavSection {
       matHelpOutline,
       matLogoutOutline,
       matMenuOutline,
-      matMenuOpenOutline
-    })
-  ]
+      matMenuOpenOutline,
+    }),
+  ],
 })
 export class Sidebar {
   collapsed = input<boolean>(false);
