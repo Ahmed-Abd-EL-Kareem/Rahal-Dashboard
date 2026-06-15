@@ -7,7 +7,7 @@ import { DestinationsService } from '../../../core/services/destinations.service
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { matArrowBackOutline, matArrowForwardOutline, matCheckOutline, matDeleteOutline, matAddOutline, matAutoAwesomeOutline, matLocationOnOutline, matCloudUploadOutline, matInfoOutline } from '@ng-icons/material-icons/outline';
-
+import { Location } from '@angular/common';
 import { effect } from '@angular/core';
 import * as L from 'leaflet';
 
@@ -44,11 +44,11 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
-
+  private location = inject(Location)
   @ViewChild('map', { static: false }) mapContainer!: ElementRef<HTMLDivElement>;
   private map!: L.Map;
   private marker!: L.Marker;
-  
+
   destinationId!: string;
   currentStep = signal(1);
   loading = signal(false);
@@ -131,23 +131,23 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.destinationId = id;
-        this.loadDestinationDetails(id);
+      const slug = params.get('slug');
+      if (slug) {
+        this.loadDestinationDetails(slug);
       }
     });
   }
 
-  loadDestinationDetails(id: string): void {
+  loadDestinationDetails(slug: string): void {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    this.destinationsService.getDestinationById(id).subscribe({
+    this.destinationsService.getDestinationBySlug(slug).subscribe({
       next: (res) => {
         this.loading.set(false);
         const destination = res.data || res.destination || res;
         if (destination) {
+          this.destinationId = destination._id; // Keep _id for updateDestination(id, payload)
           this.prefillForm(destination);
         } else {
           this.errorMessage.set('No destination data was found.');
@@ -251,11 +251,11 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
       this.http.get<any[]>(url, { headers: { 'Accept-Language': 'en' } }).subscribe({
         next: (results) => {
           const priority = ['city', 'town', 'village', 'suburb', 'quarter'];
-          const demote  = ['administrative', 'boundary'];
+          const demote = ['administrative', 'boundary'];
           const rank = (r: any): number => {
             const t = r.addresstype || r.type || '';
             if (priority.includes(t)) return 0;
-            if (demote.includes(t))   return 2;
+            if (demote.includes(t)) return 2;
             return 1;
           };
           const sortedResults = [...results].sort((a, b) => rank(a) - rank(b));
@@ -600,9 +600,8 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
       }
     });
   }
-
-  saveDraft() {
-    this.successMessage.set('Draft saved locally! (Simulated)');
-    setTimeout(() => this.successMessage.set(null), 3000);
+  goBack(): void {
+    this.location.back();
   }
+
 }

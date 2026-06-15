@@ -8,17 +8,17 @@
     <div class="font-display-lg text-headline-sm font-bold text-primary dark:text-primary-fixed md:hidden">Rahal</div>
 
     <!-- Breadcrumb Navigation -->
-    <!-- <nav class="hidden md:flex items-center gap-2 text-sm font-medium text-on-surface-variant/70">
-  <a routerLink="/dashboard" class="hover:text-primary transition-colors">Home</a>
-  @for (crumb of breadcrumbs(); track crumb.label; let last = $last) {
-    <span class="text-on-surface-variant/30 select-none">/</span>
-    @if (last) {
+    <nav class="hidden md:flex items-center gap-2 text-sm font-medium text-on-surface-variant/70">
+      <a routerLink="/dashboard" class="hover:text-primary transition-colors">Home</a>
+      @for (crumb of breadcrumbs(); track crumb.label; let last = $last) {
+      <span class="text-on-surface-variant/30 select-none">/</span>
+      @if (last) {
       <span class="text-primary font-semibold tracking-wide">{{ crumb.label }}</span>
-    } @else {
+      } @else {
       <a [routerLink]="crumb.route" class="hover:text-primary transition-colors">{{ crumb.label }}</a>
-    }
-  }
-</nav> -->
+      }
+      }
+    </nav>
   </div>
 
   <div class="flex items-center gap-2">

@@ -18,6 +18,7 @@ import {
   matInfoOutline
 } from '@ng-icons/material-icons/outline';
 
+import { matStar } from '@ng-icons/material-icons/baseline';
 @Component({
   selector: 'app-destination-details',
   imports: [CommonModule, RouterLink, NgIconComponent],
@@ -35,7 +36,8 @@ import {
       matLocalAtmOutline,
       matMapOutline,
       matScheduleOutline,
-      matInfoOutline
+      matInfoOutline,
+      matStar
     })
   ]
 })
@@ -54,18 +56,18 @@ export class DestinationDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.fetchDetails(id);
+      const slug = params.get('slug');
+      if (slug) {
+        this.fetchDetails(slug);
       }
     });
   }
 
-  fetchDetails(id: string): void {
+  fetchDetails(slug: string): void {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    this.destinationsService.getDestinationById(id).subscribe({
+    this.destinationsService.getDestinationBySlug(slug).subscribe({
       next: (res) => {
         const data = res.data || res.destination || res;
         this.destination.set(data);
@@ -111,10 +113,10 @@ export class DestinationDetailsComponent implements OnInit {
   getBestMonthsText(): string {
     const months = this.destination()?.bestMonths;
     if (!months || months.length === 0) return 'Anytime';
-    
+
     // If it's a standard list of months, format nicely (e.g. shorthand like Jan, Feb, Mar...)
     const shortMonths = months.map((m: string) => m.slice(0, 3));
-    
+
     // Check if consecutive/range or just comma-separated
     return shortMonths.join(' - ');
   }

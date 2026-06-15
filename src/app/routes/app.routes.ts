@@ -34,11 +34,11 @@ export const routes: Routes = [
         loadComponent: () => import('../features/destinations/create/destination-create').then(c => c.DestinationCreateComponent)
       },
       {
-        path: 'destinations/edit/:id',
+        path: 'destinations/edit/:slug',
         loadComponent: () => import('../features/destinations/edit/destination-edit').then(c => c.DestinationEditComponent)
       },
       {
-        path: 'destinations/:id',
+        path: 'destinations/:slug',
         loadComponent: () => import('../features/destinations/details/destination-details').then(c => c.DestinationDetailsComponent)
       },
       {

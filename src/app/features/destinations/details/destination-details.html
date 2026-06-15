@@ -32,18 +32,12 @@
       <!-- Action Buttons -->
       <div class="flex items-center gap-3">
         <!-- Edit Button -->
-        <a [routerLink]="['/dashboard/destinations/edit', destination()._id]"
+        <a [routerLink]="['/dashboard/destinations/edit', destination().slug || destination()._id]"
           class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm transition duration-150 cursor-pointer">
           <ng-icon name="matEditOutline" class="text-base"></ng-icon>
           Edit
         </a>
 
-        <!-- Add Activity Button -->
-        <!-- <button type="button"
-                class="bg-[#005c55] hover:bg-[#0f766e] text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm hover:shadow transition duration-150">
-          <ng-icon name="matAddOutline" class="text-base"></ng-icon>
-          Add Activity
-        </button> -->
       </div>
     </div>
 
@@ -62,10 +56,10 @@
           <!-- Overlay badges and texts -->
           <div class="relative z-10 p-8 w-full flex flex-col gap-3">
             <div class="flex items-center gap-2">
-              <span
+              <!-- <span
                 class="bg-[#005c55] text-white px-2.5 py-1 rounded text-[10px] font-bold tracking-wider uppercase shadow-sm">
                 PREMIUM
-              </span>
+              </span> -->
               <span class="px-2.5 py-1 rounded text-[10px] font-bold tracking-wider uppercase text-white shadow-sm"
                 [ngClass]="destination().isActive ? 'bg-emerald-600' : 'bg-red-600'">
                 {{ destination().isActive ? 'Active' : 'Inactive' }}
@@ -201,16 +195,25 @@
 
                 <div class="flex-1 min-w-0">
                   <h4 class="font-bold text-slate-800 text-sm truncate">{{ hotel.name?.en || hotel.name }}</h4>
-                  <p class="text-slate-400 text-xs mt-0.5 truncate">{{ hotel.address || hotel.location?.address ||
-                    'City Center' }}</p>
+                  <p class="text-slate-400 text-xs mt-0.5 truncate">{{ hotel.address?.en || hotel.address?.ar || 'City
+                    Center' }}</p>
                 </div>
 
                 <!-- Rating -->
-                <div
+                <!-- <div
                   class="shrink-0 flex items-center gap-1 bg-amber-50 border border-amber-100 text-amber-700 px-2 py-1 rounded-lg text-xs font-bold">
                   <ng-icon name="matStarOutline" class="text-amber-500"></ng-icon>
                   <span>{{ hotel.rating || hotel.stars || 5.0 }}</span>
+                </div> -->
+
+
+                <div class="flex items-center gap-1">
+                  <ng-icon name="matStar" class="text-sm" style="color: #F59E0B;"></ng-icon>
+                  <span class="text-sm font-semibold text-slate-700">
+                    {{ (hotel.rating ?? hotel.stars ?? 0) | number:'1.1-1' }}
+                  </span>
                 </div>
+
               </div>
             </ng-container>
 

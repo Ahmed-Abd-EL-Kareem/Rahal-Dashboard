@@ -46,10 +46,18 @@ export class TopBar {
       map(() => {
         const url = this.router.url;
         const segments = url.split('/').filter((s) => s && s !== 'dashboard');
-        return segments.map((seg, i) => ({
-          label: seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, ' '),
-          route: '/' + ['dashboard', ...segments.slice(0, i + 1)].join('/'),
-        })) as Crumb[];
+        return segments.map((seg, i) => {
+          let label = seg;
+          if (/^[0-9a-fA-F]{24}$/.test(seg)) {
+            label = 'Details';
+          } else {
+            label = seg.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+          }
+          return {
+            label,
+            route: '/' + ['dashboard', ...segments.slice(0, i + 1)].join('/'),
+          };
+        }) as Crumb[];
       }),
     ),
     { initialValue: [] as Crumb[] },

@@ -12,6 +12,8 @@ import {
   matMapOutline,
   matMoreVertOutline
 } from '@ng-icons/material-icons/outline';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-destination-list',
@@ -46,35 +48,37 @@ export class DestinationListComponent implements OnInit {
   selectedCategory = signal('all');
   selectedStatus = signal('all');
 
-  // Computed list of filtered destinations
+  // Pagination states
+  currentPage = signal(1);
+  pageSize = signal(8);
+  totalItems = signal(0);
+
+  private searchSubject = new Subject<string>();
+
+  // Computed properties for pagination UI
+  totalPages = computed(() => {
+    const total = this.totalItems();
+    const size = this.pageSize();
+    return Math.max(1, Math.ceil(total / size));
+  });
+
+  pagesArray = computed(() => {
+    const pages = this.totalPages();
+    return Array.from({ length: pages }, (_, i) => i + 1);
+  });
+
+  showingFrom = computed(() => {
+    if (this.totalItems() === 0) return 0;
+    return (this.currentPage() - 1) * this.pageSize() + 1;
+  });
+
+  showingTo = computed(() => {
+    return Math.min(this.currentPage() * this.pageSize(), this.totalItems());
+  });
+
+  // Computed list of filtered destinations (returned straight from server-side query results)
   filteredDestinations = computed(() => {
-    let list = this.destinations();
-    const query = this.searchQuery().toLowerCase().trim();
-    const cat = this.selectedCategory();
-    const status = this.selectedStatus();
-
-    if (query) {
-      list = list.filter(
-        d =>
-          d.name?.en?.toLowerCase().includes(query) ||
-          d.name?.ar?.toLowerCase().includes(query) ||
-          d.city?.toLowerCase().includes(query)
-      );
-    }
-
-    if (cat !== 'all') {
-      list = list.filter(d => d.category === cat);
-    }
-
-    if (status !== 'all') {
-      list = list.filter(d => {
-        if (status === 'active') return d.isActive === true;
-        if (status === 'inactive') return d.isActive === false;
-        return true;
-      });
-    }
-
-    return list;
+    return this.destinations();
   });
 
   categories = [
@@ -89,6 +93,16 @@ export class DestinationListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    // Setup search input debouncing
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(query => {
+      this.searchQuery.set(query);
+      this.currentPage.set(1);
+      this.fetchData();
+    });
+
     this.fetchData();
   }
 
@@ -96,17 +110,22 @@ export class DestinationListComponent implements OnInit {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    // Fetch destinations
-    this.destinationsService.getAllDestinations().subscribe({
-      next: (data) => {
+    // Fetch destinations from API using page, limit, search, status, and category
+    this.destinationsService.getAllDestinations(
+      this.currentPage(),
+      this.pageSize(),
+      this.searchQuery(),
+      this.selectedStatus(),
+      this.selectedCategory()
+    ).subscribe({
+      next: (res) => {
+        const data = res.data || res.destinations || res;
         if (Array.isArray(data)) {
           this.destinations.set(data);
-        } else if (data && Array.isArray(data.data)) {
-          this.destinations.set(data.data);
-        } else if (data && Array.isArray(data.destinations)) {
-          this.destinations.set(data.destinations);
+          this.totalItems.set(res.pagination?.total ?? res.total ?? data.length);
         } else {
           this.destinations.set([]);
+          this.totalItems.set(0);
         }
         this.loading.set(false);
       },
@@ -116,7 +135,7 @@ export class DestinationListComponent implements OnInit {
       }
     });
 
-    // Fetch hotels
+    // Fetch hotels to compute counts per city
     this.hotelsService.getAllHotels().subscribe({
       next: (data: any) => {
         if (Array.isArray(data)) {
@@ -142,17 +161,35 @@ export class DestinationListComponent implements OnInit {
 
   onSearch(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    this.searchQuery.set(value);
+    this.searchSubject.next(value);
   }
 
   onCategoryChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     this.selectedCategory.set(value);
+    this.currentPage.set(1);
+    this.fetchData();
   }
 
   onStatusChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     this.selectedStatus.set(value);
+    this.currentPage.set(1);
+    this.fetchData();
+  }
+
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.fetchData();
+    }
+  }
+
+  onLimitChange(event: Event): void {
+    const value = parseInt((event.target as HTMLSelectElement).value, 10);
+    this.pageSize.set(value);
+    this.currentPage.set(1);
+    this.fetchData();
   }
 
   @HostListener('document:click', ['$event'])
@@ -169,10 +206,10 @@ export class DestinationListComponent implements OnInit {
     }
   }
 
-  onEdit(event: Event, id: string): void {
+  onEdit(event: Event, slug: string): void {
     event.stopPropagation();
     this.activeDropdownId.set(null);
-    this.router.navigate(['/dashboard/destinations/edit', id]);
+    this.router.navigate(['/dashboard/destinations/edit', slug]);
   }
 
   onDelete(event: Event, id: string): void {

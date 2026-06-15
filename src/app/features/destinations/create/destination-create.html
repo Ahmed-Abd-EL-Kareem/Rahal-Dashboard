@@ -176,16 +176,7 @@
           </div>
         </div>
 
-        <!-- AI Assistant Banner -->
-        <!-- <div class="flex gap-4 bg-[#eff4ff] border border-blue-100 rounded-xl p-4 items-start">
-          <div class="bg-blue-500/10 p-2 rounded-lg text-blue-600">
-            <ng-icon name="matAutoAwesomeOutline" class="text-lg flex-shrink-0"></ng-icon>
-          </div>
-          <div>
-            <h4 class="text-sm font-semibold text-blue-800">AI Assistant Enabled</h4>
-            <p class="text-xs text-blue-600/90 mt-0.5 leading-relaxed">Content suggestions and auto-tagging will become available once basic info is complete.</p>
-          </div>
-        </div> -->
+
       </div>
 
       <!-- STEP 2: LOCATION -->
@@ -584,42 +575,34 @@
         </div>
       </div>
 
-      <!-- Action Buttons Footer -->
-      <div class="border-t border-slate-100 p-6 flex justify-between items-center bg-slate-50/50">
-        <!-- Draft Action -->
-        <button type="button" (click)="saveDraft()"
-          class="text-[#005c55] hover:text-[#0f766e] text-sm font-semibold transition hover:underline">
-          Save as Draft
-        </button>
 
-        <!-- Navigation Actions -->
+      <div class="border-t border-slate-100 p-6 flex justify-end items-center bg-slate-50/50">
+
         <div class="flex gap-3">
-          <!-- Cancel (If step 1) or Previous (If step > 1) -->
           <a *ngIf="currentStep() === 1" routerLink="/dashboard/destinations"
             class="px-5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition duration-150 shadow-sm cursor-pointer">
             Cancel
           </a>
+
           <button type="button" *ngIf="currentStep() > 1" (click)="prevStep()"
-            class="px-5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition duration-150 shadow-sm">
+            class="px-5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition duration-150 shadow-sm cursor-pointer">
             Previous Step
           </button>
 
-          <!-- Next Step (If step < 4) or Submit (If step == 4) -->
           <button type="button" *ngIf="currentStep() < 4" (click)="nextStep()"
-            class="px-6 py-2.5 bg-[#005c55] hover:bg-[#0f766e] text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow transition duration-150 flex items-center gap-1.5">
+            class="px-6 py-2.5 bg-[#005c55] hover:bg-[#0f766e] text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow transition duration-150 flex items-center gap-1.5 cursor-pointer">
             Next Step
             <ng-icon name="matArrowForwardOutline" class="text-base"></ng-icon>
           </button>
 
           <button type="submit" *ngIf="currentStep() === 4" [disabled]="loading()"
-            class="px-6 py-2.5 bg-[#005c55] hover:bg-[#0f766e] text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow disabled:opacity-55 disabled:cursor-not-allowed transition duration-150 flex items-center gap-1.5">
+            class="px-6 py-2.5 bg-[#005c55] hover:bg-[#0f766e] text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow disabled:opacity-55 disabled:cursor-not-allowed transition duration-150 flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed">
             <span *ngIf="loading()"
               class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            Create Destination
+            Save Changes
           </button>
         </div>
       </div>
-
     </form>
   </div>
 </div>

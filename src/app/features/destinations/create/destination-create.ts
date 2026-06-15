@@ -9,7 +9,7 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { matArrowBackOutline, matArrowForwardOutline, matCheckOutline, matDeleteOutline, matAddOutline, matAutoAwesomeOutline, matLocationOnOutline, matCloudUploadOutline, matInfoOutline } from '@ng-icons/material-icons/outline';
 
 import { effect } from '@angular/core';
-// import 'leaflet/dist/leaflet.css';
+
 import * as L from 'leaflet';
 
 // Configure default Leaflet marker icons using assets paths
@@ -139,11 +139,11 @@ export class DestinationCreateComponent {
       this.http.get<any[]>(url, { headers: { 'Accept-Language': 'en' } }).subscribe({
         next: (results) => {
           const priority = ['city', 'town', 'village', 'suburb', 'quarter'];
-          const demote  = ['administrative', 'boundary'];
+          const demote = ['administrative', 'boundary'];
           const rank = (r: any): number => {
             const t = r.addresstype || r.type || '';
             if (priority.includes(t)) return 0;
-            if (demote.includes(t))   return 2;
+            if (demote.includes(t)) return 2;
             return 1;
           };
           const sortedResults = [...results].sort((a, b) => rank(a) - rank(b));
@@ -388,44 +388,44 @@ export class DestinationCreateComponent {
       this.errorMessage.set(null);
     }
   }
-nextStep(): void {
-  const step = this.currentStep();
-  this.errorMessage.set(null);
+  nextStep(): void {
+    const step = this.currentStep();
+    this.errorMessage.set(null);
 
-  if (step === 1) {
-    if (this.isStep1Valid()) {
-      this.currentStep.set(2);
-      // Initialize map after the view for step 2 is rendered
-      setTimeout(() => this.initMap(), 0);
-    } else {
-      this.destinationForm.get('nameEn')?.markAsTouched();
-      this.destinationForm.get('nameAr')?.markAsTouched();
-      this.destinationForm.get('category')?.markAsTouched();
-      this.errorMessage.set('Please fill all required basic information.');
-    }
-  } else if (step === 2) {
-    if (this.isStep2Valid()) {
-      this.currentStep.set(3);
-    } else {
-      this.destinationForm.get('city')?.markAsTouched();
-      this.destinationForm.get('region')?.markAsTouched();
-      this.destinationForm.get('latitude')?.markAsTouched();
-      this.destinationForm.get('longitude')?.markAsTouched();
-      this.errorMessage.set('Please enter valid city, region, and coordinates.');
-    }
-  } else if (step === 3) {
-    if (this.isStep3Valid()) {
-      this.currentStep.set(4);
-    } else {
-      this.destinationForm.get('descriptionEn')?.markAsTouched();
-      this.destinationForm.get('descriptionAr')?.markAsTouched();
-      this.destinationForm.get('averageBudgetPerDay')?.markAsTouched();
-      this.destinationForm.get('currency')?.markAsTouched();
-      this.attractions.markAllAsTouched();
-      this.errorMessage.set('Please complete the content details and resolve any attraction errors.');
+    if (step === 1) {
+      if (this.isStep1Valid()) {
+        this.currentStep.set(2);
+        // Initialize map after the view for step 2 is rendered
+        setTimeout(() => this.initMap(), 0);
+      } else {
+        this.destinationForm.get('nameEn')?.markAsTouched();
+        this.destinationForm.get('nameAr')?.markAsTouched();
+        this.destinationForm.get('category')?.markAsTouched();
+        this.errorMessage.set('Please fill all required basic information.');
+      }
+    } else if (step === 2) {
+      if (this.isStep2Valid()) {
+        this.currentStep.set(3);
+      } else {
+        this.destinationForm.get('city')?.markAsTouched();
+        this.destinationForm.get('region')?.markAsTouched();
+        this.destinationForm.get('latitude')?.markAsTouched();
+        this.destinationForm.get('longitude')?.markAsTouched();
+        this.errorMessage.set('Please enter valid city, region, and coordinates.');
+      }
+    } else if (step === 3) {
+      if (this.isStep3Valid()) {
+        this.currentStep.set(4);
+      } else {
+        this.destinationForm.get('descriptionEn')?.markAsTouched();
+        this.destinationForm.get('descriptionAr')?.markAsTouched();
+        this.destinationForm.get('averageBudgetPerDay')?.markAsTouched();
+        this.destinationForm.get('currency')?.markAsTouched();
+        this.attractions.markAllAsTouched();
+        this.errorMessage.set('Please complete the content details and resolve any attraction errors.');
+      }
     }
   }
-}
 
   // ── Form Submission ───────────────────────────────────────
   onSubmit() {
@@ -497,9 +497,5 @@ nextStep(): void {
     });
   }
 
-  saveDraft() {
-    // Simulated Draft saving
-    this.successMessage.set('Draft saved locally! (Simulated)');
-    setTimeout(() => this.successMessage.set(null), 3000);
-  }
+
 }
