@@ -1,4 +1,5 @@
-import { Component, signal, inject, computed, AfterViewInit, ViewChild, ElementRef, OnDestroy, OnInit } from '@angular/core';
+
+import { Component, signal, inject, AfterViewInit, ViewChild, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormArray, Validators } from '@angular/forms';
@@ -11,7 +12,6 @@ import { Location } from '@angular/common';
 import { effect } from '@angular/core';
 import * as L from 'leaflet';
 
-// Configure default Leaflet marker icons using assets paths
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: '/assets/marker-icon-2x.png',
   iconUrl: '/assets/marker-icon.png',
@@ -44,7 +44,8 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
-  private location = inject(Location)
+  private location = inject(Location);
+
   @ViewChild('map', { static: false }) mapContainer!: ElementRef<HTMLDivElement>;
   private map!: L.Map;
   private marker!: L.Marker;
@@ -55,7 +56,6 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
 
-  // ── Available Options ────────────────────────────────────
   categories = [
     { value: 'historical', label: 'Historical' },
     { value: 'beach', label: 'Beach & Resort' },
@@ -68,13 +68,7 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
   ];
 
   regions = [
-    'Upper Egypt',
-    'Lower Egypt',
-    'Sinai',
-    'Red Sea',
-    'Western Desert',
-    'Delta',
-    'Mediterranean'
+    'Upper Egypt', 'Lower Egypt', 'Sinai', 'Red Sea', 'Western Desert', 'Delta', 'Mediterranean'
   ];
 
   monthsList = [
@@ -82,7 +76,6 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // ── Dynamic Presets for Location Picker Mockup ─────────────
   locationPresets = [
     { name: 'Pyramids of Giza', lat: 29.9792, lng: 31.1342, city: 'Giza', region: 'Lower Egypt' },
     { name: 'Karnak Temple (Luxor)', lat: 25.7188, lng: 32.6573, city: 'Luxor', region: 'Upper Egypt' },
@@ -91,9 +84,7 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     { name: 'Siwa Oasis', lat: 29.2032, lng: 25.5189, city: 'Siwa', region: 'Western Desert' }
   ];
 
-  // ── Reactive Form Configuration ──────────────────────────
   destinationForm = this.fb.group({
-    // Step 1: Basic Info
     nameEn: ['', Validators.required],
     nameAr: ['', Validators.required],
     category: ['', Validators.required],
@@ -101,29 +92,23 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     taglineEn: ['', Validators.maxLength(60)],
     taglineAr: ['', Validators.maxLength(60)],
 
-    // Step 2: Location
     city: ['', Validators.required],
     region: ['', Validators.required],
     latitude: [29.9792, [Validators.required, Validators.min(-90), Validators.max(90)]],
     longitude: [31.1342, [Validators.required, Validators.min(-180), Validators.max(180)]],
 
-    // Step 3: Content
     descriptionEn: ['', Validators.required],
     descriptionAr: ['', Validators.required],
     averageBudgetPerDay: [1200, [Validators.required, Validators.min(0)]],
     currency: ['EGP', Validators.required],
     bestMonths: this.fb.array<string>([]),
     attractions: this.fb.array([]),
-
-    // Step 4: Media
     coverImage: ['']
   });
 
-  // Step 4: Media URLs managed separately via arrays
   galleryUrls = signal<string[]>([]);
   galleryUploading = signal(false);
 
-  // ── City Search (Nominatim) ───────────────────────────────
   citySearchResults = signal<any[]>([]);
   citySearchLoading = signal(false);
   citySearchOpen = signal(false);
@@ -147,7 +132,7 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
         this.loading.set(false);
         const destination = res.data || res.destination || res;
         if (destination) {
-          this.destinationId = destination._id; // Keep _id for updateDestination(id, payload)
+          this.destinationId = destination._id;
           this.prefillForm(destination);
         } else {
           this.errorMessage.set('No destination data was found.');
@@ -161,7 +146,6 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   prefillForm(destination: any): void {
-    // 1. Tagline / Description parsing logic
     let taglineEn = '';
     let descEn = destination.description?.en || '';
     if (descEn.includes('. ')) {
@@ -182,7 +166,6 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
       }
     }
 
-    // 2. Patch basic values
     this.destinationForm.patchValue({
       nameEn: destination.name?.en || '',
       nameAr: destination.name?.ar || '',
@@ -201,7 +184,6 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
       coverImage: destination.coverImage || ''
     });
 
-    // 3. Populate bestMonths array
     const monthsFormArray = this.bestMonthsArray;
     monthsFormArray.clear();
     if (destination.bestMonths && Array.isArray(destination.bestMonths)) {
@@ -210,7 +192,6 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
       });
     }
 
-    // 4. Populate attractions FormArray
     const attractionsFormArray = this.attractions;
     attractionsFormArray.clear();
     if (destination.attractions && Array.isArray(destination.attractions)) {
@@ -219,17 +200,15 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
           this.fb.group({
             nameEn: [att.name?.en || '', Validators.required],
             nameAr: [att.name?.ar || '', Validators.required],
-            type: [att.type || '', Validators.required],
+            type: [att.type || 'historical', Validators.required], // الحفاظ على قيمة الـ Enum الصغيرة
             entryFee: [att.entryFee || 0, [Validators.required, Validators.min(0)]]
           })
         );
       });
     }
 
-    // 5. Populate gallery urls
     this.galleryUrls.set(destination.images || []);
 
-    // 6. Update map if it has been initialized
     if (this.map) {
       const lat = destination.location?.coordinates?.[1] ?? 29.9792;
       const lng = destination.location?.coordinates?.[0] ?? 31.1342;
@@ -347,7 +326,6 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     this.galleryUrls.update(prev => prev.filter((_, i) => i !== index));
   }
 
-  // ── Form Array Getters ────────────────────────────────────
   get attractions(): FormArray {
     return this.destinationForm.get('attractions') as FormArray;
   }
@@ -356,12 +334,11 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     return this.destinationForm.get('bestMonths') as FormArray;
   }
 
-  // ── Form Array Mutators ───────────────────────────────────
   addAttraction() {
     const attractionForm = this.fb.group({
       nameEn: ['', Validators.required],
       nameAr: ['', Validators.required],
-      type: ['', Validators.required],
+      type: ['historical', Validators.required],
       entryFee: [0, [Validators.required, Validators.min(0)]]
     });
     this.attractions.push(attractionForm);
@@ -382,7 +359,6 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngAfterViewInit(): void {
-    // Initialize map when step 2 becomes active
     effect(() => {
       if (this.currentStep() === 2 && !this.map) {
         this.initMap();
@@ -455,7 +431,6 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
 
-  // ── Validation Helpers ────────────────────────────────────
   isStep1Valid(): boolean {
     const form = this.destinationForm;
     return !!(
@@ -486,7 +461,6 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     );
   }
 
-  // ── Navigation Logic ──────────────────────────────────────
   prevStep() {
     const step = this.currentStep();
     if (step > 1) {
@@ -533,35 +507,30 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
 
-  // ── Form Submission ───────────────────────────────────────
   onSubmit() {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    if (!this.isStep1Valid()) {
-      this.currentStep.set(1);
-      this.errorMessage.set('Basic info is incomplete.');
-      return;
-    }
-    if (!this.isStep2Valid()) {
-      this.currentStep.set(2);
-      this.errorMessage.set('Location details are invalid.');
-      return;
-    }
-    if (!this.isStep3Valid()) {
-      this.currentStep.set(3);
-      this.errorMessage.set('Content parameters contain errors.');
-      return;
-    }
+    if (!this.isStep1Valid()) { this.currentStep.set(1); this.errorMessage.set('Basic info is incomplete.'); return; }
+    if (!this.isStep2Valid()) { this.currentStep.set(2); this.errorMessage.set('Location details are invalid.'); return; }
+    if (!this.isStep3Valid()) { this.currentStep.set(3); this.errorMessage.set('Content parameters contain errors.'); return; }
 
     this.loading.set(true);
 
     const fv = this.destinationForm.value;
+
+    const generatedSlug = (fv.nameEn || '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-');
+
     const payload = {
       name: {
         en: fv.nameEn || '',
         ar: fv.nameAr || ''
       },
+      slug: generatedSlug,
       city: fv.city || '',
       region: fv.region as any,
       category: fv.category as any,
@@ -570,9 +539,12 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
         ar: fv.taglineAr ? `${fv.taglineAr.trim()}. ${fv.descriptionAr || ''}` : (fv.descriptionAr || '')
       },
       attractions: (fv.attractions || []).map((att: any) => ({
-        name: { en: att.nameEn, ar: att.nameAr },
+        name: {
+          en: att.nameEn || '',
+          ar: att.nameAr || null
+        },
         type: att.type,
-        entryFee: Number(att.entryFee)
+        entryFee: Number(att.entryFee) || 0
       })),
       bestMonths: fv.bestMonths as string[],
       averageBudgetPerDay: Number(fv.averageBudgetPerDay),
@@ -594,14 +566,14 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
           this.router.navigate(['/dashboard/destinations']);
         }, 1500);
       },
-      error: (err: Error) => {
+      error: (err: any) => {
         this.loading.set(false);
-        this.errorMessage.set(err.message || 'An unexpected error occurred.');
+        this.errorMessage.set(err.error?.message || err.message || 'An unexpected error occurred.');
       }
     });
   }
+
   goBack(): void {
     this.location.back();
   }
-
 }

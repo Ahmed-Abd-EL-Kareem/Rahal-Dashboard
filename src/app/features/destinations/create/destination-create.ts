@@ -1,4 +1,6 @@
-import { Component, signal, inject, computed, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+
+
+import { Component, signal, inject, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormArray, Validators } from '@angular/forms';
@@ -9,10 +11,8 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { matArrowBackOutline, matArrowForwardOutline, matCheckOutline, matDeleteOutline, matAddOutline, matAutoAwesomeOutline, matLocationOnOutline, matCloudUploadOutline, matInfoOutline } from '@ng-icons/material-icons/outline';
 
 import { effect } from '@angular/core';
-
 import * as L from 'leaflet';
 
-// Configure default Leaflet marker icons using assets paths
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: '/assets/marker-icon-2x.png',
   iconUrl: '/assets/marker-icon.png',
@@ -38,7 +38,7 @@ L.Icon.Default.mergeOptions({
     })
   ]
 })
-export class DestinationCreateComponent {
+export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private destinationsService = inject(DestinationsService);
   private cloudinaryService = inject(CloudinaryService);
@@ -53,7 +53,6 @@ export class DestinationCreateComponent {
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
 
-  // ── Available Options ────────────────────────────────────
   categories = [
     { value: 'historical', label: 'Historical' },
     { value: 'beach', label: 'Beach & Resort' },
@@ -66,13 +65,7 @@ export class DestinationCreateComponent {
   ];
 
   regions = [
-    'Upper Egypt',
-    'Lower Egypt',
-    'Sinai',
-    'Red Sea',
-    'Western Desert',
-    'Delta',
-    'Mediterranean'
+    'Upper Egypt', 'Lower Egypt', 'Sinai', 'Red Sea', 'Western Desert', 'Delta', 'Mediterranean'
   ];
 
   monthsList = [
@@ -80,7 +73,6 @@ export class DestinationCreateComponent {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // ── Dynamic Presets for Location Picker Mockup ─────────────
   locationPresets = [
     { name: 'Pyramids of Giza', lat: 29.9792, lng: 31.1342, city: 'Giza', region: 'Lower Egypt' },
     { name: 'Karnak Temple (Luxor)', lat: 25.7188, lng: 32.6573, city: 'Luxor', region: 'Upper Egypt' },
@@ -89,9 +81,7 @@ export class DestinationCreateComponent {
     { name: 'Siwa Oasis', lat: 29.2032, lng: 25.5189, city: 'Siwa', region: 'Western Desert' }
   ];
 
-  // ── Reactive Form Configuration ──────────────────────────
   destinationForm = this.fb.group({
-    // Step 1: Basic Info
     nameEn: ['', Validators.required],
     nameAr: ['', Validators.required],
     category: ['', Validators.required],
@@ -99,29 +89,23 @@ export class DestinationCreateComponent {
     taglineEn: ['', Validators.maxLength(60)],
     taglineAr: ['', Validators.maxLength(60)],
 
-    // Step 2: Location
     city: ['', Validators.required],
     region: ['', Validators.required],
     latitude: [29.9792, [Validators.required, Validators.min(-90), Validators.max(90)]],
     longitude: [31.1342, [Validators.required, Validators.min(-180), Validators.max(180)]],
 
-    // Step 3: Content
     descriptionEn: ['', Validators.required],
     descriptionAr: ['', Validators.required],
     averageBudgetPerDay: [1200, [Validators.required, Validators.min(0)]],
     currency: ['EGP', Validators.required],
     bestMonths: this.fb.array<string>([]),
     attractions: this.fb.array([]),
-
-    // Step 4: Media
     coverImage: ['']
   });
 
-  // Step 4: Media URLs managed separately via arrays
   galleryUrls = signal<string[]>([]);
   galleryUploading = signal(false);
 
-  // ── City Search (Nominatim) ───────────────────────────────
   citySearchResults = signal<any[]>([]);
   citySearchLoading = signal(false);
   citySearchOpen = signal(false);
@@ -228,7 +212,6 @@ export class DestinationCreateComponent {
       });
     });
 
-    // Reset input so same file can be re-selected if needed
     target.value = '';
   }
 
@@ -236,7 +219,6 @@ export class DestinationCreateComponent {
     this.galleryUrls.update(prev => prev.filter((_, i) => i !== index));
   }
 
-  // ── Form Array Getters ────────────────────────────────────
   get attractions(): FormArray {
     return this.destinationForm.get('attractions') as FormArray;
   }
@@ -245,12 +227,11 @@ export class DestinationCreateComponent {
     return this.destinationForm.get('bestMonths') as FormArray;
   }
 
-  // ── Form Array Mutators ───────────────────────────────────
   addAttraction() {
     const attractionForm = this.fb.group({
       nameEn: ['', Validators.required],
       nameAr: ['', Validators.required],
-      type: ['', Validators.required],
+      type: ['historical', Validators.required],
       entryFee: [0, [Validators.required, Validators.min(0)]]
     });
     this.attractions.push(attractionForm);
@@ -271,7 +252,6 @@ export class DestinationCreateComponent {
   }
 
   ngAfterViewInit(): void {
-    // Initialize map when step 2 becomes active
     effect(() => {
       if (this.currentStep() === 2 && !this.map) {
         this.initMap();
@@ -301,7 +281,6 @@ export class DestinationCreateComponent {
       const pos = this.marker.getLatLng();
       this.destinationForm.patchValue({ latitude: pos.lat, longitude: pos.lng });
     });
-    // sync marker when form changes
     this.destinationForm.get('latitude')?.valueChanges.subscribe(val => {
       const lngVal = this.destinationForm.get('longitude')?.value;
       const newLatLng = L.latLng(Number(val), Number(lngVal));
@@ -329,7 +308,6 @@ export class DestinationCreateComponent {
       city: preset.city,
       region: preset.region
     });
-    // No map initialization here. The map will be set up when step 2 becomes active.
   }
 
   isMonthSelected(month: string): boolean {
@@ -337,7 +315,6 @@ export class DestinationCreateComponent {
     return arr.includes(month);
   }
 
-  // Recenter map to current form coordinates
   recenterMap(): void {
     const lat = this.destinationForm.get('latitude')?.value;
     const lng = this.destinationForm.get('longitude')?.value;
@@ -347,7 +324,6 @@ export class DestinationCreateComponent {
     }
   }
 
-  // ── Validation Helpers ────────────────────────────────────
   isStep1Valid(): boolean {
     const form = this.destinationForm;
     return !!(
@@ -378,9 +354,6 @@ export class DestinationCreateComponent {
     );
   }
 
-  // ── Navigation Logic ──────────────────────────────────────
-
-
   prevStep() {
     const step = this.currentStep();
     if (step > 1) {
@@ -388,6 +361,7 @@ export class DestinationCreateComponent {
       this.errorMessage.set(null);
     }
   }
+
   nextStep(): void {
     const step = this.currentStep();
     this.errorMessage.set(null);
@@ -395,7 +369,6 @@ export class DestinationCreateComponent {
     if (step === 1) {
       if (this.isStep1Valid()) {
         this.currentStep.set(2);
-        // Initialize map after the view for step 2 is rendered
         setTimeout(() => this.initMap(), 0);
       } else {
         this.destinationForm.get('nameEn')?.markAsTouched();
@@ -427,36 +400,30 @@ export class DestinationCreateComponent {
     }
   }
 
-  // ── Form Submission ───────────────────────────────────────
   onSubmit() {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    // Validate preceding steps just in case
-    if (!this.isStep1Valid()) {
-      this.currentStep.set(1);
-      this.errorMessage.set('Basic info is incomplete.');
-      return;
-    }
-    if (!this.isStep2Valid()) {
-      this.currentStep.set(2);
-      this.errorMessage.set('Location details are invalid.');
-      return;
-    }
-    if (!this.isStep3Valid()) {
-      this.currentStep.set(3);
-      this.errorMessage.set('Content parameters contain errors.');
-      return;
-    }
+    if (!this.isStep1Valid()) { this.currentStep.set(1); this.errorMessage.set('Basic info is incomplete.'); return; }
+    if (!this.isStep2Valid()) { this.currentStep.set(2); this.errorMessage.set('Location details are invalid.'); return; }
+    if (!this.isStep3Valid()) { this.currentStep.set(3); this.errorMessage.set('Content parameters contain errors.'); return; }
 
     this.loading.set(true);
 
     const fv = this.destinationForm.value;
+
+    const generatedSlug = (fv.nameEn || '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-');
+
     const payload = {
       name: {
         en: fv.nameEn || '',
         ar: fv.nameAr || ''
       },
+      slug: generatedSlug,
       city: fv.city || '',
       region: fv.region as any,
       category: fv.category as any,
@@ -464,10 +431,14 @@ export class DestinationCreateComponent {
         en: fv.taglineEn ? `${fv.taglineEn.trim()}. ${fv.descriptionEn || ''}` : (fv.descriptionEn || ''),
         ar: fv.taglineAr ? `${fv.taglineAr.trim()}. ${fv.descriptionAr || ''}` : (fv.descriptionAr || '')
       },
+
       attractions: (fv.attractions || []).map((att: any) => ({
-        name: { en: att.nameEn, ar: att.nameAr },
+        name: {
+          en: att.nameEn || '',
+          ar: att.nameAr || null
+        },
         type: att.type,
-        entryFee: Number(att.entryFee)
+        entryFee: Number(att.entryFee) || 0
       })),
       bestMonths: fv.bestMonths as string[],
       averageBudgetPerDay: Number(fv.averageBudgetPerDay),
@@ -485,17 +456,14 @@ export class DestinationCreateComponent {
       next: (res) => {
         this.loading.set(false);
         this.successMessage.set('Destination created successfully!');
-        // Redirect to destinations list after a brief delay
         setTimeout(() => {
           this.router.navigate(['/dashboard/destinations']);
         }, 1500);
       },
-      error: (err: Error) => {
+      error: (err: any) => {
         this.loading.set(false);
-        this.errorMessage.set(err.message || 'An unexpected error occurred.');
+        this.errorMessage.set(err.error?.message || err.message || 'An unexpected error occurred.');
       }
     });
   }
-
-
 }

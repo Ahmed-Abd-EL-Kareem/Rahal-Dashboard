@@ -212,18 +212,26 @@ export class DestinationListComponent implements OnInit {
     this.router.navigate(['/dashboard/destinations/edit', slug]);
   }
 
-  onDelete(event: Event, id: string): void {
+  onToggleStatus(event: Event, dest: any, newStatus: boolean): void {
     event.stopPropagation();
     this.activeDropdownId.set(null);
-    if (confirm('Are you sure you want to delete this destination?')) {
-      this.destinationsService.deleteDestination(id).subscribe({
+
+    const message = newStatus
+
+      ? `Are you sure you want to activate "${dest.name?.en || 'this destination'}"?`
+      : `Are you sure you want to deactivate "${dest.name?.en || 'this destination'}"?`;
+
+    if (confirm(message)) {
+      this.destinationsService.deleteDestination(dest._id).subscribe({
         next: () => {
           this.fetchData();
         },
         error: (err) => {
-          this.errorMessage.set(err.message || 'Failed to delete destination.');
+          this.errorMessage.set(err.message || 'Failed to update destination status.');
         }
       });
     }
   }
+
+
 }
