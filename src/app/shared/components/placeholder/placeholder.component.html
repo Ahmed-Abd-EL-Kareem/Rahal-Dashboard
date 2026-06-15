@@ -9,11 +9,16 @@
       <h1 class="font-headline-lg text-headline-md font-extrabold tracking-tight">{{ pageInfo().title }}</h1>
       <p class="font-body-md text-sm text-white/80 max-w-xl leading-relaxed">{{ pageInfo().description }}</p>
     </div>
-    <div class="relative z-10 flex gap-2 self-start md:self-center shrink-0">
+    <div class="relative z-10 flex gap-3 self-start md:self-center shrink-0">
       <div class="bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2.5 rounded-xl flex items-center gap-2 text-xs font-semibold">
         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
         Live Connection
       </div>
+      <a *ngIf="isDestinationsPage()" routerLink="/dashboard/destinations/create"
+         class="bg-white text-[#005c55] hover:bg-slate-50 border border-white/20 px-4 py-2.5 rounded-xl flex items-center gap-2 text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer">
+        <ng-icon name="matAutoAwesomeOutline" class="text-sm"></ng-icon>
+        Create New Destination
+      </a>
     </div>
   </header>
 

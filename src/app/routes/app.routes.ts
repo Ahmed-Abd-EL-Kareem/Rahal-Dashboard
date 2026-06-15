@@ -42,7 +42,19 @@ export const routes: Routes = [
       },
       {
         path: 'destinations',
-        loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
+        loadComponent: () => import('../features/destinations/list/destination-list').then(c => c.DestinationListComponent)
+      },
+      {
+        path: 'destinations/create',
+        loadComponent: () => import('../features/destinations/create/destination-create').then(c => c.DestinationCreateComponent)
+      },
+      {
+        path: 'destinations/edit/:slug',
+        loadComponent: () => import('../features/destinations/edit/destination-edit').then(c => c.DestinationEditComponent)
+      },
+      {
+        path: 'destinations/:slug',
+        loadComponent: () => import('../features/destinations/details/destination-details').then(c => c.DestinationDetailsComponent)
       },
  {
   path: 'hotels',

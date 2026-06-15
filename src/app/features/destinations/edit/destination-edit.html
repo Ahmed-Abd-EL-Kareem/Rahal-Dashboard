@@ -1,0 +1,630 @@
+<div class="min-h-screen bg-[#f8f9ff] py-6 px-8 flex flex-col gap-6">
+  <!-- Back Button & Header -->
+  <div class="flex flex-col gap-4">
+    <a routerLink="/dashboard/destinations"
+      class="group flex items-center gap-2 text-sm text-slate-500 hover:text-[#005c55] font-medium transition duration-200">
+      <ng-icon name="matArrowBackOutline" class="text-base group-hover:-translate-x-1 transition-transform"></ng-icon>
+      Back to Destinations
+    </a>
+    <div>
+      <h1 class="text-3xl font-bold text-[#0b1c30]">Edit Destination</h1>
+      <p class="text-slate-500 mt-1 text-sm">Modify destination details in the Rahal platform catalog.</p>
+    </div>
+  </div>
+
+  <!-- Stepper Header -->
+  <div class="relative max-w-4xl mx-auto w-full my-6">
+    <!-- Stepper Line Background -->
+    <div class="absolute top-5 left-0 right-0 h-1 bg-slate-200 -z-10 rounded-full"></div>
+    <!-- Stepper Line Active Progressive Fill -->
+    <div class="absolute top-5 left-0 h-1 bg-[#005c55] -z-10 rounded-full transition-all duration-300"
+      [style.width.%]="(currentStep() - 1) * 33.33">
+    </div>
+
+    <!-- Stepper Circles -->
+    <div class="flex justify-between items-center px-2">
+      <!-- Step 1 -->
+      <div class="flex flex-col items-center gap-2">
+        <div
+          class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-300 border-2"
+          [ngClass]="currentStep() >= 1 ? 'bg-[#005c55] border-[#005c55] text-white shadow-md' : 'bg-white border-slate-300 text-slate-500'">
+          <ng-icon *ngIf="currentStep() > 1" name="matCheckOutline" class="text-base"></ng-icon>
+          <span *ngIf="currentStep() <= 1">1</span>
+        </div>
+        <span class="text-[11px] font-bold tracking-wider transition-colors duration-300"
+          [ngClass]="currentStep() >= 1 ? 'text-[#005c55]' : 'text-slate-400'">BASIC INFO</span>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flex flex-col items-center gap-2">
+        <div
+          class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-300 border-2"
+          [ngClass]="currentStep() >= 2 ? 'bg-[#005c55] border-[#005c55] text-white shadow-md' : 'bg-white border-slate-300 text-slate-500'">
+          <ng-icon *ngIf="currentStep() > 2" name="matCheckOutline" class="text-base"></ng-icon>
+          <span *ngIf="currentStep() <= 2">2</span>
+        </div>
+        <span class="text-[11px] font-bold tracking-wider transition-colors duration-300"
+          [ngClass]="currentStep() >= 2 ? 'text-[#005c55]' : 'text-slate-400'">LOCATION</span>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="flex flex-col items-center gap-2">
+        <div
+          class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-300 border-2"
+          [ngClass]="currentStep() >= 3 ? 'bg-[#005c55] border-[#005c55] text-white shadow-md' : 'bg-white border-slate-300 text-slate-500'">
+          <ng-icon *ngIf="currentStep() > 3" name="matCheckOutline" class="text-base"></ng-icon>
+          <span *ngIf="currentStep() <= 3">3</span>
+        </div>
+        <span class="text-[11px] font-bold tracking-wider transition-colors duration-300"
+          [ngClass]="currentStep() >= 3 ? 'text-[#005c55]' : 'text-slate-400'">CONTENT</span>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="flex flex-col items-center gap-2">
+        <div
+          class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-300 border-2"
+          [ngClass]="currentStep() >= 4 ? 'bg-[#005c55] border-[#005c55] text-white shadow-md' : 'bg-white border-slate-300 text-slate-500'">
+          <span class="text-sm">4</span>
+        </div>
+        <span class="text-[11px] font-bold tracking-wider transition-colors duration-300"
+          [ngClass]="currentStep() >= 4 ? 'text-[#005c55]' : 'text-slate-400'">MEDIA</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error / Success Alert Messages -->
+  <div class="max-w-4xl mx-auto w-full flex flex-col gap-2">
+    <div *ngIf="errorMessage()"
+      class="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm animate-fade-in">
+      <ng-icon name="matInfoOutline" class="text-lg flex-shrink-0"></ng-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+    <div *ngIf="successMessage()"
+      class="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm animate-fade-in">
+      <ng-icon name="matCheckOutline" class="text-lg flex-shrink-0"></ng-icon>
+      <span>{{ successMessage() }}</span>
+    </div>
+  </div>
+
+  <!-- Wizard Form Card -->
+  <div
+    class="max-w-4xl mx-auto w-full bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
+    <form [formGroup]="destinationForm" (ngSubmit)="onSubmit()" class="flex flex-col">
+
+      <!-- STEP 1: BASIC INFO -->
+      <div *ngIf="currentStep() === 1" class="p-8 md:p-10 flex flex-col gap-6 animate-fade-in">
+        <div class="border-b border-slate-100 pb-4">
+          <h2 class="text-xl font-bold text-slate-800">Step 1: Basic Information</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- English Name -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Destination Name (English)
+              *</label>
+            <input type="text" formControlName="nameEn" placeholder="e.g. Pyramids of Giza"
+              class="w-full px-4 py-3 rounded-lg border text-sm transition outline-none"
+              [ngClass]="destinationForm.get('nameEn')?.touched && destinationForm.get('nameEn')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'">
+          </div>
+
+          <!-- Arabic Name -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Destination Name (Arabic)
+              *</label>
+            <input type="text" formControlName="nameAr" placeholder="مثال: أهرامات الجيزة" dir="rtl"
+              class="w-full px-4 py-3 rounded-lg border text-sm transition outline-none"
+              [ngClass]="destinationForm.get('nameAr')?.touched && destinationForm.get('nameAr')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Primary Category -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Primary Category *</label>
+            <div class="relative">
+              <select formControlName="category"
+                class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm transition outline-none appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] bg-white cursor-pointer"
+                [ngClass]="destinationForm.get('category')?.touched && destinationForm.get('category')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'">
+                <option value="" disabled selected>Select category</option>
+                <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                <ng-icon name="matArrowForwardOutline" class="rotate-90 text-xs"></ng-icon>
+              </div>
+            </div>
+          </div>
+
+          <!-- Operating Status -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Operating Status</label>
+            <div class="relative">
+              <select formControlName="isActive"
+                class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm transition outline-none appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] bg-white cursor-pointer focus:border-[#005c55]">
+                <option [ngValue]="true">Open / Active</option>
+                <option [ngValue]="false">Closed / Inactive</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                <ng-icon name="matArrowForwardOutline" class="rotate-90 text-xs"></ng-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tagline -->
+        <!-- English Tagline -->
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Short Tagline (EN)</label>
+          <input type="text" formControlName="taglineEn"
+            placeholder="A brief, catchy phrase summarizing the destination (English)"
+            class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm transition outline-none focus:border-[#005c55]"
+            maxlength="60">
+          <div class="flex justify-between items-center text-[11px] text-slate-400 mt-1">
+            <span>Max 60 characters. Displayed on cards and thumbnails.</span>
+            <span>{{ destinationForm.get('taglineEn')?.value?.length || 0 }}/60</span>
+          </div>
+        </div>
+        <!-- Arabic Tagline -->
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Short Tagline (AR)</label>
+          <input type="text" formControlName="taglineAr"
+            placeholder="A brief, catchy phrase summarizing the destination (Arabic)"
+            class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm transition outline-none focus:border-[#005c55]"
+            maxlength="60">
+          <div class="flex justify-between items-center text-[11px] text-slate-400 mt-1">
+            <span>Max 60 characters. Displayed on cards and thumbnails.</span>
+            <span>{{ destinationForm.get('taglineAr')?.value?.length || 0 }}/60</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- STEP 2: LOCATION -->
+      <div *ngIf="currentStep() === 2" class="p-8 md:p-10 flex flex-col gap-6 animate-fade-in">
+        <div class="border-b border-slate-100 pb-4">
+          <h2 class="text-xl font-bold text-slate-800">Step 2: Geographic Location</h2>
+        </div>
+
+        <!-- Location Presets (Quick Setup) -->
+        <div class="flex flex-col gap-3">
+          <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Quick Fill Presets</span>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" *ngFor="let p of locationPresets" (click)="applyPreset(p)"
+              class="px-3.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-[#005c55] hover:text-white hover:border-[#005c55] transition duration-200 flex items-center gap-1.5 shadow-sm">
+              <ng-icon name="matLocationOnOutline" class="text-sm"></ng-icon>
+              {{ p.name }}
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- City -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">City Name *</label>
+            <div class="relative">
+              <input type="text" formControlName="city" placeholder="e.g. Cairo — type to search"
+                class="w-full px-4 py-3 rounded-lg border text-sm transition outline-none"
+                [ngClass]="destinationForm.get('city')?.touched && destinationForm.get('city')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'"
+                (input)="onCityInput($event)" (blur)="closeCityDropdown()" autocomplete="off">
+              <!-- Loading spinner -->
+              <div *ngIf="citySearchLoading()" class="absolute inset-y-0 right-3 flex items-center">
+                <span class="w-4 h-4 border-2 border-[#005c55] border-t-transparent rounded-full animate-spin"></span>
+              </div>
+              <!-- Dropdown results -->
+              <ul *ngIf="citySearchOpen() && citySearchResults().length > 0"
+                class="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden max-h-52 overflow-y-auto">
+                <li *ngFor="let r of citySearchResults()" (mousedown)="selectCityResult(r)"
+                  class="px-4 py-2.5 text-sm text-slate-700 hover:bg-[#005c55]/10 hover:text-[#005c55] cursor-pointer flex flex-col gap-0.5 transition">
+                  <span class="font-medium">{{ r.address?.city || r.address?.town || r.address?.village ||
+                    r.address?.county || r.name }}</span>
+                  <span class="text-[11px] text-slate-400 truncate">{{ r.display_name }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Region -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Region *</label>
+            <div class="relative">
+              <select formControlName="region"
+                class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm transition outline-none appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] bg-white cursor-pointer"
+                [ngClass]="destinationForm.get('region')?.touched && destinationForm.get('region')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'">
+                <option value="" disabled selected>Select Egyptian region</option>
+                <option *ngFor="let reg of regions" [value]="reg">{{ reg }}</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                <ng-icon name="matArrowForwardOutline" class="rotate-90 text-xs"></ng-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Latitude -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Latitude *</label>
+            <input type="number" step="any" formControlName="latitude" placeholder="e.g. 29.9792"
+              class="w-full px-4 py-3 rounded-lg border text-sm transition outline-none"
+              [ngClass]="destinationForm.get('latitude')?.touched && destinationForm.get('latitude')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'">
+          </div>
+
+          <!-- Longitude -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Longitude *</label>
+            <input type="number" step="any" formControlName="longitude" placeholder="e.g. 31.1342"
+              class="w-full px-4 py-3 rounded-lg border text-sm transition outline-none"
+              [ngClass]="destinationForm.get('longitude')?.touched && destinationForm.get('longitude')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'">
+          </div>
+        </div>
+
+        <!-- Location Picker -->
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Interactive Map Picker</label>
+          <div #map
+            class="relative w-full h-56 rounded-xl border border-slate-200 bg-slate-100 overflow-hidden flex flex-col justify-end p-4 shadow-inner"
+            style="height: 400px;">
+            <!-- Coordinates overlay -->
+            <div
+              class="flex justify-between items-center bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-slate-200/50 shadow-md">
+              <div class="flex flex-col">
+                <span class="text-xs font-semibold text-slate-800">Coordinates Loaded</span>
+                <span class="text-[10px] text-slate-500">Auto-resolved destination location.</span>
+              </div>
+              <div class="flex gap-2">
+                <button type="button" (click)="recenterMap()"
+                  class="px-3 py-1.5 bg-[#005c55]/10 text-[#005c55] hover:bg-[#005c55] hover:text-white transition rounded-md text-xs font-medium flex items-center gap-1">
+                  <ng-icon name="matLocationOnOutline" class="text-sm"></ng-icon>
+                  Recenter Map
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: CONTENT & ATTRACTIONS -->
+      <div *ngIf="currentStep() === 3" class="p-8 md:p-10 flex flex-col gap-6 animate-fade-in">
+        <div class="border-b border-slate-100 pb-4">
+          <h2 class="text-xl font-bold text-slate-800">Step 3: Description & Local Attractions</h2>
+        </div>
+
+        <!-- Description English -->
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Description (English) *</label>
+          <textarea formControlName="descriptionEn" rows="3" placeholder="Provide a detailed English description..."
+            class="w-full px-4 py-3 rounded-lg border text-sm transition outline-none"
+            [ngClass]="destinationForm.get('descriptionEn')?.touched && destinationForm.get('descriptionEn')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'"></textarea>
+        </div>
+
+        <!-- Description Arabic -->
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Description (Arabic) *</label>
+          <textarea formControlName="descriptionAr" rows="3" placeholder="أدخل تفاصيل الوصف باللغة العربية..." dir="rtl"
+            class="w-full px-4 py-3 rounded-lg border text-sm transition outline-none"
+            [ngClass]="destinationForm.get('descriptionAr')?.touched && destinationForm.get('descriptionAr')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Average Budget -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Average Budget Per Day
+              *</label>
+            <input type="number" formControlName="averageBudgetPerDay"
+              class="w-full px-4 py-3 rounded-lg border text-sm transition outline-none"
+              [ngClass]="destinationForm.get('averageBudgetPerDay')?.touched && destinationForm.get('averageBudgetPerDay')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'">
+          </div>
+
+          <!-- Currency -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Currency</label>
+            <div class="relative">
+              <select formControlName="currency"
+                class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm transition outline-none appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] bg-white cursor-pointer focus:border-[#005c55]">
+                <option value="EGP">EGP - Egyptian Pound</option>
+                <option value="USD">USD - US Dollar</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                <ng-icon name="matArrowForwardOutline" class="rotate-90 text-xs"></ng-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Best Months Grid Pill Tags -->
+        <div class="flex flex-col gap-3">
+          <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Best Months to Visit</label>
+          <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+            <button type="button" *ngFor="let month of monthsList" (click)="toggleMonth(month)"
+              class="py-2.5 rounded-lg border text-xs font-medium transition duration-200 flex items-center justify-center gap-1.5 shadow-sm"
+              [ngClass]="isMonthSelected(month) ? 'bg-[#005c55] border-[#005c55] text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'">
+              <ng-icon *ngIf="isMonthSelected(month)" name="matCheckOutline" class="text-xs"></ng-icon>
+              {{ month | slice:0:3 }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Attractions Form Array -->
+        <div class="flex flex-col gap-4 border-t border-slate-100 pt-6">
+          <div class="flex justify-between items-center">
+            <div class="flex flex-col">
+              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Local Attractions Hub</label>
+              <span class="text-[11px] text-slate-400">List points of interest inside this destination.</span>
+            </div>
+            <button type="button" (click)="addAttraction()"
+              class="px-4 py-2 bg-[#005c55] hover:bg-[#0f766e] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <ng-icon name="matAddOutline" class="text-sm"></ng-icon>
+              Add Attraction
+            </button>
+          </div>
+
+          <!-- List of Attractions -->
+          <div formArrayName="attractions" class="flex flex-col gap-4">
+            <div *ngFor="let item of attractions.controls; let idx = index" [formGroupName]="idx"
+              class="relative border border-slate-200 rounded-xl p-5 bg-slate-50/50 flex flex-col gap-4 animate-scale-up">
+
+              <!-- Row Delete Button -->
+              <button type="button" (click)="removeAttraction(idx)"
+                class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition duration-150 p-1.5 hover:bg-red-50 rounded-lg">
+                <ng-icon name="matDeleteOutline" class="text-lg"></ng-icon>
+              </button>
+
+              <span class="text-xs font-semibold text-[#005c55]">Attraction #{{ idx + 1 }}</span>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Attraction Name En -->
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Attraction Name (EN)
+                    *</label>
+                  <input type="text" formControlName="nameEn" placeholder="e.g. Sphinx"
+                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#005c55] bg-white transition">
+                </div>
+                <!-- Attraction Name Ar -->
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Attraction Name (AR)
+                    *</label>
+                  <input type="text" formControlName="nameAr" placeholder="مثال: أبو الهول" dir="rtl"
+                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#005c55] bg-white transition">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Attraction Type -->
+
+
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Attraction Type *</label>
+                  <div class="relative w-full">
+                    <select formControlName="type"
+                      class="appearance-none w-full px-3 py-2 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#005c55] bg-white transition cursor-pointer text-slate-700 font-medium">
+                      <option value="historical">Historical</option>
+                      <option value="museum">Museum</option>
+                      <option value="market">Market / Bazaar</option>
+                      <option value="religious">Religious</option>
+                      <option value="nature">Nature & Eco</option>
+                      <option value="beach">Beach & Resort</option>
+                      <option value="cultural">Cultural</option>
+                      <option value="landmark">Landmark</option>
+                      <option value="adventure">Adventure & Safari</option>
+                    </select>
+
+                    <div class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-slate-400">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                <!-- Entry Fee -->
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Entry Fee ({{
+                    destinationForm.get('currency')?.value }}) *</label>
+                  <input type="number" formControlName="entryFee"
+                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#005c55] bg-white transition">
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="attractions.length === 0"
+              class="border border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-slate-400 gap-2 bg-white">
+              <ng-icon name="matLocationOnOutline" class="text-3xl text-slate-300"></ng-icon>
+              <span class="text-xs font-medium">No attractions added yet.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: MEDIA & SUBMIT -->
+      <div *ngIf="currentStep() === 4" class="p-8 md:p-10 flex flex-col gap-6 animate-fade-in">
+        <div class="border-b border-slate-100 pb-4">
+          <h2 class="text-xl font-bold text-slate-800">Step 4: Cover Image & Gallery</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Image Inputs (Left Column) -->
+          <div class="md:col-span-2 flex flex-col gap-6">
+            <!-- Cover Image URL -->
+            <div class="flex flex-col gap-2">
+              <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Cover Image URL</label>
+              <div class="relative flex">
+                <input type="text" formControlName="coverImage"
+                  placeholder="https://images.unsplash.com/... or click cloud icon to upload"
+                  class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm outline-none focus:border-[#005c55] pr-10">
+                <button type="button" (click)="coverImageFileInput.click()"
+                  class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-[#005c55] transition cursor-pointer"
+                  title="Upload Image to Cloudinary">
+                  <ng-icon name="matCloudUploadOutline" class="text-base"></ng-icon>
+                </button>
+              </div>
+              <input type="file" #coverImageFileInput class="hidden" accept="image/*" (change)="onFileSelected($event)">
+              <span class="text-[10px] text-slate-400">Paste absolute URL of the high-res cover image or click the cloud
+                icon on the right to upload.</span>
+            </div>
+
+            <!-- Gallery Images Upload -->
+            <div class="flex flex-col gap-3 border-t border-slate-100 pt-6">
+              <div class="flex justify-between items-center">
+                <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Photo Gallery</label>
+                <span *ngIf="galleryUrls().length > 0"
+                  class="text-[10px] font-bold text-[#005c55] bg-[#005c55]/10 px-2 py-1 rounded-full">{{
+                  galleryUrls().length }} image(s)</span>
+              </div>
+
+              <!-- Upload Zone -->
+              <div
+                class="relative border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50 hover:bg-slate-50 hover:border-[#005c55]/40 transition duration-200 group cursor-pointer"
+                (click)="galleryFileInput.click()">
+                <input type="file" #galleryFileInput class="hidden" accept="image/*" multiple
+                  (change)="onGalleryFileSelected($event)">
+                <div class="flex flex-col items-center justify-center py-8 gap-2.5">
+                  <!-- Spinner while uploading -->
+                  <div *ngIf="galleryUploading()" class="flex flex-col items-center gap-2">
+                    <span
+                      class="w-8 h-8 border-2 border-[#005c55] border-t-transparent rounded-full animate-spin"></span>
+                    <span class="text-xs font-medium text-[#005c55]">Uploading to Cloudinary…</span>
+                  </div>
+                  <!-- Default idle state -->
+                  <ng-container *ngIf="!galleryUploading()">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-[#005c55]/10 flex items-center justify-center group-hover:bg-[#005c55]/20 transition">
+                      <ng-icon name="matCloudUploadOutline" class="text-xl text-[#005c55]"></ng-icon>
+                    </div>
+                    <div class="flex flex-col items-center gap-0.5">
+                      <span class="text-sm font-semibold text-slate-700">Click to upload images</span>
+                      <span class="text-[11px] text-slate-400">Supports JPG, PNG, WebP — multiple files allowed</span>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+
+              <!-- Uploaded Gallery Thumbnails List -->
+              <div *ngIf="galleryUrls().length > 0" class="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
+                <div *ngFor="let url of galleryUrls(); let i = index"
+                  class="flex items-center gap-3 bg-white border border-slate-200 px-3 py-2 rounded-xl shadow-sm animate-scale-up">
+                  <img [src]="url" alt="Gallery {{ i + 1 }}"
+                    class="w-10 h-10 object-cover rounded-lg flex-shrink-0 border border-slate-100">
+                  <span class="truncate text-[11px] text-slate-500 flex-1">Image {{ i + 1 }}</span>
+                  <button type="button" (click)="removeGalleryImage(i); $event.stopPropagation()"
+                    class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition flex-shrink-0">
+                    <ng-icon name="matDeleteOutline" class="text-sm"></ng-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image Previews (Right Column) -->
+          <div class="flex flex-col gap-4">
+            <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Visual Previews</span>
+
+            <!-- Cover Preview -->
+            <div class="flex flex-col gap-1">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cover Image</span>
+              <div
+                class="w-full h-36 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center relative shadow-inner">
+                <img *ngIf="destinationForm.get('coverImage')?.value" [src]="destinationForm.get('coverImage')?.value"
+                  alt="Cover Preview" class="w-full h-full object-cover">
+                <div *ngIf="!destinationForm.get('coverImage')?.value"
+                  class="flex flex-col items-center justify-center text-slate-300 gap-1.5">
+                  <ng-icon name="matCloudUploadOutline" class="text-3xl"></ng-icon>
+                  <span class="text-[10px] font-medium">No cover image</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gallery Grid Preview -->
+            <div class="flex flex-col gap-1.5 mt-2">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gallery Grid ({{
+                galleryUrls().length }})</span>
+              <div class="grid grid-cols-3 gap-2">
+                <div *ngFor="let g of galleryUrls(); let i = index"
+                  class="w-full aspect-square rounded-lg border border-slate-100 bg-slate-50 overflow-hidden relative group shadow-sm">
+                  <img [src]="g" alt="Gallery preview {{ i + 1 }}"
+                    class="w-full h-full object-cover transition group-hover:scale-105 duration-300">
+                  <!-- Overlay delete button on hover -->
+                  <button type="button" (click)="removeGalleryImage(i)"
+                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                    <ng-icon name="matDeleteOutline" class="text-white text-lg"></ng-icon>
+                  </button>
+                </div>
+                <div *ngIf="galleryUrls().length === 0"
+                  class="col-span-3 h-20 rounded-xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 gap-1">
+                  <ng-icon name="matCloudUploadOutline" class="text-xl"></ng-icon>
+                  <span class="text-[10px]">No gallery images yet</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submission Summary Box -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 flex flex-col gap-3">
+          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <ng-icon name="matCheckOutline" class="text-emerald-600 text-sm"></ng-icon>
+            Destination Edit Summary
+          </h4>
+          <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
+            <div class="flex justify-between border-b border-slate-200/50 py-1">
+              <span class="text-slate-500">Name (English):</span>
+              <span class="font-semibold text-slate-800">{{ destinationForm.value.nameEn || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200/50 py-1">
+              <span class="text-slate-500">City / Region:</span>
+              <span class="font-semibold text-slate-800">{{ destinationForm.value.city || 'N/A' }} ({{
+                destinationForm.value.region || 'N/A' }})</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200/50 py-1">
+              <span class="text-slate-500">Category:</span>
+              <span class="font-semibold text-slate-800 capitalize">{{ destinationForm.value.category || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200/50 py-1">
+              <span class="text-slate-500">Operating Status:</span>
+              <span class="font-semibold text-slate-800">{{ destinationForm.value.isActive ? 'Active' : 'Inactive'
+                }}</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200/50 py-1">
+              <span class="text-slate-500">Daily Budget:</span>
+              <span class="font-semibold text-slate-800">{{ destinationForm.value.averageBudgetPerDay }} {{
+                destinationForm.value.currency }}</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200/50 py-1">
+              <span class="text-slate-500">Attractions Added:</span>
+              <span class="font-semibold text-slate-800">{{ attractions.length }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons Footer -->
+
+      <!-- Navigation Actions -->
+
+      <div class="border-t border-slate-100 p-6 flex justify-end items-center bg-slate-50/50">
+
+
+        <div class="flex gap-3">
+          <button type="button" *ngIf="currentStep() === 1" (click)="goBack()"
+            class="px-5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition duration-150 shadow-sm cursor-pointer">
+            Cancel
+          </button>
+          <button type="button" *ngIf="currentStep() > 1" (click)="prevStep()"
+            class="px-5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition duration-150 shadow-sm cursor-pointer">
+            Previous Step
+          </button>
+
+          <button type="button" *ngIf="currentStep() < 4" (click)="nextStep()"
+            class="px-6 py-2.5 bg-[#005c55] hover:bg-[#0f766e] text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow transition duration-150 flex items-center gap-1.5 cursor-pointer">
+            Next Step
+            <ng-icon name="matArrowForwardOutline" class="text-base"></ng-icon>
+          </button>
+
+          <button type="submit" *ngIf="currentStep() === 4" [disabled]="loading()"
+            class="px-6 py-2.5 bg-[#005c55] hover:bg-[#0f766e] text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow disabled:opacity-55 disabled:cursor-not-allowed transition duration-150 flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed">
+            <span *ngIf="loading()"
+              class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

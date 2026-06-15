@@ -1,6 +1,6 @@
 import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   matGroupOutline,
@@ -36,7 +36,7 @@ interface ActivityRow {
 
 @Component({
   selector: 'app-placeholder',
-  imports: [CommonModule, NgIconComponent],
+  imports: [CommonModule, NgIconComponent, RouterLink],
   templateUrl: './placeholder.component.html',
   styleUrl: './placeholder.component.css',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -58,6 +58,8 @@ interface ActivityRow {
 })
 export class PlaceholderComponent {
   private router = inject(Router);
+
+  isDestinationsPage = computed(() => this.router.url.includes('/destinations'));
 
   // Compute page information based on the active path
   pageInfo = computed(() => {
