@@ -38,7 +38,11 @@ export const routes: Routes = [
       },
       {
         path: 'users',
-        loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
+        loadComponent: () => import('../shared/components/user/user').then(c => c.UsersComponent)
+      },
+      {
+        path: 'users/:id',
+        loadComponent: () => import('../shared/components/user-details/user-details').then(c => c.UserDetailsComponent)
       },
       {
         path: 'destinations',
@@ -85,6 +89,10 @@ export const routes: Routes = [
       {
         path: 'stripe',
         loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('../features/profile/profile').then(c => c.ProfileComponent)
       }
     ]
   },

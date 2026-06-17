@@ -1,0 +1,364 @@
+@if (toast(); as t) {
+<div
+  class="fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-top-4"
+  [ngClass]="{
+         'bg-emerald-50 border-emerald-200 text-emerald-800': t.type === 'success',
+         'bg-rose-50 border-rose-200 text-rose-800': t.type === 'danger',
+         'bg-amber-50 border-amber-200 text-amber-800': t.type === 'warning'
+       }">
+  <ng-icon [name]="t.type === 'success' ? 'matCheckCircleOutline' : 'matSettingsOutline'" class="w-5 h-5"></ng-icon>
+  <span class="font-body-md font-semibold">{{ t.message }}</span>
+  <button (click)="toast.set(null)" class="text-slate-400 hover:text-slate-600 ml-2 focus:outline-none">
+    <ng-icon name="matCloseOutline" class="w-4 h-4"></ng-icon>
+  </button>
+</div>
+}
+
+<div class="max-w-[1600px] mx-auto flex flex-col gap-6 h-full">
+  <!-- Header & Toolbar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="font-headline-md text-headline-md text-on-surface">User Management</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage platform users, subscription tiers, and
+        administrative rights.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button (click)="onExport()"
+        class="flex items-center gap-2 px-4 py-2 bg-surface-light border border-border-subtle rounded-lg text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md shadow-sm cursor-pointer">
+        <ng-icon name="matDownloadOutline" class="text-[18px] text-on-surface-variant"></ng-icon>
+        Export CSV
+      </button>
+      <button (click)="openAddModal()"
+        class="flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary rounded-lg hover:opacity-90 transition-all font-label-md text-label-md shadow-sm cursor-pointer">
+        <ng-icon name="matAddOutline" class="text-[18px]"></ng-icon>
+        Add Admin User
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Bar -->
+  <div class="bg-surface-light border border-border-subtle rounded-lg p-3 flex flex-wrap gap-3 items-center shadow-sm">
+    <!-- Search Field -->
+    <div class="relative w-full sm:w-64">
+      <ng-icon name="matSearchOutline"
+        class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5"></ng-icon>
+      <input [value]="searchQuery()" (input)="onSearchChange($event)"
+        class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-body-md font-body-md text-on-surface placeholder:text-outline"
+        placeholder="Search name, email..." type="text" />
+    </div>
+
+    <!-- Role Filter Toggle -->
+    <div class="flex items-center gap-1 bg-surface-container-low border border-border-subtle rounded-lg p-1">
+      <button (click)="setRoleFilter('all')"
+        [class]="'px-3 py-1.5 rounded-md text-body-md font-medium transition-colors cursor-pointer ' + (roleFilter() === 'all' ? 'bg-surface-light text-primary shadow-sm border border-border-subtle' : 'text-on-surface-variant hover:text-on-surface')">
+        All Roles
+      </button>
+      <button (click)="setRoleFilter('admin')"
+        [class]="'px-3 py-1.5 rounded-md text-body-md font-medium transition-colors cursor-pointer ' + (roleFilter() === 'admin' ? 'bg-surface-light text-primary shadow-sm border border-border-subtle' : 'text-on-surface-variant hover:text-on-surface')">
+        Admins
+      </button>
+      <button type="button" (click)="setRoleFilter('user')"
+        [class]="'px-3 py-1.5 rounded-md text-body-md font-medium transition-colors cursor-pointer ' + (roleFilter() === 'user' ? 'bg-surface-light text-primary shadow-sm border border-border-subtle' : 'text-on-surface-variant hover:text-on-surface')">
+        Users
+      </button>
+    </div>
+
+    <!-- Sort Dropdown -->
+    <div
+      class="flex items-center gap-2 px-3 py-1.5 border border-border-subtle rounded-md bg-surface-container-low text-on-surface font-label-md text-label-md">
+      <span class="text-on-surface-variant">Sort:</span>
+      <select (change)="setSortFilter($any($event.target).value)" [value]="sortFilter()"
+        class="bg-transparent border-none focus:outline-none cursor-pointer font-semibold text-primary">
+        <option value="-createdAt">Newest First</option>
+        <option value="createdAt">Oldest First</option>
+        <option value="name">Name (A-Z)</option>
+        <option value="-name">Name (Z-A)</option>
+      </select>
+    </div>
+
+    <!-- Density Settings -->
+    <div class="ml-auto flex items-center gap-2">
+      <span class="font-label-md text-label-md text-on-surface-variant">Density:</span>
+      <button (click)="setDensity('normal')"
+        [class]="'p-1.5 rounded transition-colors border cursor-pointer ' + (density() === 'normal' ? 'bg-surface-container-high border-border-subtle text-primary' : 'bg-transparent border-transparent text-on-surface-variant hover:bg-surface-container-low')">
+        <ng-icon name="matDensityMediumOutline" class="text-[18px]"></ng-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+  <div
+    class="flex flex-col items-center justify-center p-24 bg-surface-light border border-border-subtle rounded-lg shadow-sm">
+    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+    <p class="text-body-md text-on-surface-variant mt-4 font-semibold">Fetching directory data...</p>
+  </div>
+  } @else {
+  <!-- Empty State -->
+  @if (users().length === 0) {
+  <div
+    class="flex flex-col items-center justify-center p-16 bg-surface-light border border-border-subtle border-dashed rounded-xl shadow-sm">
+    <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+      <ng-icon name="matGroupOutline" class="w-8 h-8"></ng-icon>
+    </div>
+    <h3 class="text-title-lg font-bold text-on-surface">No users found</h3>
+    <p class="text-body-md text-on-surface-variant text-center mt-1 max-w-sm">No user records match your search
+      criteria. Try modifying your filter options or add a new administrator.</p>
+    <button (click)="openAddModal()"
+      class="mt-4 flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary rounded-lg hover:opacity-90 font-label-md text-label-md shadow-sm cursor-pointer">
+      <ng-icon name="matAddOutline" class="w-5 h-5"></ng-icon> Add Admin User
+    </button>
+  </div>
+  } @else {
+  <!-- Data Table (AG Grid Style) -->
+  <div
+    class="flex-1 bg-surface-light border border-border-subtle rounded-lg overflow-hidden flex flex-col shadow-sm relative min-h-[500px]">
+    <!-- AI Intelligence indicator for smart sorting/filtering -->
+    <div
+      class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-secondary-container via-primary-container to-secondary-container">
+    </div>
+
+    <div class="overflow-x-auto flex-1">
+      <div class="min-w-[1000px] w-full">
+        <!-- Grid Header -->
+        <div class="flex w-full bg-surface-container-low border-b border-border-subtle font-semibold">
+          <div class="w-64 ag-grid-header font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+            User</div>
+          <div
+            class="flex-1 ag-grid-header font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+            Email</div>
+          <div class="w-40 ag-grid-header font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+            Subscription</div>
+          <div class="w-40 ag-grid-header font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+            Role</div>
+          <div class="w-32 ag-grid-header font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+            Trips</div>
+          <div class="w-40 ag-grid-header font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+            Created</div>
+
+          <div
+            class="w-24 ag-grid-header justify-center font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+            Actions</div>
+        </div>
+
+        <!-- Grid Rows -->
+        @for (user of users(); track user._id) {
+        <div (click)="viewUserDetails(user)"  class="flex w-full ag-grid-row group items-center relative transition-colors cursor-pointer"
+          [style.height]="density() === 'compact' ? '48px' : '64px'">
+          <!-- User Profile -->
+          <div class="w-64 ag-grid-cell gap-3">
+            @if (user.image) {
+            <div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-highest flex-shrink-0">
+              <img [src]="user.image" alt="Avatar" class="w-full h-full object-cover" />
+            </div>
+            } @else {
+            <div
+              class="w-8 h-8 rounded-full overflow-hidden bg-primary/10 text-primary flex-shrink-0 flex items-center justify-center font-bold font-label-md text-label-md">
+              {{ getInitials(user.name) }}
+            </div>
+            }
+            <span class="font-label-md text-label-md text-on-surface truncate font-semibold">{{ user.name }}</span>
+          </div>
+
+          <!-- Email Address -->
+          <div class="flex-1 ag-grid-cell font-body-md text-body-md text-on-surface-variant truncate">
+            {{ user.email }}
+          </div>
+
+          <!-- Subscription Tier -->
+          <div class="w-40 ag-grid-cell">
+            @if (user.subscription === 'pro') {
+            <span
+              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary-container/10 text-primary font-semibold font-label-sm text-label-sm border border-primary-container/20">
+              <ng-icon name="matStarOutline" class="text-[12px]"></ng-icon> Traveler (Pro)
+            </span>
+            } @else if (user.subscription === 'enterprise') {
+            <span
+              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold font-label-sm text-label-sm border border-indigo-200">
+              <ng-icon name="matCardMembershipOutline" class="text-[12px]"></ng-icon> Enterprise
+            </span>
+            } @else {
+            <span
+              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container border border-border-subtle text-on-surface-variant font-label-sm text-label-sm">
+              Explorer (Free)
+            </span>
+            }
+          </div>
+
+          <!-- Role Badge -->
+          <div class="w-40 ag-grid-cell">
+            @if (user.role === 'admin') {
+            <span
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold uppercase tracking-wider">
+              Admin
+            </span>
+            } @else {
+            <span
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium uppercase tracking-wider">
+              User
+            </span>
+            }
+          </div>
+
+          <!-- User Trips -->
+          <div class="w-32 ag-grid-cell">
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20 text-xs">
+              <ng-icon name="matTravelExploreOutline" class="text-[14px]"></ng-icon>
+              {{ getUserTripsCount(user) }} Trips
+            </span>
+          </div>
+
+          <!-- Created Date -->
+          <div class="w-40 ag-grid-cell font-body-md text-body-md text-on-surface-variant">
+            {{ formatDate(user.createdAt) }}
+          </div>
+
+          <!-- Actions cell with view details eye icon and delete button -->
+          <div class="w-24 ag-grid-cell justify-center gap-2">
+            <button (click)="viewUserDetails(user); $event.stopPropagation()"
+              class="p-1.5 rounded-full text-primary hover:bg-primary/10 transition-colors cursor-pointer focus:outline-none"
+              title="View User Details">
+              <ng-icon name="matVisibilityOutline" class="text-[20px]"></ng-icon>
+            </button>
+            <button (click)="openDeleteModal(user); $event.stopPropagation()"
+              class="p-1.5 rounded-full text-red-600 hover:bg-red-50 hover:text-red-800 transition-colors cursor-pointer focus:outline-none"
+              title="Delete User">
+              <ng-icon name="matDeleteOutline" class="text-[20px]"></ng-icon>
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    <!-- Pagination Footer -->
+    <div
+      class="flex items-center justify-between px-6 py-4 bg-surface-container-low border-t border-border-subtle shrink-0">
+      <div class="text-sm text-on-surface-variant font-body-md">
+        Showing page <span class="font-semibold text-primary">{{ page() }}</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button (click)="prevPage()" [disabled]="page() === 1 || isLoading()"
+          class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface-light border border-border-subtle rounded-lg text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm">
+          <ng-icon name="matChevronLeftOutline" class="text-[18px]"></ng-icon>
+          Previous
+        </button>
+        <button (click)="nextPage()" [disabled]="users().length < limit() || isLoading()"
+          class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface-light border border-border-subtle rounded-lg text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm">
+          Next
+          <ng-icon name="matChevronRightOutline" class="text-[18px]"></ng-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+  }
+</div>
+
+<!-- ================= MODALS SECTION ================= -->
+
+<!-- ADD ADMIN USER MODAL -->
+@if (showAddModal()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/50 backdrop-blur-sm p-4 animate-fade-in">
+  <div
+    class="bg-surface-light border border-border-subtle rounded-xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-border-subtle bg-slate-50">
+      <h3 class="text-title-lg font-bold text-on-surface flex items-center gap-2">
+        <ng-icon name="matAddOutline" class="w-5 h-5 text-primary"></ng-icon> Add Admin User
+      </h3>
+      <button (click)="closeAllModals()"
+        class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-slate-200 border-none cursor-pointer">
+        <ng-icon name="matCloseOutline" class="w-5 h-5"></ng-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="addForm" (ngSubmit)="onSubmitAdd()" class="p-6 space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-on-surface mb-1">Full Name</label>
+        <div class="relative">
+          <ng-icon name="matPersonOutline"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5"></ng-icon>
+          <input formControlName="name" type="text"
+            class="w-full pl-10 pr-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:border-primary text-body-md font-body-md text-on-surface placeholder:text-outline"
+            placeholder="e.g. Ahmed Ali" />
+        </div>
+        @if (addForm.get('name')?.touched && addForm.get('name')?.invalid) {
+        <p class="text-xs text-error mt-1">Name is required (min 2 characters).</p>
+        }
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-on-surface mb-1">Email Address</label>
+        <div class="relative">
+          <ng-icon name="matMailOutline"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5"></ng-icon>
+          <input formControlName="email" type="email"
+            class="w-full pl-10 pr-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:border-primary text-body-md font-body-md text-on-surface placeholder:text-outline"
+            placeholder="name@example.com" />
+        </div>
+        @if (addForm.get('email')?.touched && addForm.get('email')?.invalid) {
+        <p class="text-xs text-error mt-1">Please enter a valid email address.</p>
+        }
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-on-surface mb-1">Password</label>
+        <div class="relative">
+          <ng-icon name="matVpnKeyOutline"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5"></ng-icon>
+          <input formControlName="password" type="password"
+            class="w-full pl-10 pr-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:border-primary text-body-md font-body-md text-on-surface placeholder:text-outline"
+            placeholder="••••••••" />
+        </div>
+        @if (addForm.get('password')?.touched && addForm.get('password')?.invalid) {
+        <p class="text-xs text-error mt-1">
+          Password must be at least 8 characters, and contain at least one uppercase letter, one lowercase letter, one
+          number, and one special character.
+        </p>
+        }
+      </div>
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
+        <button type="button" (click)="closeAllModals()"
+          class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-border-subtle rounded-lg text-on-surface text-body-md font-semibold cursor-pointer">
+          Cancel
+        </button>
+        <button type="submit" [disabled]="addForm.invalid || isLoading()"
+          class="px-4 py-2 bg-primary-container text-on-primary rounded-lg hover:opacity-90 transition-opacity text-body-md font-semibold disabled:opacity-50 cursor-pointer">
+          Save Admin
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- DELETE CONFIRMATION MODAL -->
+@if (showDeleteModal()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/50 backdrop-blur-sm p-4 animate-fade-in">
+  <div
+    class="bg-surface-light border border-border-subtle rounded-xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+    <div class="p-6 text-center">
+      <div
+        class="w-16 h-16 bg-rose-50 border border-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <ng-icon name="matDeleteOutline" class="text-3xl"></ng-icon>
+      </div>
+      <h3 class="text-xl font-bold text-on-surface">Delete Account?</h3>
+      <p class="text-body-md text-on-surface-variant mt-2">
+        Are you sure you want to permanently delete <strong>{{ selectedUser()?.name }}</strong>'s account ({{
+        selectedUser()?.email }})? This action is irreversible.
+      </p>
+    </div>
+
+    <div class="flex items-center justify-center gap-3 px-6 py-4 bg-slate-50 border-t border-border-subtle">
+      <button (click)="closeAllModals()"
+        class="px-4 py-2 bg-slate-200 hover:bg-slate-300 border border-border-subtle rounded-lg text-on-surface text-body-md font-semibold cursor-pointer">
+        Cancel
+      </button>
+      <button (click)="onConfirmDelete()" [disabled]="isLoading()"
+        class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-all text-body-md font-semibold disabled:opacity-50 cursor-pointer">
+        Delete User
+      </button>
+    </div>
+  </div>
+</div>
+}
