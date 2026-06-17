@@ -132,7 +132,7 @@ export class Sidebar {
         },
         {
           label: 'Trips',
-          route: '/dashboard/trips',
+          route: '/dashboard/trip-templates',
           icon: 'matTravelExploreOutline',
         },
       ],

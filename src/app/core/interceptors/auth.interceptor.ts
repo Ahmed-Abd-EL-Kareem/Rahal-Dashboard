@@ -23,7 +23,12 @@ import { AuthService } from '../auth/auth.service';
 import { environment } from '../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = inject(AuthService).token();
+  const authService = inject(AuthService);
+  const token = authService?.token ? authService.token() : authService?.getToken?.();
+
+  // Debugging: log token presence for dev (remove in production)
+  // eslint-disable-next-line no-console
+  console.debug('[authInterceptor] url=', req.url, 'startsWithApi=', req.url.startsWith(environment.apiUrl), 'tokenPresent=', !!token);
 
   // لا تضف أي Headers لطلبات Cloudinary
   if (req.url.includes('cloudinary.com')) {
@@ -33,11 +38,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   let clonedReq = req;
 
   if (req.url.startsWith(environment.apiUrl)) {
-    clonedReq = req.clone({
-      withCredentials: true
-    });
+    clonedReq = req.clone({ withCredentials: true });
 
     if (token) {
+      // eslint-disable-next-line no-console
+      console.debug('[authInterceptor] Attaching Authorization header');
       clonedReq = clonedReq.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`

@@ -20,6 +20,8 @@ import {
   matMenuOutline,
 } from '@ng-icons/material-icons/outline';
 
+import { TripService } from '../../../core/services/trip.service';
+
 interface Crumb {
   label: string;
   route: string | null;
@@ -45,6 +47,7 @@ export class TopBar {
 
   private router = inject(Router);
   private auth = inject(AuthService);
+  private tripService = inject(TripService, { optional: true });
 
   dropdownOpen = signal(false);
 
@@ -54,28 +57,34 @@ export class TopBar {
   userImage = computed(() => this.auth.currentUser()?.image ?? null);
 
   // Build breadcrumbs from current URL
-  breadcrumbs = toSignal(
+  currentUrl = toSignal(
     this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
-      map(() => {
-        const url = this.router.url;
-        const segments = url.split('/').filter((s) => s && s !== 'dashboard');
-        return segments.map((seg, i) => {
-          let label = seg;
-          if (/^[0-9a-fA-F]{24}$/.test(seg)) {
-            label = 'Details';
-          } else {
-            label = seg.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-          }
-          return {
-            label,
-            route: '/' + ['dashboard', ...segments.slice(0, i + 1)].join('/'),
-          };
-        }) as Crumb[];
-      }),
+      map(() => this.router.url)
     ),
-    { initialValue: [] as Crumb[] },
+    { initialValue: '' }
   );
+
+  breadcrumbs = computed(() => {
+    const url = this.currentUrl() || this.router.url;
+    const segments = url.split('/').filter((s) => s && s !== 'dashboard');
+    return segments.map((seg, i) => {
+      let label = seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, ' ');
+
+      if (this.tripService) {
+        const cachedTrip = this.tripService.detailsSignal()[seg]
+          || this.tripService.templatesSignal().find(t => t._id === seg);
+        if (cachedTrip) {
+          label = cachedTrip.title;
+        }
+      }
+
+      return {
+        label,
+        route: '/' + ['dashboard', ...segments.slice(0, i + 1)].join('/'),
+      };
+    }) as Crumb[];
+  });
 
   dropdownItems = [
     {
