@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+=======
+import { Component, signal } from '@angular/core';
+>>>>>>> 8457a8f (Initial commit)
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Sidebar } from '../sidebar/sidebar';
@@ -8,7 +12,10 @@ import { TopBar } from '../topbar/topbar';
   selector: 'app-shell',
   imports: [CommonModule, RouterOutlet, Sidebar, TopBar],
   templateUrl: './shell.html',
+<<<<<<< HEAD
   changeDetection: ChangeDetectionStrategy.Eager,
+=======
+>>>>>>> 8457a8f (Initial commit)
   styleUrl: './shell.css',
 })
 export class Shell {

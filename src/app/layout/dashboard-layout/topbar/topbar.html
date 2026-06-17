@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <header
   class="bg-surface-light top-0 sticky z-50 border-b border-border-subtle shadow-sm flex justify-between items-center h-header-height px-8 md:px-container-margin w-full">
   <div class="flex items-center gap-4">
@@ -62,3 +63,60 @@
     </div>
   </div>
 </header>
+=======
+<header class="bg-surface-light top-0 sticky z-50 border-b border-border-subtle shadow-sm flex justify-between items-center h-header-height px-8 md:px-container-margin w-full">
+<div class="flex items-center gap-4">
+<button (click)="menuClick.emit()" class="lg:hidden p-2 -ml-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors focus:outline-none">
+<ng-icon name="matMenuOutline" size="24px"></ng-icon>
+</button>
+<div class="font-display-lg text-headline-sm font-bold text-primary dark:text-primary-fixed md:hidden">Rahal</div>
+
+<!-- Breadcrumb Navigation -->
+<nav class="hidden md:flex items-center gap-2 text-sm font-medium text-on-surface-variant/70">
+  <a routerLink="/dashboard" class="hover:text-primary transition-colors">Home</a>
+  @for (crumb of breadcrumbs(); track crumb.label; let last = $last) {
+    <span class="text-on-surface-variant/30 select-none">/</span>
+    @if (last) {
+      <span class="text-primary font-semibold tracking-wide">{{ crumb.label }}</span>
+    } @else {
+      <a [routerLink]="crumb.route" class="hover:text-primary transition-colors">{{ crumb.label }}</a>
+    }
+  }
+</nav>
+</div>
+
+<div class="flex items-center gap-2">
+<button (click)="handleDropdown('settings')" class="p-2 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors cursor-pointer active:opacity-80 hidden sm:flex focus:outline-none" title="Settings">
+<ng-icon name="matSettingsOutline" size="24px"></ng-icon>
+</button>
+
+<!-- Admin Avatar Dropdown -->
+<div class="relative ml-2">
+  <button (click)="dropdownOpen.set(!dropdownOpen())" class="w-8 h-8 rounded-full bg-surface-container-low overflow-hidden border border-border-subtle cursor-pointer active:opacity-80 flex items-center justify-center font-bold text-white text-sm focus:outline-none" style="background:linear-gradient(135deg,#2EC4B6,#0F766E);">
+    @if (userImage()) {
+      <img [src]="userImage()" alt="User Avatar" class="w-full h-full object-cover" />
+    } @else {
+      {{ userInitial() }}
+    }
+  </button>
+
+  @if (dropdownOpen()) {
+    <div class="absolute right-0 top-full mt-2 w-52 rounded-xl overflow-hidden bg-surface-light border border-border-subtle shadow-sm z-50">
+      <div class="px-4 py-3 border-b border-border-subtle">
+        <div class="text-sm font-semibold text-on-surface">{{ userName() }}</div>
+        <div class="text-xs mt-0.5 text-on-surface-variant">{{ userEmail() }}</div>
+      </div>
+      <div class="py-1">
+        @for (item of dropdownItems; track item.label) {
+          <button (click)="handleDropdown(item.action)" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-150 text-left hover:bg-surface-container-low focus:outline-none" [class.text-danger]="item.danger" [class.text-on-surface-variant]="!item.danger">
+            <ng-icon [name]="item.icon" size="18px" class="shrink-0"></ng-icon>
+            {{ item.label }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>
+</div>
+</header>
+>>>>>>> 8457a8f (Initial commit)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   Component,
   signal,
@@ -7,10 +8,14 @@ import {
   input,
   ChangeDetectionStrategy,
 } from '@angular/core';
+=======
+import { Component, signal, computed, inject, output, input } from '@angular/core';
+>>>>>>> 8457a8f (Initial commit)
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/auth/auth.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
+<<<<<<< HEAD
 import {
   matDashboardOutline,
   matAnalyticsOutline,
@@ -22,11 +27,28 @@ import {
   matAutoAwesomeOutline,
   matCardMembershipOutline,
   matPaymentsOutline,
+=======
+import { 
+  matDashboardOutline, 
+  matAnalyticsOutline, 
+  matGroupOutline, 
+  matMapOutline, 
+  matHotelOutline, 
+  matTravelExploreOutline, 
+  matBookOnlineOutline, 
+  matAutoAwesomeOutline, 
+  matCardMembershipOutline, 
+  matPaymentsOutline, 
+>>>>>>> 8457a8f (Initial commit)
   matRateReviewOutline,
   matHelpOutline,
   matLogoutOutline,
   matMenuOutline,
+<<<<<<< HEAD
   matMenuOpenOutline,
+=======
+  matMenuOpenOutline
+>>>>>>> 8457a8f (Initial commit)
 } from '@ng-icons/material-icons/outline';
 
 interface NavItem {
@@ -45,7 +67,10 @@ interface NavSection {
   imports: [CommonModule, RouterLink, RouterLinkActive, NgIconComponent],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
+<<<<<<< HEAD
   changeDetection: ChangeDetectionStrategy.Eager,
+=======
+>>>>>>> 8457a8f (Initial commit)
   viewProviders: [
     provideIcons({
       matDashboardOutline,
@@ -62,9 +87,15 @@ interface NavSection {
       matHelpOutline,
       matLogoutOutline,
       matMenuOutline,
+<<<<<<< HEAD
       matMenuOpenOutline,
     }),
   ],
+=======
+      matMenuOpenOutline
+    })
+  ]
+>>>>>>> 8457a8f (Initial commit)
 })
 export class Sidebar {
   collapsed = input<boolean>(false);
@@ -132,7 +163,11 @@ export class Sidebar {
         },
         {
           label: 'Trips',
+<<<<<<< HEAD
           route: '/dashboard/trip-templates',
+=======
+          route: '/dashboard/trips',
+>>>>>>> 8457a8f (Initial commit)
           icon: 'matTravelExploreOutline',
         },
       ],

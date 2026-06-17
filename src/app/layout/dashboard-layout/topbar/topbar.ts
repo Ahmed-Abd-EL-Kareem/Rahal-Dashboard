@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   Component,
   signal,
@@ -7,12 +8,16 @@ import {
   output,
   ChangeDetectionStrategy,
 } from '@angular/core';
+=======
+import { Component, signal, computed, inject, input, output } from '@angular/core';
+>>>>>>> 8457a8f (Initial commit)
 import { Router, RouterLink, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter, map } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth/auth.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
+<<<<<<< HEAD
 import {
   matSettingsOutline,
   matPersonOutline,
@@ -21,6 +26,9 @@ import {
 } from '@ng-icons/material-icons/outline';
 
 import { TripService } from '../../../core/services/trip.service';
+=======
+import { matSettingsOutline, matPersonOutline, matLogoutOutline, matMenuOutline } from '@ng-icons/material-icons/outline';
+>>>>>>> 8457a8f (Initial commit)
 
 interface Crumb {
   label: string;
@@ -32,22 +40,34 @@ interface Crumb {
   imports: [CommonModule, RouterLink, NgIconComponent],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css',
+<<<<<<< HEAD
   changeDetection: ChangeDetectionStrategy.Eager,
+=======
+>>>>>>> 8457a8f (Initial commit)
   viewProviders: [
     provideIcons({
       matSettingsOutline,
       matPersonOutline,
       matLogoutOutline,
+<<<<<<< HEAD
       matMenuOutline,
     }),
   ],
+=======
+      matMenuOutline
+    })
+  ]
+>>>>>>> 8457a8f (Initial commit)
 })
 export class TopBar {
   menuClick = output<void>();
 
   private router = inject(Router);
   private auth = inject(AuthService);
+<<<<<<< HEAD
   private tripService = inject(TripService, { optional: true });
+=======
+>>>>>>> 8457a8f (Initial commit)
 
   dropdownOpen = signal(false);
 
@@ -57,6 +77,7 @@ export class TopBar {
   userImage = computed(() => this.auth.currentUser()?.image ?? null);
 
   // Build breadcrumbs from current URL
+<<<<<<< HEAD
   currentUrl = toSignal(
     this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
@@ -86,6 +107,23 @@ export class TopBar {
     }) as Crumb[];
   });
 
+=======
+  breadcrumbs = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map(() => {
+        const url = this.router.url;
+        const segments = url.split('/').filter((s) => s && s !== 'dashboard');
+        return segments.map((seg, i) => ({
+          label: seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, ' '),
+          route: '/' + ['dashboard', ...segments.slice(0, i + 1)].join('/'),
+        })) as Crumb[];
+      }),
+    ),
+    { initialValue: [] as Crumb[] },
+  );
+
+>>>>>>> 8457a8f (Initial commit)
   dropdownItems = [
     {
       label: 'My Profile',
