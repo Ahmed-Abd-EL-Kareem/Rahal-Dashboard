@@ -1,0 +1,303 @@
+<div class="max-w-[1600px] mx-auto flex flex-col gap-6">
+  
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex flex-col items-center justify-center min-h-[500px] gap-4">
+    <div class="animate-spin rounded-full h-12 w-12 border-4 border-surface-container-high border-t-primary"></div>
+    <p class="text-on-surface-variant font-medium">Loading AI metrics and request logs...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="bg-error-container/20 border border-error/30 rounded-xl p-8 flex flex-col items-center justify-center min-h-[400px] text-center gap-4">
+    <span class="material-symbols-outlined text-error text-display-lg fill-icon">warning</span>
+    <h3 class="font-headline-md text-on-surface">Failed to load AI metrics</h3>
+    <p class="text-on-surface-variant max-w-md">{{ error() }}</p>
+    <button (click)="loadData()" class="bg-primary text-on-primary rounded-lg px-6 py-2.5 font-label-md flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer">
+      <span class="material-symbols-outlined text-body-lg">refresh</span>
+      Retry Connection
+    </button>
+  </div>
+
+  <!-- Main Content Dashboard -->
+  <div *ngIf="!loading() && !error()" class="flex flex-col gap-6">
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-secondary fill-icon">auto_awesome</span>
+          <h1 class="font-headline-lg text-headline-lg text-on-surface">AI Overview</h1>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">Real-time metrics and performance data for enterprise generative models.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <select [value]="selectedPeriod()" (change)="onPeriodChange($event)" class="bg-surface-light border border-border-subtle rounded-lg px-4 py-2 font-label-md text-label-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer">
+          <option>Last 24 Hours</option>
+          <option>Last 7 Days</option>
+          <option>Last 30 Days</option>
+        </select>
+        <button class="bg-primary text-on-primary rounded-lg px-4 py-2 font-label-md text-label-md flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer">
+          <span class="material-symbols-outlined text-body-lg">download</span>
+          Export Report
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI Bento Grid (5 Columns) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      
+      <!-- KPI Card 1: Total Requests -->
+      <div class="bg-surface-light rounded-xl p-5 border border-border-subtle relative overflow-hidden flex flex-col justify-between h-32 group">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary-fixed"></div>
+        <div class="flex justify-between items-start">
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Requests</span>
+          <span class="material-symbols-outlined text-outline text-title-lg">monitoring</span>
+        </div>
+        <div class="flex items-end justify-between">
+          <span class="font-display-lg text-headline-lg font-bold text-on-surface">{{ stats()?.totalRequests || 0 }}</span>
+          <div class="flex items-center text-success bg-success/10 px-2 py-0.5 rounded text-label-sm font-label-sm mb-1">
+            <span class="material-symbols-outlined text-label-sm mr-1">trending_up</span>
+            Today: {{ stats()?.requestsToday || 0 }}
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Card 2: Success Rate -->
+      <div class="bg-surface-light rounded-xl p-5 border border-border-subtle relative overflow-hidden flex flex-col justify-between h-32 group">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary-fixed"></div>
+        <div class="flex justify-between items-start">
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Success Rate</span>
+          <span class="material-symbols-outlined text-secondary text-title-lg">auto_awesome</span>
+        </div>
+        <div class="flex items-end justify-between">
+          <span class="font-display-lg text-headline-lg font-bold text-on-surface">{{ stats()?.successRate || 100 }}%</span>
+          <div class="flex items-center text-success bg-success/10 px-2 py-0.5 rounded text-label-sm font-label-sm mb-1">
+            <span class="material-symbols-outlined text-label-sm mr-1">trending_up</span>
+            Optimal
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Card 3: Avg Response Time -->
+      <div class="bg-surface-light rounded-xl p-5 border border-border-subtle relative overflow-hidden flex flex-col justify-between h-32">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary-fixed"></div>
+        <div class="flex justify-between items-start">
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Avg Latency</span>
+          <span class="material-symbols-outlined text-outline text-title-lg">speed</span>
+        </div>
+        <div class="flex items-end justify-between">
+          <span class="font-display-lg text-headline-lg font-bold text-on-surface">{{ formatLatency(stats()?.averageResponseTime || 0) }}</span>
+          <div class="flex items-center text-success bg-success/10 px-2 py-0.5 rounded text-label-sm font-label-sm mb-1">
+            <span class="material-symbols-outlined text-label-sm mr-1">trending_down</span>
+            Fast
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Card 4: Token Usage -->
+      <div class="bg-surface-light rounded-xl p-5 border border-border-subtle relative overflow-hidden flex flex-col justify-between h-32">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary-fixed"></div>
+        <div class="flex justify-between items-start">
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Token Usage</span>
+          <span class="material-symbols-outlined text-outline text-title-lg">data_usage</span>
+        </div>
+        <div class="flex items-end justify-between">
+          <span class="font-display-lg text-headline-lg font-bold text-on-surface">{{ formatTokens(stats()?.totalTokens || 0) }}</span>
+          <div class="flex items-center text-warning bg-warning/10 px-2 py-0.5 rounded text-label-sm font-label-sm mb-1">
+            <span class="material-symbols-outlined text-label-sm mr-1">trending_up</span>
+            Active
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Card 5: Est. Cost -->
+      <div class="bg-surface-light rounded-xl p-5 border border-border-subtle relative overflow-hidden flex flex-col justify-between h-32">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary-fixed"></div>
+        <div class="flex justify-between items-start">
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Est. Cost</span>
+          <span class="material-symbols-outlined text-outline text-title-lg">payments</span>
+        </div>
+        <div class="flex items-end justify-between">
+          <span class="font-display-lg text-headline-lg font-bold text-on-surface">{{ formatCost(stats()?.totalCost || 0) }}</span>
+          <div class="flex items-center text-success bg-success/10 px-2 py-0.5 rounded text-label-sm font-label-sm mb-1">
+            <span class="material-symbols-outlined text-label-sm mr-1">lock</span>
+            USD
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section (Asymmetric Layout) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Main Chart: Requests Over Time (Visual Component kept as generated) -->
+      <div class="lg:col-span-2 bg-surface-light rounded-xl border border-border-subtle p-6 flex flex-col relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary-fixed"></div>
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="font-headline-sm text-headline-sm text-on-surface">Request Volume</h2>
+          <button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+            <span class="material-symbols-outlined">more_horiz</span>
+          </button>
+        </div>
+        <!-- Simulated Line Chart Area -->
+        <div class="flex-1 min-h-[240px] relative border-b border-l border-border-subtle flex items-end pt-4 pr-2">
+          <!-- Y-axis labels -->
+          <div class="absolute -left-8 top-0 h-full flex flex-col justify-between text-label-sm font-label-sm text-outline py-2">
+            <span>5k</span><span>4k</span><span>3k</span><span>2k</span><span>1k</span><span>0</span>
+          </div>
+          <!-- Grid lines -->
+          <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-between z-0">
+            <div class="border-t border-border-subtle border-dashed w-full opacity-50"></div>
+            <div class="border-t border-border-subtle border-dashed w-full opacity-50"></div>
+            <div class="border-t border-border-subtle border-dashed w-full opacity-50"></div>
+            <div class="border-t border-border-subtle border-dashed w-full opacity-50"></div>
+            <div class="border-t border-border-subtle border-dashed w-full opacity-50"></div>
+            <div></div>
+          </div>
+          <!-- CSS Simulated Line Graph -->
+          <div class="w-full h-full flex items-end justify-between px-2 z-10 gap-1">
+            <div class="w-full bg-primary-container/20 rounded-t-sm h-[30%] hover:bg-primary-container transition-colors relative group"><div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-label-sm px-2 py-1 rounded">1.5k</div></div>
+            <div class="w-full bg-primary-container/20 rounded-t-sm h-[45%] hover:bg-primary-container transition-colors relative group"><div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-label-sm px-2 py-1 rounded">2.2k</div></div>
+            <div class="w-full bg-primary-container/40 rounded-t-sm h-[40%] hover:bg-primary-container transition-colors relative group"></div>
+            <div class="w-full bg-primary-container/60 rounded-t-sm h-[60%] hover:bg-primary-container transition-colors relative group"></div>
+            <div class="w-full bg-primary-container/80 rounded-t-sm h-[75%] hover:bg-primary-container transition-colors relative group"></div>
+            <div class="w-full bg-primary-container/70 rounded-t-sm h-[65%] hover:bg-primary-container transition-colors relative group"></div>
+            <div class="w-full bg-primary rounded-t-sm h-[90%] hover:bg-secondary transition-colors relative group shadow-[0_0_10px_rgba(15,118,110,0.5)]">
+              <div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-label-sm px-2 py-1 rounded z-20">4.5k</div>
+            </div>
+          </div>
+        </div>
+        <!-- X-axis labels -->
+        <div class="flex justify-between text-label-sm font-label-sm text-outline mt-2 pl-2">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+      </div>
+
+      <!-- Secondary Chart: Popular Generations -->
+      <div class="bg-surface-light rounded-xl border border-border-subtle p-6 flex flex-col relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary-fixed"></div>
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="font-headline-sm text-headline-sm text-on-surface">Top Destinations Generated</h2>
+        </div>
+        <div class="flex-1 flex flex-col gap-4 justify-center">
+          
+          <!-- Loop through top destinations dynamically -->
+          <div *ngFor="let item of destinationStats() | slice:0:4; let i = index">
+            <div class="flex justify-between text-label-md font-label-md mb-1">
+              <span class="text-on-surface font-medium flex items-center gap-1">
+                <span class="material-symbols-outlined text-label-sm text-secondary">location_on</span> 
+                {{ item.destination }}
+              </span>
+              <span class="text-on-surface-variant font-semibold">{{ item.count }} requests</span>
+            </div>
+            <div class="w-full bg-surface-container-high rounded-full h-2">
+              <!-- Assigning colored bar styles based on index to retain Stitch design color theme -->
+              <div class="h-2 rounded-full" 
+                   [style.width.%]="(item.count / (destinationStats()[0]?.count || 1)) * 100"
+                   [ngClass]="{
+                     'bg-primary': i === 0,
+                     'bg-primary-container': i === 1,
+                     'bg-secondary': i === 2,
+                     'bg-secondary-container': i === 3
+                   }">
+              </div>
+            </div>
+          </div>
+
+          <!-- Fallback when no destinations are loaded yet -->
+          <div *ngIf="destinationStats().length === 0" class="text-center text-on-surface-variant py-4">
+            No destination requests recorded.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Logs Table -->
+    <div class="bg-surface-light rounded-xl border border-border-subtle overflow-hidden flex flex-col relative">
+      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary-fixed z-10"></div>
+      <div class="p-4 border-b border-border-subtle flex justify-between items-center bg-surface-light z-0 mt-1">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+          Recent Logs
+          <span class="material-symbols-outlined text-body-lg text-outline cursor-help" title="Performance metrics and request payload metadata across active logs.">info</span>
+        </h2>
+        <div class="flex gap-2">
+          <button class="p-1.5 text-on-surface-variant hover:bg-surface-container-low rounded border border-transparent hover:border-border-subtle transition-all cursor-pointer">
+            <span class="material-symbols-outlined text-body-lg">filter_list</span>
+          </button>
+          <button class="p-1.5 text-on-surface-variant hover:bg-surface-container-low rounded border border-transparent hover:border-border-subtle transition-all cursor-pointer">
+            <span class="material-symbols-outlined text-body-lg">view_column</span>
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto table-scrollbar pb-2">
+        <table class="w-full text-left border-collapse min-w-[900px]">
+          <thead>
+            <tr class="border-b border-border-subtle bg-surface-container-lowest">
+              <th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider sticky top-0 bg-surface-container-lowest">User name</th>
+              <th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider sticky top-0 bg-surface-container-lowest">AI model</th>
+              <th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider sticky top-0 bg-surface-container-lowest text-right">Tokens</th>
+              <th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider sticky top-0 bg-surface-container-lowest text-right">Cost</th>
+              <th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider sticky top-0 bg-surface-container-lowest text-right">Response time</th>
+              <th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider sticky top-0 bg-surface-container-lowest text-center">Status</th>
+              <th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider sticky top-0 bg-surface-container-lowest text-right">Created date</th>
+            </tr>
+          </thead>
+          <tbody class="font-body-md text-body-md text-on-surface divide-y divide-border-subtle">
+            <tr *ngFor="let log of recentLogs()" class="hover:bg-surface-container-low transition-colors group">
+              <!-- User cell displaying name and email -->
+              <td class="py-3 px-4 font-medium">
+                <div class="flex flex-col">
+                  <span class="text-on-surface font-semibold">{{ log.user?.name || 'System / Anonymous' }}</span>
+                  <span class="text-xs text-on-surface-variant">{{ log.user?.email || 'N/A' }}</span>
+                </div>
+              </td>
+              <!-- Model name -->
+              <td class="py-3 px-4 text-on-surface-variant font-mono text-xs">
+                {{ log.model }}
+              </td>
+              <!-- Tokens -->
+              <td class="py-3 px-4 text-right tabular-nums">
+                {{ formatTokens(log.totalTokens || 0) }}
+              </td>
+              <!-- Cost -->
+              <td class="py-3 px-4 text-right tabular-nums text-on-surface">
+                {{ formatCost(log.cost) }}
+              </td>
+              <!-- Latency (responseTime in ms converted to seconds) -->
+              <td class="py-3 px-4 text-right tabular-nums">
+                {{ formatLatency(log.responseTime) }}
+              </td>
+              <!-- Status -->
+              <td class="py-3 px-4 text-center">
+                <span *ngIf="log.success" class="inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full bg-success/10 text-success font-label-sm text-label-sm">
+                  <span class="w-1.5 h-1.5 rounded-full bg-success"></span> Success
+                </span>
+                <span *ngIf="!log.success" class="inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full bg-danger/10 text-danger font-label-sm text-label-sm">
+                  <span class="w-1.5 h-1.5 rounded-full bg-danger"></span> Failed
+                </span>
+              </td>
+              <!-- Created Date formatted -->
+              <td class="py-3 px-4 text-right text-on-surface-variant tabular-nums text-xs">
+                {{ log.createdAt | date:'MMM d, y, h:mm a' }}
+              </td>
+            </tr>
+
+            <!-- Table empty state fallback -->
+            <tr *ngIf="recentLogs().length === 0">
+              <td colspan="7" class="py-8 text-center text-on-surface-variant font-medium">
+                No logs recorded yet in this workspace.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination Footer -->
+      <div class="p-3 border-t border-border-subtle bg-surface-light flex justify-between items-center text-label-md font-label-md text-on-surface-variant">
+        <span>Showing 1 to {{ recentLogs().length }} of {{ recentLogs().length }} log entries</span>
+        <div class="flex gap-1">
+          <button class="px-2 py-1 border border-border-subtle rounded hover:bg-surface-container-low disabled:opacity-50" disabled>Prev</button>
+          <button class="px-2 py-1 border border-border-subtle rounded bg-surface-container-low text-on-surface font-medium">1</button>
+          <button class="px-2 py-1 border border-border-subtle rounded hover:bg-surface-container-low disabled:opacity-50" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

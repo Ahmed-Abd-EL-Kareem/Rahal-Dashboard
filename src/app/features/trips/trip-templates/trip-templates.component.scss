@@ -1,0 +1,126 @@
+.trip-templates-container {
+  min-height: 100%;
+  animation: fadeIn 0.4s ease-out;
+
+  // Custom Category Buttons
+  .active-category {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 4px 10px rgba(0, 92, 85, 0.2);
+  }
+
+  .inactive-category {
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-on-surface-variant);
+
+    &:hover {
+      background-color: var(--color-surface-container-low);
+      color: var(--color-primary);
+      transform: translateY(-1px);
+    }
+  }
+
+  // Cards & Category Highlights
+  .card {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(15, 118, 110, 0.08);
+
+      .delete-btn, .edit-btn {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  }
+
+  // AI Generated card enhancements
+  .ai-card {
+    border-color: transparent;
+    background: linear-gradient(var(--color-surface-light), var(--color-surface-light)) padding-box,
+                linear-gradient(135deg, var(--color-secondary), var(--color-primary-container)) border-box;
+
+    &:hover {
+      box-shadow: 0 12px 24px rgba(0, 107, 95, 0.12);
+    }
+  }
+
+  // Category Badge Themes (Match design palette)
+  .category-family {
+    background-color: rgba(211, 228, 254, 0.9);
+    color: #004d80;
+  }
+
+  .category-luxury {
+    background-color: rgba(255, 221, 184, 0.9);
+    color: var(--color-tertiary);
+  }
+
+  .category-adventure {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #065f46;
+  }
+
+  .category-weekend {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #92400e;
+  }
+
+  // Delete and Edit button state
+  .delete-btn, .edit-btn {
+    opacity: 0.9;
+    transform: scale(0.95);
+    transition: all 0.2s ease;
+    @media (min-width: 1024px) {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+
+  // Toast animation
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fixed.bottom-5 {
+    animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  // Hide scrollbar utility
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+  }
+}
+
+// Modal Animation Keyframes
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Form Focus Enhancements
+input, select, textarea {
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(0, 92, 85, 0.15);
+  }
+}

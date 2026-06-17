@@ -1,0 +1,12 @@
+/* Custom styles for AI Usage component */
+.table-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.table-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.table-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #E2E8F0;
+  border-radius: 9999px;
+}

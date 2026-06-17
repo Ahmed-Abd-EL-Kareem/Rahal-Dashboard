@@ -1,0 +1,115 @@
+.ai-sparkle {
+  background: linear-gradient(135deg, #006b5f, #005c55);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+// Tooltips styling
+.group\/tooltip {
+  position: relative;
+  
+  &:hover {
+    span.absolute {
+      opacity: 1;
+      transform: translate(-50%, -2px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+  }
+}
+
+span.absolute {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  transform: translate(-50%, 4px);
+}
+
+// Toast animation
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fixed.bottom-5 {
+  animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+// Custom table styles
+table {
+  tbody {
+    tr {
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      
+      &:hover {
+        background-color: var(--color-surface-container-low, #eff4ff);
+      }
+      
+      &:active {
+        transform: scale(0.998);
+      }
+    }
+  }
+}
+
+// Fade in animations for list rows
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+tbody tr {
+  animation: fadeInUp 0.35s ease forwards;
+  
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.05}s;
+    }
+  }
+}
+
+// Custom select styling
+select {
+  background-position: right 0.75rem center;
+  background-size: 16px 16px;
+  
+  &:focus {
+    border-color: #005c55;
+    box-shadow: 0 0 0 1px #005c55;
+  }
+}
+
+// Modal zoom animation
+.fixed {
+  animation: fadeIn 0.25s ease-out;
+
+  .bg-surface-light {
+    animation: zoomIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
