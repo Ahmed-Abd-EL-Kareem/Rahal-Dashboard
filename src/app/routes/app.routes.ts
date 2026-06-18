@@ -26,7 +26,7 @@ export const routes: Routes = [
         loadComponent: () => import('../shared/components/user/user').then(c => c.UsersComponent)
       },
       {
-        path: 'users/:id',
+        path: 'users/:name',
         loadComponent: () => import('../shared/components/user-details/user-details').then(c => c.UserDetailsComponent)
       },
       {

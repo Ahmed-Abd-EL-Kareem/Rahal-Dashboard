@@ -127,21 +127,41 @@ export class UserDetailsComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // this.route.paramMap.pipe(
+    //   map(params => params.get('id')?.trim() ?? ''),
+    //   distinctUntilChanged(),
+    //   switchMap(userId => {
+    //     if (!OBJECT_ID_PATTERN.test(userId)) {
+    //       this.showToast('Invalid user identifier', 'danger');
+    //       void this.router.navigate(['/dashboard/users']);
+    //       return EMPTY;
+    //     }
+
+    //     this.isLoading.set(true);
+    //     return this.loadUserData(userId);
+    //   }),
+    //   takeUntilDestroyed(this.destroyRef)
+    // ).subscribe();
+
     this.route.paramMap.pipe(
-      map(params => params.get('id')?.trim() ?? ''),
+      map(params => params.get('name')?.trim() ?? ''),
       distinctUntilChanged(),
-      switchMap(userId => {
-        if (!OBJECT_ID_PATTERN.test(userId)) {
-          this.showToast('Invalid user identifier', 'danger');
+      switchMap(name => {
+
+        const navigation = this.router.getCurrentNavigation();
+        const userId = navigation?.extras.state?.['id'] || history.state?.['id'];
+
+        if (!userId || !OBJECT_ID_PATTERN.test(userId)) {
+          this.showToast('Invalid or missing user identifier', 'danger');
           void this.router.navigate(['/dashboard/users']);
           return EMPTY;
         }
 
-        this.isLoading.set(true);
-        return this.loadUserData(userId);
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
+    this.isLoading.set(true);
+    return this.loadUserData(userId);
+  }),
+  takeUntilDestroyed(this.destroyRef)
+).subscribe();
   }
 
   private loadUserData(userId: string) {
