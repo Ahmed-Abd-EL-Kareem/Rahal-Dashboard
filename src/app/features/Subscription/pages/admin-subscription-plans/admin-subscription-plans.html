@@ -1,0 +1,325 @@
+<div class="min-h-screen bg-gray-50 p-4 sm:p-6 max-w-7xl mx-auto">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+  <div>
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">User Subscriptions</h1>
+    <p class="text-sm text-gray-500 mt-1">Manage and monitor all subscriber accounts.</p>
+  </div>
+
+  <div class="flex gap-3">
+    <button
+      (click)="goToPlans()"
+      class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300
+             text-sm font-medium text-gray-700 bg-white hover:bg-gray-50
+             transition-colors shadow-sm whitespace-nowrap"
+    >
+      Manage Plans
+    </button>
+
+    <button
+      (click)="goToMySubscription()"
+      class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium
+             text-white bg-teal-700 hover:bg-teal-800 transition-colors shadow-sm whitespace-nowrap"
+    >
+      My Subscription
+    </button>
+  </div>
+</div>
+
+  <!-- ── Success / Error ─────────────────────────────────────────────────── -->
+  <div *ngIf="successMessage()"
+    class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-4 py-3 rounded-xl">
+    {{ successMessage() }}
+  </div>
+  <div *ngIf="error()"
+    class="mb-4 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+    {{ error() }}
+  </div>
+
+  <!-- ── Churn Stats Cards ────────────────────────────────────────────────── -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+
+  <ng-container *ngIf="churnLoading()">
+  <div *ngFor="let i of [1,2,3,4,5]"
+    class="bg-gray-100 rounded-2xl h-20 sm:h-24 animate-pulse">
+  </div>
+</ng-container>
+
+    <ng-container *ngIf="!churnLoading() && churnStats() as stats">
+      <div class="bg-white rounded-2xl border border-gray-200 p-3 sm:p-4 shadow-sm">
+        <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide">Total</p>
+        <p class="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{{ stats.total }}</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-emerald-200 p-3 sm:p-4 shadow-sm">
+        <p class="text-xs text-emerald-500 font-semibold uppercase tracking-wide">Active</p>
+        <p class="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1">{{ stats.active }}</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-gray-200 p-3 sm:p-4 shadow-sm">
+        <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide">Free</p>
+        <p class="text-2xl sm:text-3xl font-bold text-gray-600 mt-1">{{ stats.free }}</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-orange-200 p-3 sm:p-4 shadow-sm">
+        <p class="text-xs text-orange-500 font-semibold uppercase tracking-wide">Past Due</p>
+        <p class="text-2xl sm:text-3xl font-bold text-orange-600 mt-1">{{ stats.past_due }}</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-red-200 p-3 sm:p-4 shadow-sm col-span-2 sm:col-span-1">
+        <p class="text-xs text-red-400 font-semibold uppercase tracking-wide">Churn Rate</p>
+        <p class="text-2xl sm:text-3xl font-bold text-red-500 mt-1">{{ stats.churnRate }}%</p>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- ── Expiring Soon Alert ─────────────────────────────────────────────── -->
+  <div *ngIf="!expiringLoading() && expiring().length > 0"
+    class="bg-amber-50 border border-amber-200 rounded-2xl p-3 sm:p-4 mb-6">
+    <div class="flex items-center gap-2 mb-3">
+      <svg class="text-amber-500 shrink-0" width="16" height="16" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <p class="text-sm font-semibold text-amber-700">
+        {{ expiring().length }} subscription(s) expiring within 7 days
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <span *ngFor="let s of expiring()"
+        class="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-medium">
+        {{ s.user.name }} — {{ daysUntilExpiry(s.endDate) }}d left
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Filters ─────────────────────────────────────────────────────────── -->
+  <div class="flex flex-col sm:flex-row gap-3 mb-5">
+
+    <!-- Search -->
+    <div class="relative flex-1">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        width="15" height="15" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search by name or email..."
+        [value]="searchQuery()"
+        (input)="setSearch($any($event.target).value)"
+        class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+      />
+    </div>
+
+    <!-- Status Filter -->
+    <div class="flex gap-2 overflow-x-auto sm:overflow-visible sm:flex-wrap pb-1 -mx-1 px-1">
+      <button *ngFor="let f of ['all','active','free','past_due','canceled','expired','trial']"
+        (click)="setFilter(f)"
+        class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-colors"
+        [ngClass]="statusFilter() === f
+          ? 'bg-teal-600 text-white'
+          : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'"
+      >
+        {{ f === 'past_due' ? 'Past Due' : f }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Table Skeleton ──────────────────────────────────────────────────── -->
+  <div *ngIf="loading()" class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+    <div *ngFor="let i of [1,2,3,4,5]"
+      class="h-16 border-b border-gray-50 animate-pulse bg-gray-50 odd:bg-white">
+    </div>
+  </div>
+
+  <!-- ── Data ────────────────────────────────────────────────────────────── -->
+  <div *ngIf="!loading()" class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+
+    <!-- Empty State -->
+    <div *ngIf="filtered().length === 0" class="text-center py-16 text-gray-400">
+      <svg class="mx-auto mb-3 text-gray-300" width="40" height="40" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      <p class="text-sm">No subscriptions found.</p>
+    </div>
+
+    <!-- ── Mobile / Tablet: Card List (below lg) ───────────────────────────── -->
+    <div *ngIf="filtered().length > 0" class="lg:hidden divide-y divide-gray-100">
+      <div *ngFor="let sub of filtered()" class="p-4">
+
+        <!-- Name + Status -->
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div class="min-w-0">
+            <p class="font-semibold text-gray-900 truncate">{{ sub.user.name }}</p>
+            <p class="text-xs text-gray-400 mt-0.5 truncate">{{ sub.user.email }}</p>
+          </div>
+          <span class="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full capitalize"
+            [ngClass]="statusClass(sub.status)">
+            {{ sub.status === 'past_due' ? 'Past Due' : sub.status }}
+          </span>
+        </div>
+
+        <!-- Plan + Renewal -->
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-0.5">Plan</p>
+            <p class="text-sm font-semibold text-gray-800 capitalize">{{ sub.plan?.displayName ?? sub.planName }}</p>
+            <p class="text-xs text-gray-400">${{ sub.plan?.price?.monthly ?? 0 }}/mo</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-0.5">Renewal</p>
+            <p class="text-sm text-gray-700">{{ formatDate(sub.endDate) }}</p>
+            <p *ngIf="sub.endDate" class="text-xs"
+              [ngClass]="daysUntilExpiry(sub.endDate) <= 7 ? 'text-amber-500 font-semibold' : 'text-gray-400'">
+              {{ daysUntilExpiry(sub.endDate) }}d left
+            </p>
+          </div>
+        </div>
+
+        <!-- API Quota -->
+        <div class="mb-3">
+          <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+            <span>API Quota</span>
+            <span>{{ sub.usage.tokensUsedThisMonth | number }} /
+              {{ sub.plan?.limits?.tokensPerMonth | number }}</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-1.5">
+            <div class="bg-teal-500 h-1.5 rounded-full transition-all"
+              [style.width.%]="quotaPercent(sub.usage.tokensUsedThisMonth, sub.plan?.limits?.tokensPerMonth)">
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 mt-1.5">
+            {{ sub.usage.requestsToday }} req today
+          </p>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
+          <select
+            [disabled]="isActing(sub.user._id)"
+            (change)="changePlan(sub, $any($event.target).value)"
+            class="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-400 disabled:opacity-50"
+          >
+            <option value="">Change Plan</option>
+            <option value="free">Free</option>
+            <option value="pro">Pro</option>
+          </select>
+
+          <button
+            *ngIf="sub.status !== 'canceled'"
+            [disabled]="isActing(sub.user._id)"
+            (click)="cancelSubscription(sub)"
+            class="shrink-0 text-xs text-red-500 hover:text-red-700 font-semibold px-3 py-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+          >
+            <span *ngIf="isActing(sub.user._id)"
+              class="w-3 h-3 border-2 border-red-300 border-t-red-500 rounded-full animate-spin inline-block">
+            </span>
+            <span *ngIf="!isActing(sub.user._id)">Cancel</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Desktop: Table (lg and up) ──────────────────────────────────────── -->
+    <div *ngIf="filtered().length > 0" class="hidden lg:block overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-100">
+            <th class="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">User</th>
+            <th class="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Plan</th>
+            <th class="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
+            <th class="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Renewal</th>
+            <th class="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">API Quota</th>
+            <th class="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <tr *ngFor="let sub of filtered()" class="hover:bg-gray-50/50 transition-colors">
+
+            <!-- User -->
+            <td class="px-5 py-4">
+              <p class="font-semibold text-gray-900">{{ sub.user.name }}</p>
+              <p class="text-xs text-gray-400 mt-0.5">{{ sub.user.email }}</p>
+            </td>
+
+            <!-- Plan -->
+            <td class="px-5 py-4">
+              <span class="font-semibold text-gray-800 capitalize">{{ sub.plan?.displayName ?? sub.planName }}</span>
+              <p class="text-xs text-gray-400 mt-0.5">${{ sub.plan?.price?.monthly ?? 0 }}/mo</p>
+            </td>
+
+            <!-- Status -->
+            <td class="px-5 py-4">
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-full capitalize"
+                [ngClass]="statusClass(sub.status)">
+                {{ sub.status === 'past_due' ? 'Past Due' : sub.status }}
+              </span>
+            </td>
+
+            <!-- Renewal -->
+            <td class="px-5 py-4">
+              <p class="text-gray-700">{{ formatDate(sub.endDate) }}</p>
+              <p *ngIf="sub.endDate" class="text-xs mt-0.5"
+                [ngClass]="daysUntilExpiry(sub.endDate) <= 7 ? 'text-amber-500 font-semibold' : 'text-gray-400'">
+                {{ daysUntilExpiry(sub.endDate) }}d left
+              </p>
+            </td>
+
+            <!-- API Quota -->
+            <td class="px-5 py-4 min-w-[140px]">
+              <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+                <span>Tokens</span>
+                <span>{{ sub.usage.tokensUsedThisMonth | number }} /
+                  {{ sub.plan?.limits?.tokensPerMonth | number }}</span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-1.5">
+                <div class="bg-teal-500 h-1.5 rounded-full transition-all"
+                  [style.width.%]="quotaPercent(sub.usage.tokensUsedThisMonth, sub.plan?.limits?.tokensPerMonth)">
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 mt-1.5">
+                {{ sub.usage.requestsToday }} req today
+              </p>
+            </td>
+
+            <!-- Actions -->
+            <td class="px-5 py-4">
+              <div class="flex items-center gap-2">
+
+                <!-- Change Plan -->
+                <select
+                  [disabled]="isActing(sub.user._id)"
+                  (change)="changePlan(sub, $any($event.target).value)"
+                  class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-400 disabled:opacity-50"
+                >
+                  <option value="">Change Plan</option>
+                  <option value="free">Free</option>
+                  <option value="pro">Pro</option>
+                </select>
+
+                <!-- Cancel -->
+                <button
+                  *ngIf="sub.status !== 'canceled'"
+                  [disabled]="isActing(sub.user._id)"
+                  (click)="cancelSubscription(sub)"
+                  class="text-xs text-red-500 hover:text-red-700 font-semibold px-2 py-1.5 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                >
+                  <span *ngIf="isActing(sub.user._id)"
+                    class="w-3 h-3 border-2 border-red-300 border-t-red-500 rounded-full animate-spin inline-block">
+                  </span>
+                  <span *ngIf="!isActing(sub.user._id)">Cancel</span>
+                </button>
+
+              </div>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
