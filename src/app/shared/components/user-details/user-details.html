@@ -196,7 +196,7 @@
             <div class="flex items-center gap-4 min-w-0 flex-1">
               <div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0">
                 <img [src]="getDestinationImage(trip.destination)" [alt]="trip.destination"
-                  class="w-full h-full object-cover" />
+                  class="w-full h-full object-cover"/>
               </div>
               <div class="min-w-0 flex-1">
                 <h5 class="font-title-lg text-[16px] text-on-surface mb-1 font-semibold truncate">{{ trip.title }}</h5>
@@ -244,29 +244,21 @@
       <div class="bg-surface-light border border-border-subtle rounded-xl overflow-hidden shadow-sm">
         <div class="p-5 border-b border-border-subtle flex justify-between items-center">
           <h4 class="font-title-lg text-title-lg text-on-surface font-semibold">Recent Bookings</h4>
-          <button
-            class="p-1 rounded hover:bg-surface-container-low text-on-surface-variant transition-colors cursor-pointer">
-            <ng-icon name="matMoreVertOutline"></ng-icon>
-          </button>
         </div>
+
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-surface border-b border-border-subtle">
-                <th class="py-3 px-5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-                  Reference ID</th>
-                <th class="py-3 px-5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-                  Destination</th>
-                <th class="py-3 px-5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Dates
-                </th>
-                <th class="py-3 px-5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-                  Amount</th>
-                <th class="py-3 px-5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-                  Status</th>
+                <th class="py-3 px-5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Reference ID</th>
+                <th class="py-3 px-5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Destination</th>
+                <th class="py-3 px-5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Dates</th>
+                <th class="py-3 px-5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Amount</th>
+                <th class="py-3 px-5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border-subtle">
-              @for (booking of bookings(); track booking._id) {
+              @for (booking of paginatedBookings(); track booking._id) {
               <tr class="hover:bg-surface-container-low/50 transition-colors">
                 <td class="py-3 px-5 font-body-md text-body-md text-primary font-semibold">#{{ booking._id }}</td>
                 <td class="py-3 px-5 font-body-md text-body-md text-on-surface">
@@ -300,8 +292,27 @@
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
-  </div>
-  }
+
+        @if (bookings().length > bookingsPageSize) {
+        <div class="flex items-center justify-between px-5 py-4 bg-surface-container-low border-t border-border-subtle">
+          <div class="text-sm text-on-surface-variant font-body-md">
+            Page <span class="font-semibold text-primary">{{ bookingsPage() }}</span>
+            of <span class="font-semibold">{{ totalBookingsPages() }}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <button (click)="prevBookingsPage()" [disabled]="bookingsPage() === 1"
+              class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface-light border border-border-subtle rounded-lg text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm">
+              <ng-icon name="matChevronLeftOutline" class="text-[18px]"></ng-icon>
+              Previous
+            </button>
+            <button (click)="nextBookingsPage()" [disabled]="bookingsPage() >= totalBookingsPages()"
+              class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface-light border border-border-subtle rounded-lg text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm">
+              Next
+              <ng-icon name="matChevronRightOutline" class="text-[18px]"></ng-icon>
+            </button>
+          </div>
+        </div>
+        }
+
+      </div> </div> </div> }
 </main>

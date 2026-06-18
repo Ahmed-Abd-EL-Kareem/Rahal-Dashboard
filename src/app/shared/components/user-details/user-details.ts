@@ -23,8 +23,8 @@ import {
 } from '@ng-icons/material-icons/outline';
 
 const OBJECT_ID_PATTERN = /^[0-9a-fA-F]{24}$/;
-const TRIPS_PAGE_SIZE = 3;
-
+const TRIPS_PAGE_SIZE = 2;
+const BOOKINGS_PAGE_SIZE = 2;
 @Component({
   selector: 'app-user-details',
   imports: [CommonModule, NgIconComponent],
@@ -57,10 +57,12 @@ export class UserDetailsComponent implements OnInit {
   trips = signal<Trip[]>([]);
   bookings = signal<Booking[]>([]);
   tripsPage = signal(1);
+  bookingsPage = signal(1);
   isLoading = signal(true);
   toast = signal<{ message: string; type: 'success' | 'danger' | 'warning' } | null>(null);
 
   readonly tripsPageSize = TRIPS_PAGE_SIZE;
+  readonly bookingsPageSize = BOOKINGS_PAGE_SIZE;
 
   totalSpend = computed(() =>
     this.bookings()
@@ -76,6 +78,15 @@ export class UserDetailsComponent implements OnInit {
   totalTripsPages = computed(() =>
     Math.max(1, Math.ceil(this.trips().length / TRIPS_PAGE_SIZE))
   );
+
+  paginatedBookings = computed(() => {
+  const start = (this.bookingsPage() - 1) * BOOKINGS_PAGE_SIZE;
+  return this.bookings().slice(start, start + BOOKINGS_PAGE_SIZE);
+});
+
+totalBookingsPages = computed(() =>
+  Math.max(1, Math.ceil(this.bookings().length / BOOKINGS_PAGE_SIZE))
+);
 
   maxTokens = computed(() => {
     const plan = this.subscription()?.planName;
@@ -127,21 +138,41 @@ export class UserDetailsComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // this.route.paramMap.pipe(
+    //   map(params => params.get('id')?.trim() ?? ''),
+    //   distinctUntilChanged(),
+    //   switchMap(userId => {
+    //     if (!OBJECT_ID_PATTERN.test(userId)) {
+    //       this.showToast('Invalid user identifier', 'danger');
+    //       void this.router.navigate(['/dashboard/users']);
+    //       return EMPTY;
+    //     }
+
+    //     this.isLoading.set(true);
+    //     return this.loadUserData(userId);
+    //   }),
+    //   takeUntilDestroyed(this.destroyRef)
+    // ).subscribe();
+
     this.route.paramMap.pipe(
-      map(params => params.get('id')?.trim() ?? ''),
+      map(params => params.get('name')?.trim() ?? ''),
       distinctUntilChanged(),
-      switchMap(userId => {
-        if (!OBJECT_ID_PATTERN.test(userId)) {
-          this.showToast('Invalid user identifier', 'danger');
+      switchMap(name => {
+
+        const navigation = this.router.getCurrentNavigation();
+        const userId = navigation?.extras.state?.['id'] || history.state?.['id'];
+
+        if (!userId || !OBJECT_ID_PATTERN.test(userId)) {
+          this.showToast('Invalid or missing user identifier', 'danger');
           void this.router.navigate(['/dashboard/users']);
           return EMPTY;
         }
 
-        this.isLoading.set(true);
-        return this.loadUserData(userId);
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
+    this.isLoading.set(true);
+    return this.loadUserData(userId);
+  }),
+  takeUntilDestroyed(this.destroyRef)
+).subscribe();
   }
 
   private loadUserData(userId: string) {
@@ -175,6 +206,7 @@ export class UserDetailsComponent implements OnInit {
         this.trips.set(tripsRes.data ?? []);
         this.bookings.set(bookingsRes.data ?? []);
         this.tripsPage.set(1);
+        this.bookingsPage.set(1);
         this.subscription.set(this.resolveSubscription(userId, user, subsRes.subscriptions ?? []));
         this.isLoading.set(false);
       }),
@@ -306,6 +338,17 @@ export class UserDetailsComponent implements OnInit {
       this.tripsPage.update(page => page - 1);
     }
   }
+nextBookingsPage(): void {
+  if (this.bookingsPage() < this.totalBookingsPages()) {
+    this.bookingsPage.update(page => page + 1);
+  }
+}
+
+prevBookingsPage(): void {
+  if (this.bookingsPage() > 1) {
+    this.bookingsPage.update(page => page - 1);
+  }
+}
 
   private showToast(message: string, type: 'success' | 'danger' | 'warning'): void {
     this.toast.set({ message, type });
