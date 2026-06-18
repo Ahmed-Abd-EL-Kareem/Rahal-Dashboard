@@ -1,5 +1,4 @@
 @import "tailwindcss";
-
 @variant dark (&:where(.dark, .dark *));
 
 
@@ -64,7 +63,6 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius-full: 9999px;
-
 
   --container-margin: 24px;
   --spacing-gutter: 16px;

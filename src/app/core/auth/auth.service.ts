@@ -12,13 +12,11 @@
 //   private http = inject(HttpClient);
 //   private router = inject(Router);
 //   private cookieService = inject(CookieService);
-
 //   private TOKEN_KEY = 'token';
 //   private USER_KEY = 'rahal_user';
 
 //   token = signal<string | null>(this.cookieService.get(this.TOKEN_KEY) || null);
 //   currentUser = signal<User | null>(this._loadUser());
-
 //   isAuthenticated = computed(() => !!this.token() || !!this.currentUser());
 //   isAdmin = computed(() => this.currentUser()?.role === 'admin');
 
@@ -68,7 +66,6 @@
 //         return throwError(() => new Error(msg));
 //       }),
 //     );
-
 //   }
 
 //   logout(): void {
