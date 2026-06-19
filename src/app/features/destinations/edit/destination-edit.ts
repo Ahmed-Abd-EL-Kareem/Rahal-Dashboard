@@ -12,12 +12,17 @@ import { Location } from '@angular/common';
 import { effect } from '@angular/core';
 import * as L from 'leaflet';
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: '/assets/marker-icon-2x.png',
-  iconUrl: '/assets/marker-icon.png',
-  shadowUrl: '/assets/marker-shadow.png'
-});
+// L.Icon.Default.mergeOptions({
+//   iconRetinaUrl: '/assets/marker-icon-2x.png',
+//   iconUrl: '/assets/marker-icon.png',
+//   shadowUrl: '/assets/marker-shadow.png'
+// });
 
+L.Icon.Default.mergeOptions({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+});
 @Component({
   selector: 'app-destination-edit',
   imports: [CommonModule, ReactiveFormsModule, RouterLink, NgIconComponent],
@@ -377,9 +382,12 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(this.map);
     const customIcon = L.icon({
-      iconUrl: '/assets/marker-icon.png',
-      iconRetinaUrl: '/assets/marker-icon-2x.png',
-      shadowUrl: '/assets/marker-shadow.png',
+      // iconUrl: '/assets/marker-icon.png',
+      // iconRetinaUrl: '/assets/marker-icon-2x.png',
+      // shadowUrl: '/assets/marker-shadow.png',
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       iconSize: [25, 41],
       iconAnchor: [12, 41]
     });
