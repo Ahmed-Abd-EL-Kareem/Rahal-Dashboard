@@ -1,6 +1,12 @@
-
-
-import { Component, signal, inject, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  AfterViewInit,
+  ViewChild,
+  ElementRef,
+  OnDestroy,
+} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormArray, Validators } from '@angular/forms';
@@ -8,15 +14,31 @@ import { Router, RouterLink } from '@angular/router';
 import { DestinationsService } from '../../../core/services/destinations.service';
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { matArrowBackOutline, matArrowForwardOutline, matCheckOutline, matDeleteOutline, matAddOutline, matAutoAwesomeOutline, matLocationOnOutline, matCloudUploadOutline, matInfoOutline } from '@ng-icons/material-icons/outline';
+import {
+  matArrowBackOutline,
+  matArrowForwardOutline,
+  matCheckOutline,
+  matDeleteOutline,
+  matAddOutline,
+  matAutoAwesomeOutline,
+  matLocationOnOutline,
+  matCloudUploadOutline,
+  matInfoOutline,
+} from '@ng-icons/material-icons/outline';
 
 import { effect } from '@angular/core';
 import * as L from 'leaflet';
 
+// L.Icon.Default.mergeOptions({
+//   iconRetinaUrl: '/assets/marker-icon-2x.png',
+//   iconUrl: '/assets/marker-icon.png',
+//   shadowUrl: '/assets/marker-shadow.png'
+// });
+
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: '/assets/marker-icon-2x.png',
-  iconUrl: '/assets/marker-icon.png',
-  shadowUrl: '/assets/marker-shadow.png'
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
 @Component({
@@ -34,9 +56,9 @@ L.Icon.Default.mergeOptions({
       matAutoAwesomeOutline,
       matLocationOnOutline,
       matCloudUploadOutline,
-      matInfoOutline
-    })
-  ]
+      matInfoOutline,
+    }),
+  ],
 })
 export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
@@ -61,24 +83,52 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
     { value: 'religious', label: 'Religious' },
     { value: 'nature', label: 'Nature & Eco' },
     { value: 'landmark', label: 'Landmark' },
-    { value: 'other', label: 'Other' }
+    { value: 'other', label: 'Other' },
   ];
 
   regions = [
-    'Upper Egypt', 'Lower Egypt', 'Sinai', 'Red Sea', 'Western Desert', 'Delta', 'Mediterranean'
+    'Upper Egypt',
+    'Lower Egypt',
+    'Sinai',
+    'Red Sea',
+    'Western Desert',
+    'Delta',
+    'Mediterranean',
   ];
 
   monthsList = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   locationPresets = [
     { name: 'Pyramids of Giza', lat: 29.9792, lng: 31.1342, city: 'Giza', region: 'Lower Egypt' },
-    { name: 'Karnak Temple (Luxor)', lat: 25.7188, lng: 32.6573, city: 'Luxor', region: 'Upper Egypt' },
-    { name: 'Sharm El Sheikh', lat: 27.9158, lng: 34.3299, city: 'Sharm El Sheikh', region: 'Sinai' },
-    { name: 'Aswan High Dam', lat: 23.9700, lng: 32.8800, city: 'Aswan', region: 'Upper Egypt' },
-    { name: 'Siwa Oasis', lat: 29.2032, lng: 25.5189, city: 'Siwa', region: 'Western Desert' }
+    {
+      name: 'Karnak Temple (Luxor)',
+      lat: 25.7188,
+      lng: 32.6573,
+      city: 'Luxor',
+      region: 'Upper Egypt',
+    },
+    {
+      name: 'Sharm El Sheikh',
+      lat: 27.9158,
+      lng: 34.3299,
+      city: 'Sharm El Sheikh',
+      region: 'Sinai',
+    },
+    { name: 'Aswan High Dam', lat: 23.97, lng: 32.88, city: 'Aswan', region: 'Upper Egypt' },
+    { name: 'Siwa Oasis', lat: 29.2032, lng: 25.5189, city: 'Siwa', region: 'Western Desert' },
   ];
 
   destinationForm = this.fb.group({
@@ -100,7 +150,7 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
     currency: ['EGP', Validators.required],
     bestMonths: this.fb.array<string>([]),
     attractions: this.fb.array([]),
-    coverImage: ['']
+    coverImage: [''],
   });
 
   galleryUrls = signal<string[]>([]);
@@ -135,7 +185,7 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
           this.citySearchOpen.set(sortedResults.length > 0);
           this.citySearchLoading.set(false);
         },
-        error: () => this.citySearchLoading.set(false)
+        error: () => this.citySearchLoading.set(false),
       });
     }, 400);
   }
@@ -151,7 +201,7 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
     this.destinationForm.patchValue({
       city: cityName,
       latitude: parseFloat(result.lat),
-      longitude: parseFloat(result.lon)
+      longitude: parseFloat(result.lon),
     });
     this.citySearchResults.set([]);
     this.citySearchOpen.set(false);
@@ -177,7 +227,7 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
         error: (err: Error) => {
           this.loading.set(false);
           this.errorMessage.set('Failed to upload image: ' + err.message);
-        }
+        },
       });
     }
   }
@@ -193,10 +243,10 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
     let completed = 0;
     const total = files.length;
 
-    files.forEach(file => {
+    files.forEach((file) => {
       this.cloudinaryService.uploadImage(file).subscribe({
         next: (url) => {
-          this.galleryUrls.update(prev => [...prev, url]);
+          this.galleryUrls.update((prev) => [...prev, url]);
           completed++;
           if (completed === total) {
             this.galleryUploading.set(false);
@@ -208,7 +258,7 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
           completed++;
           if (completed === total) this.galleryUploading.set(false);
           this.errorMessage.set('Gallery upload failed: ' + err.message);
-        }
+        },
       });
     });
 
@@ -216,7 +266,7 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
   }
 
   removeGalleryImage(index: number) {
-    this.galleryUrls.update(prev => prev.filter((_, i) => i !== index));
+    this.galleryUrls.update((prev) => prev.filter((_, i) => i !== index));
   }
 
   get attractions(): FormArray {
@@ -232,7 +282,7 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
       nameEn: ['', Validators.required],
       nameAr: ['', Validators.required],
       type: ['historical', Validators.required],
-      entryFee: [0, [Validators.required, Validators.min(0)]]
+      entryFee: [0, [Validators.required, Validators.min(0)]],
     });
     this.attractions.push(attractionForm);
   }
@@ -267,27 +317,32 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
     setTimeout(() => this.map.invalidateSize(), 0);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
     const customIcon = L.icon({
-      iconUrl: '/assets/marker-icon.png',
-      iconRetinaUrl: '/assets/marker-icon-2x.png',
-      shadowUrl: '/assets/marker-shadow.png',
+      // iconUrl: '/assets/marker-icon.png',
+      // iconRetinaUrl: '/assets/marker-icon-2x.png',
+      // shadowUrl: '/assets/marker-shadow.png',
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       iconSize: [25, 41],
-      iconAnchor: [12, 41]
+      iconAnchor: [12, 41],
     });
-    this.marker = L.marker(L.latLng(lat, lng), { draggable: true, icon: customIcon }).addTo(this.map);
+    this.marker = L.marker(L.latLng(lat, lng), { draggable: true, icon: customIcon }).addTo(
+      this.map,
+    );
     this.marker.on('dragend', () => {
       const pos = this.marker.getLatLng();
       this.destinationForm.patchValue({ latitude: pos.lat, longitude: pos.lng });
     });
-    this.destinationForm.get('latitude')?.valueChanges.subscribe(val => {
+    this.destinationForm.get('latitude')?.valueChanges.subscribe((val) => {
       const lngVal = this.destinationForm.get('longitude')?.value;
       const newLatLng = L.latLng(Number(val), Number(lngVal));
       this.marker.setLatLng(newLatLng);
       this.map.panTo(newLatLng);
     });
-    this.destinationForm.get('longitude')?.valueChanges.subscribe(val => {
+    this.destinationForm.get('longitude')?.valueChanges.subscribe((val) => {
       const latVal = this.destinationForm.get('latitude')?.value;
       const newLatLng = L.latLng(Number(latVal), Number(val));
       this.marker.setLatLng(newLatLng);
@@ -301,12 +356,18 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  applyPreset(preset: { lat: number; lng: number; city: string; region: string; name?: string }): void {
+  applyPreset(preset: {
+    lat: number;
+    lng: number;
+    city: string;
+    region: string;
+    name?: string;
+  }): void {
     this.destinationForm.patchValue({
       latitude: preset.lat,
       longitude: preset.lng,
       city: preset.city,
-      region: preset.region
+      region: preset.region,
     });
   }
 
@@ -395,7 +456,9 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
         this.destinationForm.get('averageBudgetPerDay')?.markAsTouched();
         this.destinationForm.get('currency')?.markAsTouched();
         this.attractions.markAllAsTouched();
-        this.errorMessage.set('Please complete the content details and resolve any attraction errors.');
+        this.errorMessage.set(
+          'Please complete the content details and resolve any attraction errors.',
+        );
       }
     }
   }
@@ -404,9 +467,21 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    if (!this.isStep1Valid()) { this.currentStep.set(1); this.errorMessage.set('Basic info is incomplete.'); return; }
-    if (!this.isStep2Valid()) { this.currentStep.set(2); this.errorMessage.set('Location details are invalid.'); return; }
-    if (!this.isStep3Valid()) { this.currentStep.set(3); this.errorMessage.set('Content parameters contain errors.'); return; }
+    if (!this.isStep1Valid()) {
+      this.currentStep.set(1);
+      this.errorMessage.set('Basic info is incomplete.');
+      return;
+    }
+    if (!this.isStep2Valid()) {
+      this.currentStep.set(2);
+      this.errorMessage.set('Location details are invalid.');
+      return;
+    }
+    if (!this.isStep3Valid()) {
+      this.currentStep.set(3);
+      this.errorMessage.set('Content parameters contain errors.');
+      return;
+    }
 
     this.loading.set(true);
 
@@ -421,35 +496,39 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
     const payload = {
       name: {
         en: fv.nameEn || '',
-        ar: fv.nameAr || ''
+        ar: fv.nameAr || '',
       },
       slug: generatedSlug,
       city: fv.city || '',
       region: fv.region as any,
       category: fv.category as any,
       description: {
-        en: fv.taglineEn ? `${fv.taglineEn.trim()}. ${fv.descriptionEn || ''}` : (fv.descriptionEn || ''),
-        ar: fv.taglineAr ? `${fv.taglineAr.trim()}. ${fv.descriptionAr || ''}` : (fv.descriptionAr || '')
+        en: fv.taglineEn
+          ? `${fv.taglineEn.trim()}. ${fv.descriptionEn || ''}`
+          : fv.descriptionEn || '',
+        ar: fv.taglineAr
+          ? `${fv.taglineAr.trim()}. ${fv.descriptionAr || ''}`
+          : fv.descriptionAr || '',
       },
 
       attractions: (fv.attractions || []).map((att: any) => ({
         name: {
           en: att.nameEn || '',
-          ar: att.nameAr || null
+          ar: att.nameAr || null,
         },
         type: att.type,
-        entryFee: Number(att.entryFee) || 0
+        entryFee: Number(att.entryFee) || 0,
       })),
       bestMonths: fv.bestMonths as string[],
       averageBudgetPerDay: Number(fv.averageBudgetPerDay),
       currency: fv.currency as 'EGP' | 'USD',
       location: {
         type: 'Point' as const,
-        coordinates: [Number(fv.longitude), Number(fv.latitude)] as [number, number]
+        coordinates: [Number(fv.longitude), Number(fv.latitude)] as [number, number],
       },
       images: this.galleryUrls(),
       coverImage: fv.coverImage || null,
-      isActive: fv.isActive ?? true
+      isActive: fv.isActive ?? true,
     };
 
     this.destinationsService.createDestination(payload).subscribe({
@@ -463,7 +542,7 @@ export class DestinationCreateComponent implements AfterViewInit, OnDestroy {
       error: (err: any) => {
         this.loading.set(false);
         this.errorMessage.set(err.error?.message || err.message || 'An unexpected error occurred.');
-      }
+      },
     });
   }
 }

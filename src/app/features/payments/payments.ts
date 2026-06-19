@@ -20,9 +20,12 @@ import {
   matAutoAwesomeOutline,
   matCloseOutline,
   matCheckCircleOutline,
-  matErrorOutline
+  matErrorOutline,
 } from '@ng-icons/material-icons/outline';
-import { PaymentsOverviewService, PaymentTransaction } from '../../core/services/payments-overview.service';
+import {
+  PaymentsOverviewService,
+  PaymentTransaction,
+} from '../../core/services/payments-overview.service';
 import { PaymentService } from '../../core/services/payment.service';
 
 type Transaction = PaymentTransaction;
@@ -49,9 +52,9 @@ type Transaction = PaymentTransaction;
       matAutoAwesomeOutline,
       matCloseOutline,
       matCheckCircleOutline,
-      matErrorOutline
-    })
-  ]
+      matErrorOutline,
+    }),
+  ],
 })
 export class Payments implements OnInit {
   private fb = inject(FormBuilder);
@@ -79,7 +82,7 @@ export class Payments implements OnInit {
     clientName: ['', Validators.required],
     amount: [null, [Validators.required, Validators.min(1)]],
     category: ['flight', Validators.required],
-    description: ['']
+    description: [''],
   });
 
   // ── KPI Signals (populated from /payments/admin/*) ─────────
@@ -106,7 +109,7 @@ export class Payments implements OnInit {
       revenue: this.paymentService.getRevenue(),
       avgPrice: this.paymentService.getAveragePrice(),
       cancelled: this.paymentService.getCancelledBookings(),
-      overview: this.overviewService.getOverview()
+      overview: this.overviewService.getOverview(),
     }).subscribe({
       next: ({ revenue, avgPrice, cancelled, overview }) => {
         this.totalRevenue.set(revenue.totalRevenue);
@@ -125,7 +128,7 @@ export class Payments implements OnInit {
         this.loading.set(false);
         this.error.set('Failed to load payments overview data.');
         this.showToast('Failed to load payments overview data.', 'info');
-      }
+      },
     });
   }
 
@@ -135,7 +138,7 @@ export class Payments implements OnInit {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false
+        display: false,
       },
       tooltip: {
         backgroundColor: '#213145',
@@ -147,23 +150,23 @@ export class Payments implements OnInit {
         callbacks: {
           label: (context) => {
             const y = context.parsed.y;
-            return ` Revenue: $${y !== null && y !== undefined ? y.toLocaleString() : 0}`;
-          }
-        }
-      }
+            return `  ${y !== null && y !== undefined ? y.toLocaleString() : 0}  EGP`;
+          },
+        },
+      },
     },
     scales: {
       x: {
         grid: {
-          display: false
+          display: false,
         },
         ticks: {
           color: '#6e7977',
           font: {
             family: 'Inter',
-            size: 11
-          }
-        }
+            size: 11,
+          },
+        },
       },
       y: {
         grid: {
@@ -173,12 +176,12 @@ export class Payments implements OnInit {
           color: '#6e7977',
           font: {
             family: 'Inter',
-            size: 11
+            size: 11,
           },
-          callback: (value) => `$${Number(value) / 1000}k`
-        }
-      }
-    }
+          callback: (value) => ` ${Number(value) / 1000}k`,
+        },
+      },
+    },
   };
 
   chartData = computed<ChartData<'bar'>>(() => {
@@ -201,17 +204,18 @@ export class Payments implements OnInit {
       datasets: [
         {
           data,
-          label: 'Revenue ($)',
+          label: 'Revenue (EGP )',
           backgroundColor: (context) => {
             const index = context.dataIndex;
             const isLast = index === data.length - 1;
             return isLast ? '#005c55' : 'rgba(128, 213, 203, 0.4)';
           },
+
           hoverBackgroundColor: '#005c55',
           borderRadius: 4,
           borderSkipped: false,
-        }
-      ]
+        },
+      ],
     };
   });
 
@@ -235,7 +239,7 @@ export class Payments implements OnInit {
 
   openNewInvoiceModal() {
     this.invoiceForm.reset({
-      category: 'flight'
+      category: 'flight',
     });
     this.showNewInvoiceModal.set(true);
   }
@@ -254,7 +258,10 @@ export class Payments implements OnInit {
     // admin dashboard (POST /bookings requires a real hotel/trip context).
     // Avoid fabricating a transaction in the list.
     this.closeNewInvoiceModal();
-    this.showToast('Creating invoices from the dashboard is not supported by the backend yet.', 'info');
+    this.showToast(
+      'Creating invoices from the dashboard is not supported by the backend yet.',
+      'info',
+    );
   }
 
   dismissAiInsights() {
