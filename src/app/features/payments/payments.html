@@ -5,15 +5,16 @@
       <h2 class="font-headline-lg text-headline-lg text-on-surface">Payments Overview</h2>
       <p class="font-body-md text-body-md text-on-surface-variant mt-1">Monitor revenue, transactions, and financial health.</p>
     </div>
-    <div class="flex gap-3">
-      <button (click)="exportCsv()" class="border border-border-subtle bg-surface-light text-on-surface px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container-low transition-colors cursor-pointer">
+    <!-- <div class="flex gap-3"> -->
+      <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      <!-- <button (click)="exportCsv()" class="border border-border-subtle bg-surface-light text-on-surface px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container-low transition-colors cursor-pointer">
         <ng-icon name="matDownloadOutline" class="text-lg"></ng-icon>
         Export CSV
-      </button>
-      <button (click)="openNewInvoiceModal()" class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer">
+      </button> -->
+      <!-- <button (click)="openNewInvoiceModal()" class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer">
         <ng-icon name="matAddOutline" class="text-lg"></ng-icon>
         New Invoice
-      </button>
+      </button> -->
     </div>
   </div>
 
@@ -27,7 +28,8 @@
   }
 
   <!-- KPI Bento Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-6"> -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <!-- Total Revenue Card -->
     <div class="bg-surface-light border border-border-subtle rounded-xl p-5 flex flex-col justify-between shadow-sm relative overflow-hidden group">
       <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors"></div>
@@ -41,8 +43,10 @@
         @if (loading()) {
           <div class="h-9 w-32 bg-surface-container rounded animate-pulse"></div>
         } @else {
-          <h3 class="font-headline-lg text-headline-lg text-on-surface">${{ totalRevenue() | number:'1.2-2' }}</h3>
+          <h3 class="font-headline-lg text-headline-lg text-on-surface"> {{ totalRevenue() | number:'1.2-2' }}</h3>
+          <p>EGP</p>
         }
+
         <p class="font-label-sm text-label-sm text-on-surface-variant mt-2">From succeeded bookings</p>
       </div>
     </div>
@@ -60,14 +64,16 @@
         @if (loading()) {
           <div class="h-9 w-24 bg-surface-container rounded animate-pulse"></div>
         } @else {
-          <h3 class="font-headline-lg text-headline-lg text-on-surface">${{ avgTransactionValue() | number:'1.2-2' }}</h3>
+          <h3 class="font-headline-lg text-headline-lg text-on-surface"> {{ avgTransactionValue() | number:'1.2-2' }}</h3>
+                    <p>EGP</p>
+
         }
         <p class="font-label-sm text-label-sm text-on-surface-variant mt-2">Per successful booking</p>
       </div>
     </div>
 
     <!-- Refund Rate Card -->
-    <div class="bg-surface-light border border-border-subtle rounded-xl p-5 flex flex-col justify-between shadow-sm relative overflow-hidden group">
+    <!-- <div class="bg-surface-light border border-border-subtle rounded-xl p-5 flex flex-col justify-between shadow-sm relative overflow-hidden group">
       <div class="absolute -right-4 -top-4 w-24 h-24 bg-error/5 rounded-full blur-xl group-hover:bg-error/10 transition-colors"></div>
       <div class="flex justify-between items-start mb-4 relative z-10">
         <div class="w-10 h-10 rounded-lg bg-error-container flex items-center justify-center text-error">
@@ -83,7 +89,7 @@
         }
         <p class="font-label-sm text-label-sm text-on-surface-variant mt-2">Refunded vs. completed payments</p>
       </div>
-    </div>
+    </div> -->
   </div>
 
   <!-- Main Grid Layout: Chart & Recent Transactions -->
@@ -144,7 +150,9 @@
                 </div>
               </div>
               <div class="text-right">
-                <p class="font-label-md text-label-md text-on-surface">${{ tx.amount | number:'1.2-2' }}</p>
+                <p class="font-label-md text-label-md text-on-surface"> {{ tx.amount | number:'1.2-2' }}</p>
+                          <p class="font-label-md text-label-md text-on-surface">EGP</p>
+
                 <span class="inline-block mt-1 font-label-sm text-[10px] uppercase px-2 py-0.5 rounded-full"
                       [ngClass]="{
                         'bg-success/10 text-success': tx.status === 'Completed',
@@ -161,7 +169,7 @@
   </div>
 
   <!-- AI Insights Section -->
-  @if (showAiInsights()) {
+  <!-- @if (showAiInsights()) {
     <div class="bg-surface-light border border-border-subtle rounded-xl p-5 relative overflow-hidden shadow-sm">
       <div class="absolute inset-0 bg-gradient-to-r from-secondary/5 to-primary/5 pointer-events-none"></div>
       <div class="relative z-10 flex items-start gap-4">
@@ -181,7 +189,7 @@
       </div>
     </div>
   }
-</div>
+</div> -->
 
 <!-- Toast Notifications -->
 @if (toastMessage()) {
@@ -209,7 +217,7 @@
           }
         </div>
         <div>
-          <label class="block font-label-md text-label-md text-on-surface-variant mb-1">Amount ($)</label>
+          <label class="block font-label-md text-label-md text-on-surface-variant mb-1">Amount (EGP )</label>
           <input type="number" formControlName="amount" class="w-full px-3 py-2 border border-border-subtle rounded-lg bg-surface text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="e.g. 500">
           @if (invoiceForm.get('amount')?.touched && invoiceForm.get('amount')?.invalid) {
             <p class="text-error font-label-sm text-[11px] mt-1">Please enter a valid amount.</p>
@@ -263,7 +271,9 @@
                 </div>
               </div>
               <div class="text-right">
-                <p class="font-label-md text-label-md text-on-surface">${{ tx.amount | number:'1.2-2' }}</p>
+                <p class="font-label-md text-label-md text-on-surface"> {{ tx.amount | number:'1.2-2' }}</p>
+                          <p class="font-label-md text-label-md text-on-surface">EGP</p>
+
                 <span class="inline-block mt-1 font-label-sm text-[10px] uppercase px-2 py-0.5 rounded-full"
                       [ngClass]="{
                         'bg-success/10 text-success': tx.status === 'Completed',
