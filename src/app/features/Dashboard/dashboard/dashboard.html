@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 p-6">
+<div class="min-h-screen bg-gray-50 p-3 sm:p-6">
 
   @if (loading()) {
     <div class="flex items-center justify-center min-h-screen">
@@ -20,92 +20,94 @@
   @if (!loading() && !error() && data(); as d) {
 
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-        <p class="text-sm text-gray-500 mt-0.5">Welcome back. Here's what's happening today.</p>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+        <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Welcome back. Here's what's happening today.</p>
       </div>
-      <div class="flex items-center gap-3">
-        <button class="flex items-center gap-2 border border-gray-200 bg-white rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition">
+      <div class="flex items-center gap-2 sm:gap-3 overflow-x-auto">
+        <button class="flex items-center gap-2 border border-gray-200 bg-white rounded-lg px-3 py-2 text-xs sm:text-sm text-gray-600 hover:bg-gray-50 transition whitespace-nowrap shrink-0">
           <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          Last 30 Days
+          <span class="hidden xs:inline">Last 30 Days</span>
+          <span class="xs:hidden">30D</span>
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         <button
-          class="flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg px-4 py-2 text-sm font-medium transition"
+          class="flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition whitespace-nowrap shrink-0"
           (click)="exportReport()">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
-          Export Report
+          <span class="hidden xs:inline">Export Report</span>
+          <span class="xs:hidden">Export</span>
         </button>
       </div>
     </div>
 
     <!-- Stat Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-4 sm:mb-6">
 
-      <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm col-span-1">
+      <div class="bg-white rounded-xl border border-gray-100 p-3 sm:p-4 shadow-sm">
         <div class="flex items-center justify-between mb-2">
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Total Revenue</p>
-          <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide">Total Revenue</p>
+          <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
         </div>
-        <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(d.bookings.totalRevenue) }}</p>
-        <p class="text-xs mt-1" [ngClass]="growthClass(d.bookings.revenueGrowth)">
+        <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ formatCurrency(d.bookings.totalRevenue) }}</p>
+        <p class="text-[10px] sm:text-xs mt-1" [ngClass]="growthClass(d.bookings.revenueGrowth)">
           {{ growthIcon(d.bookings.revenueGrowth) }} {{ d.bookings.revenueGrowth }}% vs last month
         </p>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Total Users</p>
-        <p class="text-2xl font-bold text-gray-900">{{ formatNumber(d.users.totalUsers) }}</p>
-        <p class="text-xs mt-1" [ngClass]="growthClass(d.users.usersGrowth)">
+      <div class="bg-white rounded-xl border border-gray-100 p-3 sm:p-4 shadow-sm">
+        <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Total Users</p>
+        <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ formatNumber(d.users.totalUsers) }}</p>
+        <p class="text-[10px] sm:text-xs mt-1" [ngClass]="growthClass(d.users.usersGrowth)">
           {{ growthIcon(d.users.usersGrowth) }} {{ d.users.usersGrowth }}%
         </p>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Active Users</p>
-        <p class="text-2xl font-bold text-gray-900">{{ formatNumber(d.users.activeUsers) }}</p>
-        <p class="text-xs mt-1" [ngClass]="growthClass(d.users.activeUsersGrowth)">
+      <div class="bg-white rounded-xl border border-gray-100 p-3 sm:p-4 shadow-sm">
+        <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Active Users</p>
+        <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ formatNumber(d.users.activeUsers) }}</p>
+        <p class="text-[10px] sm:text-xs mt-1" [ngClass]="growthClass(d.users.activeUsersGrowth)">
           {{ growthIcon(d.users.activeUsersGrowth) }} {{ d.users.activeUsersGrowth }}%
         </p>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+      <div class="bg-white rounded-xl border border-gray-100 p-3 sm:p-4 shadow-sm">
         <div class="flex items-center gap-1 mb-2">
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Premium</p>
-          <span class="w-3.5 h-3.5 rounded-full bg-amber-400 flex items-center justify-center text-white text-[8px] font-bold">i</span>
+          <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide">Premium</p>
+          <span class="w-3.5 h-3.5 rounded-full bg-amber-400 flex items-center justify-center text-white text-[8px] font-bold shrink-0">i</span>
         </div>
-        <p class="text-2xl font-bold text-gray-900">{{ formatNumber(d.users.premiumUsers) }}</p>
-        <p class="text-xs mt-1" [ngClass]="growthClass(d.users.premiumGrowth)">
+        <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ formatNumber(d.users.premiumUsers) }}</p>
+        <p class="text-[10px] sm:text-xs mt-1" [ngClass]="growthClass(d.users.premiumGrowth)">
           {{ growthIcon(d.users.premiumGrowth) }} {{ d.users.premiumGrowth }}%
         </p>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Total Trips</p>
-        <p class="text-2xl font-bold text-gray-900">{{ formatNumber(d.trips.totalTrips) }}</p>
-        <p class="text-xs mt-1 text-gray-500">Active now: {{ d.trips.activeTripsNow }}</p>
+      <div class="bg-white rounded-xl border border-gray-100 p-3 sm:p-4 shadow-sm">
+        <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Total Trips</p>
+        <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ formatNumber(d.trips.totalTrips) }}</p>
+        <p class="text-[10px] sm:text-xs mt-1 text-gray-500">Active now: {{ d.trips.activeTripsNow }}</p>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+      <div class="bg-white rounded-xl border border-gray-100 p-3 sm:p-4 shadow-sm">
         <div class="flex items-center justify-between mb-2">
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">AI Requests</p>
-          <svg class="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide">AI Requests</p>
+          <svg class="w-4 h-4 text-teal-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
-        <p class="text-2xl font-bold text-gray-900">{{ formatNumber(d.ai.aiRequests) }}</p>
-        <p class="text-xs mt-1" [ngClass]="growthClass(d.ai.aiRequestsGrowth)">
+        <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ formatNumber(d.ai.aiRequests) }}</p>
+        <p class="text-[10px] sm:text-xs mt-1" [ngClass]="growthClass(d.ai.aiRequestsGrowth)">
           {{ growthIcon(d.ai.aiRequestsGrowth) }} {{ d.ai.aiRequestsGrowth }}%
         </p>
       </div>
@@ -113,31 +115,31 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4 sm:mb-6">
 
       <!-- Revenue Growth Chart -->
-      <div class="xl:col-span-2 bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+      <div class="xl:col-span-2 bg-white rounded-xl border border-gray-100 p-4 sm:p-5 shadow-sm">
         <div class="flex items-start justify-between mb-4">
           <div>
-            <h2 class="text-base font-semibold text-gray-900">Revenue Growth</h2>
-            <p class="text-xs text-gray-400">Monthly recurring revenue (MRR)</p>
+            <h2 class="text-sm sm:text-base font-semibold text-gray-900">Revenue Growth</h2>
+            <p class="text-[11px] sm:text-xs text-gray-400">Monthly recurring revenue (MRR)</p>
           </div>
-          <button class="text-gray-400 hover:text-gray-600 p-1">
+          <button class="text-gray-400 hover:text-gray-600 p-1 shrink-0">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
             </svg>
           </button>
         </div>
 
-        <div class="relative h-48">
-          <div class="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-xs text-gray-400 pr-2">
+        <div class="relative h-40 sm:h-48">
+          <div class="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-[10px] sm:text-xs text-gray-400 pr-1 sm:pr-2">
             <span>$1.5M</span>
             <span>$1.0M</span>
             <span>$0.5M</span>
             <span>$0</span>
           </div>
 
-          <div style="margin-left:40px; height:100%; display:flex; align-items:flex-end; gap:12px; border-bottom:1px solid #f3f4f6; padding-bottom:24px;">
+          <div style="margin-left:32px; height:100%; display:flex; align-items:flex-end; gap:6px; border-bottom:1px solid #f3f4f6; padding-bottom:24px;">
             @for (item of d.bookings.revenueChart; track item.month) {
               <div style="flex:1; height:100%; display:flex; align-items:flex-end; justify-content:center;">
                 <div
@@ -148,26 +150,26 @@
             }
           </div>
 
-          <div class="ml-10 flex gap-1 mt-1">
+          <div style="margin-left:32px; display:flex; gap:4px; margin-top:4px;">
             @for (item of d.bookings.revenueChart; track item.month) {
-              <div class="flex-1 text-center text-xs text-gray-400">{{ item.month }}</div>
+              <div class="flex-1 text-center text-[10px] sm:text-xs text-gray-400">{{ item.month }}</div>
             }
           </div>
         </div>
       </div>
 
       <!-- Booking Trends Chart -->
-      <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+      <div class="bg-white rounded-xl border border-gray-100 p-4 sm:p-5 shadow-sm">
         <div class="mb-4">
-          <h2 class="text-base font-semibold text-gray-900">Booking Trends</h2>
+          <h2 class="text-sm sm:text-base font-semibold text-gray-900">Booking Trends</h2>
           <div class="flex items-center gap-3 mt-1">
-            <span class="flex items-center gap-1 text-xs text-gray-500">
+            <span class="flex items-center gap-1 text-[11px] sm:text-xs text-gray-500">
               <span class="w-2 h-2 rounded-full bg-teal-600 inline-block"></span> Hotels
             </span>
           </div>
         </div>
 
-        <div style="height:160px; display:flex; align-items:flex-end; gap:8px; border-bottom:1px solid #f3f4f6; padding-bottom:16px;">
+        <div style="height:140px; display:flex; align-items:flex-end; gap:6px; border-bottom:1px solid #f3f4f6; padding-bottom:16px;">
           @for (trend of d.bookings.bookingTrends; track trend.day) {
             <div style="flex:1; height:100%; display:flex; align-items:flex-end;">
               <div
@@ -178,9 +180,9 @@
           }
         </div>
 
-        <div class="flex gap-2 mt-1">
+        <div class="flex gap-1 sm:gap-2 mt-1">
           @for (trend of d.bookings.bookingTrends; track trend.day) {
-            <div class="flex-1 text-center text-xs text-gray-400">{{ trend.day }}</div>
+            <div class="flex-1 text-center text-[10px] sm:text-xs text-gray-400">{{ trend.day }}</div>
           }
         </div>
       </div>
@@ -188,18 +190,18 @@
     </div>
 
     <!-- Destinations + Subscription Row -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4 sm:mb-6">
 
       <!-- Trending Destinations -->
-      <div class="xl:col-span-2 bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+      <div class="xl:col-span-2 bg-white rounded-xl border border-gray-100 p-4 sm:p-5 shadow-sm">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-semibold text-gray-900">Trending Destinations</h2>
-          <button class="text-xs text-teal-600 font-medium hover:text-teal-800" (click)="viewAllDestinations()">View All</button>
+          <h2 class="text-sm sm:text-base font-semibold text-gray-900">Trending Destinations</h2>
+          <button class="text-xs text-teal-600 font-medium hover:text-teal-800 shrink-0" (click)="viewAllDestinations()">View All</button>
         </div>
 
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
           @for (dest of d.destinations.destinations; track dest.rank) {
-            <div class="relative rounded-xl overflow-hidden h-44 group cursor-pointer">
+            <div class="relative rounded-xl overflow-hidden h-32 sm:h-44 group cursor-pointer">
               <img
                 [src]="dest.image || 'https://images.unsplash.com/photo-1539768942893-daf53e448371?w=400'"
                 [alt]="dest.city"
@@ -207,17 +209,17 @@
                 onerror="this.src='https://images.unsplash.com/photo-1539768942893-daf53e448371?w=400'"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-              <div class="absolute top-2 left-2 bg-teal-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+              <div class="absolute top-2 left-2 bg-teal-600 text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1">
                 <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                 </svg>
                 #{{ dest.rank }}
               </div>
-              <div class="absolute bottom-0 left-0 right-0 p-3">
-                <p class="text-white font-semibold text-sm">{{ dest.city }}, {{ dest.country }}</p>
+              <div class="absolute bottom-0 left-0 right-0 p-2 sm:p-3">
+                <p class="text-white font-semibold text-[11px] sm:text-sm truncate">{{ dest.city }}, {{ dest.country }}</p>
                 <div class="flex items-center justify-between mt-1">
-                  <p class="text-white/80 text-xs">{{ formatNumber(dest.bookings) }} Bookings</p>
-                  <span class="text-xs font-semibold" [ngClass]="growthClass(dest.growth)">
+                  <p class="text-white/80 text-[10px] sm:text-xs">{{ formatNumber(dest.bookings) }} Bookings</p>
+                  <span class="text-[10px] sm:text-xs font-semibold" [ngClass]="growthClass(dest.growth)">
                     {{ growthIcon(dest.growth) }}{{ dest.growth }}%
                   </span>
                 </div>
@@ -228,11 +230,11 @@
       </div>
 
       <!-- Subscription Tiers -->
-      <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-        <h2 class="text-base font-semibold text-gray-900 mb-4">Subscription Tiers</h2>
+      <div class="bg-white rounded-xl border border-gray-100 p-4 sm:p-5 shadow-sm">
+        <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-4">Subscription Tiers</h2>
 
         <div class="flex justify-center mb-4">
-          <div class="relative w-32 h-32">
+          <div class="relative w-28 h-28 sm:w-32 sm:h-32">
             <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
               @for (seg of getDonutSegments(); track seg.name) {
                 <circle
@@ -247,8 +249,8 @@
               }
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <p class="text-xl font-bold text-gray-900">{{ formatNumber(d.subscriptions.total) }}</p>
-              <p class="text-[10px] text-gray-400">Total Subs</p>
+              <p class="text-lg sm:text-xl font-bold text-gray-900">{{ formatNumber(d.subscriptions.total) }}</p>
+              <p class="text-[9px] sm:text-[10px] text-gray-400">Total Subs</p>
             </div>
           </div>
         </div>
@@ -257,10 +259,10 @@
           @for (tier of d.subscriptions.tiers; track tier.name) {
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full inline-block" [style.background]="tierColor(tier.name)"></span>
-                <span class="text-sm text-gray-600">{{ tier.name }}</span>
+                <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" [style.background]="tierColor(tier.name)"></span>
+                <span class="text-xs sm:text-sm text-gray-600">{{ tier.name }}</span>
               </div>
-              <span class="text-sm font-semibold text-gray-800">{{ tier.percentage }}%</span>
+              <span class="text-xs sm:text-sm font-semibold text-gray-800">{{ tier.percentage }}%</span>
             </div>
           }
         </div>
@@ -269,10 +271,10 @@
     </div>
 
     <!-- Top Hotels Table -->
-    <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+    <div class="bg-white rounded-xl border border-gray-100 p-4 sm:p-5 shadow-sm">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-base font-semibold text-gray-900">Top Performing Hotels</h2>
-        <button class="text-gray-400 hover:text-gray-600 p-1">
+        <h2 class="text-sm sm:text-base font-semibold text-gray-900">Top Performing Hotels</h2>
+        <button class="text-gray-400 hover:text-gray-600 p-1 shrink-0">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
@@ -280,26 +282,26 @@
         </button>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+      <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+        <table class="w-full text-sm min-w-[480px]">
           <thead>
             <tr class="border-b border-gray-100">
-              <th class="text-left py-2 px-3 text-xs font-semibold text-gray-400 uppercase">Hotel</th>
-              <th class="text-left py-2 px-3 text-xs font-semibold text-gray-400 uppercase">Location</th>
-              <th class="text-right py-2 px-3 text-xs font-semibold text-gray-400 uppercase">Revenue</th>
-              <th class="text-right py-2 px-3 text-xs font-semibold text-gray-400 uppercase">Bookings</th>
-              <th class="text-right py-2 px-3 text-xs font-semibold text-gray-400 uppercase">Rating</th>
+              <th class="text-left py-2 px-2 sm:px-3 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase">Hotel</th>
+              <th class="text-left py-2 px-2 sm:px-3 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase">Location</th>
+              <th class="text-right py-2 px-2 sm:px-3 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase">Revenue</th>
+              <th class="text-right py-2 px-2 sm:px-3 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase">Bookings</th>
+              <th class="text-right py-2 px-2 sm:px-3 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase">Rating</th>
             </tr>
           </thead>
           <tbody>
             @for (hotel of d.hotels.hotels; track hotel.name) {
               <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                <td class="py-3 px-3 font-medium text-gray-800">{{ hotel.name }}</td>
-                <td class="py-3 px-3 text-gray-500">{{ hotel.location }}</td>
-                <td class="py-3 px-3 text-right text-gray-800">{{ formatCurrency(hotel.revenue) }}</td>
-                <td class="py-3 px-3 text-right text-gray-800">{{ hotel.bookings }}</td>
-                <td class="py-3 px-3 text-right">
-                  <span class="inline-flex items-center gap-1 text-amber-500 font-semibold">
+                <td class="py-3 px-2 sm:px-3 font-medium text-gray-800 text-xs sm:text-sm">{{ hotel.name }}</td>
+                <td class="py-3 px-2 sm:px-3 text-gray-500 text-xs sm:text-sm">{{ hotel.location }}</td>
+                <td class="py-3 px-2 sm:px-3 text-right text-gray-800 text-xs sm:text-sm">{{ formatCurrency(hotel.revenue) }}</td>
+                <td class="py-3 px-2 sm:px-3 text-right text-gray-800 text-xs sm:text-sm">{{ hotel.bookings }}</td>
+                <td class="py-3 px-2 sm:px-3 text-right">
+                  <span class="inline-flex items-center gap-1 text-amber-500 font-semibold text-xs sm:text-sm">
                     <svg class="w-3.5 h-3.5 fill-amber-400" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
