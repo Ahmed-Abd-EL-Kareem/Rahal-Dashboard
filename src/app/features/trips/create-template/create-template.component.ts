@@ -4,6 +4,11 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { Router } from '@angular/router';
 import { TripService } from '../../../core/services/trip.service';
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
+import {
+  TRIP_CATEGORY_OPTIONS,
+  createInterestsFormFields,
+  getInterestsFromForm,
+} from '../../../core/utils/trip-interests-form.util';
 
 @Component({
   selector: 'app-create-template',
@@ -25,7 +30,11 @@ export class CreateTemplateComponent {
   toastMessage = signal<string | null>(null);
   toastIsError = signal<boolean>(false);
 
+  readonly categoryOptions = TRIP_CATEGORY_OPTIONS;
+
   constructor() {
+    const interestsFields = createInterestsFormFields();
+
     this.templateForm = this.fb.group({
       title: ['', [Validators.required]],           
       destination: ['', [Validators.required]],
@@ -33,7 +42,8 @@ export class CreateTemplateComponent {
       budget: ['mid-range', [Validators.required]],
       estimatedTotalCost: [1000, [Validators.required, Validators.min(0)]],
       travelers: [1, [Validators.required, Validators.min(1)]],
-      interestsInput: ['', [Validators.required]],
+      category: [interestsFields.category],
+      otherInterest: [interestsFields.otherInterest],
       language: ['en', [Validators.required]],
       imageUrl: ['', [Validators.required]]
     });
@@ -69,9 +79,7 @@ export class CreateTemplateComponent {
     }
 
     const val = this.templateForm.value;
-    const interestsArray = val.interestsInput
-      ? val.interestsInput.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0)
-      : [];
+    const interestsArray = getInterestsFromForm(val);
 
     const newTripData = {
       title: val.title,   
