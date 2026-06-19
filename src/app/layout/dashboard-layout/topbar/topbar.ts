@@ -94,12 +94,6 @@ export class TopBar {
       danger: false,
     },
     {
-      label: 'Settings',
-      icon: 'matSettingsOutline',
-      action: 'settings',
-      danger: false,
-    },
-    {
       label: 'Logout',
       icon: 'matLogoutOutline',
       action: 'logout',
@@ -115,7 +109,7 @@ export class TopBar {
     } else if (action === 'profile') {
       this.router.navigate(['/dashboard/profile']);
     } else if (action === 'settings') {
-      this.router.navigate(['/dashboard/settings']);
+      this.router.navigate(['/dashboard/profile']);
     }
   }
 }

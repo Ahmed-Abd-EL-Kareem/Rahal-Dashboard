@@ -30,9 +30,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: '',
-        loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
-      },
+  path: '',
+  loadComponent: () =>
+    import('../features/Dashboard/dashboard/dashboard')
+      .then(c => c.DashboardComponent)
+},
       {
         path: 'analytics',
         loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)

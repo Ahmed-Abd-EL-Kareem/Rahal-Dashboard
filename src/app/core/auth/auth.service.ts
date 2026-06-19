@@ -106,7 +106,7 @@ export class AuthService {
   token = signal<string | null>(null);
   currentUser = signal<User | null>(this._loadUser());
 
-  isAuthenticated = computed(() => !!this.token() || !!this.currentUser());
+  isAuthenticated = computed(() => !!this.token());
   isAdmin = computed(() => this.currentUser()?.role === 'admin');
 
   constructor() {
@@ -117,7 +117,7 @@ export class AuthService {
     }
 
     // لو فيه token ومفيش user نجيب بياناته
-    if (this.getToken() && !this.currentUser()) {
+    if (this.token() && !this.currentUser()) {
       this.fetchCurrentUser().subscribe({
         error: () => this.logout()
       });
@@ -126,7 +126,7 @@ export class AuthService {
 
   // ✅ GETTER مهم جدًا
   getToken(): string | null {
-    return this.cookieService.get(this.TOKEN_KEY) || this.token();
+    return this.token();
   }
 
   fetchCurrentUser() {
@@ -200,6 +200,7 @@ export class AuthService {
     this.currentUser.set(null);
     this.cookieService.delete(this.TOKEN_KEY, '/');
     this.cookieService.delete(this.USER_KEY, '/');
+    this.cookieService.deleteAll('/');
 
     this.router.navigate(['/login']);
   }

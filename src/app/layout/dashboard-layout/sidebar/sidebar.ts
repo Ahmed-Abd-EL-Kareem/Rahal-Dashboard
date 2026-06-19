@@ -100,11 +100,6 @@ export class Sidebar {
           route: '/dashboard',
           icon: 'matDashboardOutline',
         },
-        {
-          label: 'Analytics',
-          route: '/dashboard/analytics',
-          icon: 'matAnalyticsOutline',
-        },
       ],
     },
     {
@@ -143,7 +138,6 @@ export class Sidebar {
         {
           label: 'Bookings',
           route: '/dashboard/bookings',
-          badge: 12,
           icon: 'matBookOnlineOutline',
         },
         {
@@ -165,11 +159,6 @@ export class Sidebar {
           label: 'Payments',
           route: '/dashboard/payments',
           icon: 'matPaymentsOutline',
-        },
-        {
-          label: 'Reviews',
-          route: '/dashboard/stripe',
-          icon: 'matRateReviewOutline',
         },
       ],
     },

@@ -44,14 +44,7 @@
             <span class="hidden xs:inline">Edit Details</span>
             <span class="xs:hidden">Edit</span>
           </button>
-          <button (click)="viewLive()"
-            class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-[#005c55] text-white text-[13px] font-semibold hover:bg-[#0f766e] transition-colors cursor-pointer focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-            </svg>
-            <span class="hidden xs:inline">View Live</span>
-            <span class="xs:hidden">Live</span>
-          </button>
+          
         </ng-container>
 
         <!-- Edit Mode Buttons -->
@@ -290,17 +283,16 @@
 
               <div>
                 <p class="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-3">Daily Revenue — Last 7 Days</p>
-                <div class="flex items-end gap-1.5 sm:gap-2 h-[80px] sm:h-[90px]">
-                  <div *ngFor="let day of dailyRevenueChart()" class="flex-1 flex flex-col items-center gap-1">
-                    <div class="w-full rounded-t-md transition-all"
-                      [style.height.%]="maxChartValue() > 0 ? (day.value / maxChartValue()) * 100 : 4"
-                      [class.bg-\[#005c55\]]="day.value > 0"
-                      [class.bg-slate-100]="day.value === 0"
-                      style="min-height: 4px">
-                    </div>
-                    <span class="text-[9px] sm:text-[10px] text-slate-400 font-semibold">{{ day.label }}</span>
-                  </div>
-                </div>
+                
+           <div class="relative flex items-end gap-1.5 sm:gap-2" style="height: 100px;">
+  <div *ngFor="let day of dailyRevenueChart()" class="flex-1 flex flex-col items-center gap-1">
+    <div class="w-full rounded-t-md transition-all"
+      [style.background]="day.value > 0 ? '#005c55' : '#f1f5f9'"
+      [style.height.px]="barPx(day.value)">
+    </div>
+    <span class="text-[9px] sm:text-[10px] text-slate-400 font-semibold">{{ day.label }}</span>
+  </div>
+</div>
               </div>
 
               <div *ngIf="totalBookings() === 0" class="text-center py-6 text-slate-400">

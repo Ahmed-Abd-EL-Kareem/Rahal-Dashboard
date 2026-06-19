@@ -24,7 +24,7 @@ import { environment } from '../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const token = authService?.token ? authService.token() : authService?.getToken?.();
+  const token = authService.getToken();
 
   // Debugging: log token presence for dev (remove in production)
   // eslint-disable-next-line no-console

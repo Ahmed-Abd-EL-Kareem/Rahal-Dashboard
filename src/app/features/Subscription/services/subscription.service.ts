@@ -65,13 +65,12 @@ export class SubscriptionService {
   }
 
   // ── Admin ─────────────────────────────────────────────────────────────────────
-
-  adminGetAllSubscriptions(): Observable<GetAllSubscriptionsResponse> {
-    return this.http.get<GetAllSubscriptionsResponse>(
-      `${this.base}/admin/all`,
-      { withCredentials: true }
-    );
-  }
+adminGetAllSubscriptions(): Observable<GetAllSubscriptionsResponse> {
+  return this.http.get<GetAllSubscriptionsResponse>(
+    `${this.base}/admin/all?limit=1000`,
+    { withCredentials: true }
+  );
+}
 
   adminGetStats(): Observable<GetStatsResponse> {
     return this.http.get<GetStatsResponse>(
