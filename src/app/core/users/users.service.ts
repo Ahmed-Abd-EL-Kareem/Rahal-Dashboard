@@ -104,6 +104,13 @@ export class UsersService {
     });
   }
 
+  getSubscriptionByUserId(userId: string): Observable<SubscriptionsResponse> {
+  return this.http.get<SubscriptionsResponse>(
+    `${environment.apiUrl}/subscriptions/admin/all`,
+    { params: new HttpParams().set('user', userId) }
+  );
+}
+
   private buildScopedParams(params: UserScopedQueryParams): HttpParams {
     let httpParams = new HttpParams();
 

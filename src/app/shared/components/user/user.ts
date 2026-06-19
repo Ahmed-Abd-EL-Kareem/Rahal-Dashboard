@@ -4,10 +4,15 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { of, Subject } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { UsersService } from '../../../core/users/users.service';
 import { User } from '../../../models/auth.models';
+import {
+  getSubscriptionLabel,
+  getUserPlanName,
+  isPremiumPlan
+} from '../../utils/subscription.utils';
 
 import {
   matGroupOutline,
@@ -103,26 +108,50 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  loadUsers(): void {
-    this.isLoading.set(true);
 
-    this.usersService.getUsers({
-      search: this.searchQuery(),
-      role: this.roleFilter(),
-      sort: this.sortFilter(),
-      limit: this.limit(),
-      page: this.page()
-    }).subscribe({
-      next: res => {
-        this.users.set(res.data.users ?? []);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.showToast('Failed to load users', 'danger');
-        this.isLoading.set(false);
-      }
-    });
-  }
+  loadUsers(): void {
+  this.isLoading.set(true);
+
+  this.usersService.getUsers({
+    search: this.searchQuery(),
+    role: this.roleFilter(),
+    sort: this.sortFilter(),
+    limit: this.limit(),
+    page: this.page()
+  }).pipe(
+    switchMap(res => {
+      const users = res.data.users ?? [];
+      if (users.length === 0) return of(users);
+
+      return this.usersService.getSubscriptions({ }).pipe(
+        map(subsRes => {
+          const subs = subsRes.subscriptions ?? [];
+          return users.map(user => {
+            const sub = subs.find(s =>
+              (typeof s.user === 'string' ? s.user : s.user?._id) === user._id
+            );
+            if (sub) {
+              return { ...user, subscription: sub.planName };
+            }
+            return user;
+          });
+        }),
+        catchError(() => of(users))
+      );
+    })
+  ).subscribe({
+    next: users => {
+      this.users.set(users);
+      this.isLoading.set(false);
+    },
+    error: () => {
+      this.showToast('Failed to load users', 'danger');
+      this.isLoading.set(false);
+    }
+  });
+}
+
+
 
   onSearchChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
@@ -213,7 +242,7 @@ export class UsersComponent implements OnInit {
   onExport(): void {
     const header = 'Name,Email,Role,Subscription,Saved Trips';
     const rows = this.users().map(user =>
-      `"${user.name}","${user.email}","${user.role}","${user.subscription ?? 'free'}","${this.getUserTripsCount(user)}"`
+      `"${user.name}","${user.email}","${user.role}","${getSubscriptionLabel(getUserPlanName(user))}","${this.getUserTripsCount(user)}"`
     );
     const csvContent = `data:text/csv;charset=utf-8,${header}\n${rows.join('\n')}`;
 
@@ -261,6 +290,18 @@ private generateSlug(name: string): string {
 
   getUserTripsCount(user: User): number {
     return user.savedTrips?.length ?? 0;
+  }
+
+  getUserPlanName(user: User): string {
+    return getUserPlanName(user);
+  }
+
+  getSubscriptionLabel(user: User): string {
+    return getSubscriptionLabel(getUserPlanName(user));
+  }
+
+  isPremiumUser(user: User): boolean {
+    return isPremiumPlan(getUserPlanName(user));
   }
 
   formatDate(dateStr?: string): string {

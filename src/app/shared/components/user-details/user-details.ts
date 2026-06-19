@@ -7,6 +7,11 @@ import { EMPTY, forkJoin, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { UsersService } from '../../../core/users/users.service';
 import { Booking, Trip, User, UserSubscription } from '../../../models/auth.models';
+import {
+  getSubscriptionLabel,
+  getUserPlanName,
+  isPremiumPlan
+} from '../../utils/subscription.utils';
 
 import {
   matSettingsOutline,
@@ -91,7 +96,6 @@ totalBookingsPages = computed(() =>
   maxTokens = computed(() => {
     const plan = this.subscription()?.planName;
     if (plan === 'pro') return 300_000;
-    if (plan === 'enterprise') return 1_000_000;
     return 100_000;
   });
 
@@ -183,13 +187,13 @@ totalBookingsPages = computed(() =>
           return of(null);
         })
       ),
-      tripsRes: this.usersService.getTrips({ user: userId, limit: 100 }).pipe(
+      tripsRes: this.usersService.getTrips({ user: userId }).pipe(
         catchError(() => of({ data: [] as Trip[] }))
       ),
-      bookingsRes: this.usersService.getBookings({ user: userId, limit: 100 }).pipe(
+      bookingsRes: this.usersService.getBookings({ user: userId}).pipe(
         catchError(() => of({ data: [] as Booking[] }))
       ),
-      subsRes: this.usersService.getSubscriptions({ user: userId, limit: 100 }).pipe(
+      subsRes: this.usersService.getSubscriptions({ user: userId}).pipe(
         catchError(() => of({ subscriptions: [] as UserSubscription[] }))
       )
     }).pipe(
@@ -233,7 +237,7 @@ totalBookingsPages = computed(() =>
     }
 
     return {
-      planName: user.subscription ?? 'free',
+      planName: getUserPlanName(user),
       status: 'active',
       startDate: user.createdAt,
       usage: {
@@ -245,10 +249,13 @@ totalBookingsPages = computed(() =>
   }
 
   getTierLabel(): string {
-    const tier = this.user()?.subscription;
-    if (tier === 'pro') return 'Traveler Pro';
-    if (tier === 'enterprise') return 'Enterprise';
-    return 'Explorer Free';
+    const plan = this.subscription()?.planName ?? getUserPlanName(this.user() ?? { subscription: undefined });
+    return getSubscriptionLabel(plan);
+  }
+
+  isPremiumUser(): boolean {
+    const plan = this.subscription()?.planName ?? getUserPlanName(this.user() ?? { subscription: undefined });
+    return isPremiumPlan(plan);
   }
 
   getDestinationImage(destination: string): string {

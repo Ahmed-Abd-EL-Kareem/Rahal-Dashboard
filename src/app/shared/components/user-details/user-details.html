@@ -49,7 +49,7 @@
             class="px-3 py-1 bg-primary-container/10 text-primary font-label-sm text-label-sm rounded-full flex items-center gap-1">
             <ng-icon name="matCheckCircleOutline" class="text-[14px]"></ng-icon> Verified
           </span>
-          @if (user()?.subscription === 'pro' || user()?.subscription === 'enterprise') {
+          @if (isPremiumUser()) {
           <span
             class="px-3 py-1 bg-warning/10 text-warning font-label-sm text-label-sm rounded-full flex items-center gap-1">
             <ng-icon name="matStarOutline" class="text-[14px]"></ng-icon> Premium
