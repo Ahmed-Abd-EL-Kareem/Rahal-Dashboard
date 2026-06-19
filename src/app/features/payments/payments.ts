@@ -147,7 +147,7 @@ export class Payments implements OnInit {
         callbacks: {
           label: (context) => {
             const y = context.parsed.y;
-            return ` Revenue: $${y !== null && y !== undefined ? y.toLocaleString() : 0}`;
+            return `  ${y !== null && y !== undefined ? y.toLocaleString() : 0}  EGP`;
           }
         }
       }
@@ -175,7 +175,7 @@ export class Payments implements OnInit {
             family: 'Inter',
             size: 11
           },
-          callback: (value) => `$${Number(value) / 1000}k`
+          callback: (value) => ` ${Number(value) / 1000}k`
         }
       }
     }
@@ -201,12 +201,13 @@ export class Payments implements OnInit {
       datasets: [
         {
           data,
-          label: 'Revenue ($)',
+          label: 'Revenue (EGP )',
           backgroundColor: (context) => {
             const index = context.dataIndex;
             const isLast = index === data.length - 1;
             return isLast ? '#005c55' : 'rgba(128, 213, 203, 0.4)';
           },
+          
           hoverBackgroundColor: '#005c55',
           borderRadius: 4,
           borderSkipped: false,
