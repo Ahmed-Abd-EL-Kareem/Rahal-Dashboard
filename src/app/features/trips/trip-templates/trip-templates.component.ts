@@ -18,7 +18,7 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './trip-templates.component.html',
-  styleUrl: './trip-templates.component.scss'
+  styleUrl: './trip-templates.component.scss',
 })
 export class TripTemplatesComponent implements OnInit {
   private router = inject(Router);
@@ -52,28 +52,22 @@ export class TripTemplatesComponent implements OnInit {
     return (this.page() - 1) * this.limit() + 1;
   });
 
-  showingTo = computed(() =>
-    Math.min(this.page() * this.limit(), this.total())
-  );
+  showingTo = computed(() => Math.min(this.page() * this.limit(), this.total()));
 
   canGoPrev = computed(() => this.page() > 1);
   canGoNext = computed(() => this.page() < this.totalPages());
 
   categories = [
     { name: 'All', icon: 'apps', label: 'All Templates' },
-    { name: 'Family', icon: 'family_restroom', label: 'Family' },
+    { name: 'Famaily', icon: 'family_restroom', label: 'Family' },
     { name: 'Luxury', icon: 'diamond', label: 'Luxury' },
     { name: 'Adventure', icon: 'hiking', label: 'Adventure' },
-    { name: 'Weekend', icon: 'weekend', label: 'Weekend' }
+    { name: 'History', icon: 'history', label: 'History' },
   ];
 
   ngOnInit(): void {
     this.searchSubject
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef)
-      )
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.page.set(1);
         this.loadTemplates();
@@ -140,14 +134,14 @@ export class TripTemplatesComponent implements OnInit {
 
   prevPage(): void {
     if (this.canGoPrev()) {
-      this.page.update(p => p - 1);
+      this.page.update((p) => p - 1);
       this.loadTemplates();
     }
   }
 
   nextPage(): void {
     if (this.canGoNext()) {
-      this.page.update(p => p + 1);
+      this.page.update((p) => p + 1);
       this.loadTemplates();
     }
   }
@@ -193,8 +187,8 @@ export class TripTemplatesComponent implements OnInit {
       .map((interest) => normalizeInterest(interest))
       .find((interest) =>
         TRIP_PREDEFINED_CATEGORIES.some(
-          (category) => category.toLowerCase() === interest?.toLowerCase()
-        )
+          (category) => category.toLowerCase() === interest?.toLowerCase(),
+        ),
       );
     return found ?? 'Family';
   }
@@ -218,7 +212,7 @@ export class TripTemplatesComponent implements OnInit {
           console.error('Error deleting template', err);
           this.showToast('Failed to delete template', true);
           this.closeDeleteConfirm();
-        }
+        },
       });
     }
   }

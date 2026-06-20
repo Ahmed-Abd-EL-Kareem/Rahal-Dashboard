@@ -418,7 +418,7 @@ export class TripService {
         httpParams = httpParams.set('isAIGenerated', String(params.isAIGenerated));
       }
       if (params.category && params.category !== 'All') {
-        httpParams = httpParams.set('category', params.category);
+        httpParams = httpParams.set('interests', params.category.toLowerCase());
       }
       if (params.budgetRange && params.budgetRange !== 'All') {
         httpParams = httpParams.set('budgetRange', params.budgetRange);
