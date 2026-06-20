@@ -111,17 +111,20 @@ export class AuthService {
 
   constructor() {
     // تحميل التوكن من الكوكي عند بداية التطبيق
-    const savedToken = this.cookieService.get(this.TOKEN_KEY);
-    if (savedToken) {
-      this.token.set(savedToken);
-    }
+   const savedToken = this.cookieService.get(this.TOKEN_KEY);
+   if (savedToken) this.token.set(savedToken);
 
-    // لو فيه token ومفيش user نجيب بياناته
-    if (this.token() && !this.currentUser()) {
-      this.fetchCurrentUser().subscribe({
-        error: () => this.logout()
-      });
-    }
+   if (this.token() && !this.currentUser()) {
+     this.fetchCurrentUser().subscribe({
+       error: (err) => {
+         // only a real auth rejection should kill the session —
+         // not "couldn't resolve an id locally" or a network hiccup
+         if (err?.status === 401 || err?.status === 403) {
+           this.logout();
+         }
+       },
+     });
+   }
   }
 
   // ✅ GETTER مهم جدًا
@@ -196,13 +199,13 @@ export class AuthService {
   }
 
   logout(): void {
-    this.token.set(null);
-    this.currentUser.set(null);
-    this.cookieService.delete(this.TOKEN_KEY, '/');
-    this.cookieService.delete(this.USER_KEY, '/');
-    this.cookieService.deleteAll('/');
-
-    this.router.navigate(['/login']);
+  this.token.set(null);
+  this.currentUser.set(null);
+  this.cookieService.delete(this.TOKEN_KEY, '/');
+  this.cookieService.delete(this.USER_KEY, '/');
+  // remove this — it's collateral damage:
+  // this.cookieService.deleteAll('/');
+  this.router.navigate(['/login']);
   }
 
   updateProfile(userId: string, data: UpdateProfileRequest) {
@@ -224,10 +227,12 @@ export class AuthService {
   private _getUserIdFromToken(): string | null {
     const token = this.token();
     if (!token) return null;
-
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.id ?? null;
+      // log this once to confirm the real claim name your backend uses
+      console.debug('JWT payload', payload);
+      console.log('JWT payload', payload);
+      return payload.id ?? payload._id ?? payload.userId ?? payload.sub ?? null;
     } catch {
       return null;
     }
