@@ -4,10 +4,15 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { of, Subject } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { UsersService } from '../../../core/users/users.service';
 import { User } from '../../../models/auth.models';
+import {
+  getSubscriptionLabel,
+  getUserPlanName,
+  isPremiumPlan,
+} from '../../utils/subscription.utils';
 
 import {
   matGroupOutline,
@@ -27,7 +32,7 @@ import {
   matMailOutline,
   matVpnKeyOutline,
   matVisibilityOutline,
-  matTravelExploreOutline
+  matTravelExploreOutline,
 } from '@ng-icons/material-icons/outline';
 
 const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
@@ -56,9 +61,9 @@ const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z
       matMailOutline,
       matVpnKeyOutline,
       matVisibilityOutline,
-      matTravelExploreOutline
-    })
-  ]
+      matTravelExploreOutline,
+    }),
+  ],
 })
 export class UsersComponent implements OnInit {
   private readonly usersService = inject(UsersService);
@@ -84,7 +89,10 @@ export class UsersComponent implements OnInit {
   addForm: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(PASSWORD_PATTERN)]]
+    password: [
+      '',
+      [Validators.required, Validators.minLength(8), Validators.pattern(PASSWORD_PATTERN)],
+    ],
   });
 
   private readonly searchSubject = new Subject<string>();
@@ -92,36 +100,58 @@ export class UsersComponent implements OnInit {
   ngOnInit(): void {
     this.loadUsers();
 
-    this.searchSubject.pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(value => {
-      this.searchQuery.set(value);
-      this.page.set(1);
-      this.loadUsers();
-    });
+    this.searchSubject
+      .pipe(debounceTime(400), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        this.searchQuery.set(value);
+        this.page.set(1);
+        this.loadUsers();
+      });
   }
 
   loadUsers(): void {
     this.isLoading.set(true);
 
-    this.usersService.getUsers({
-      search: this.searchQuery(),
-      role: this.roleFilter(),
-      sort: this.sortFilter(),
-      limit: this.limit(),
-      page: this.page()
-    }).subscribe({
-      next: res => {
-        this.users.set(res.data.users ?? []);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.showToast('Failed to load users', 'danger');
-        this.isLoading.set(false);
-      }
-    });
+    this.usersService
+      .getUsers({
+        search: this.searchQuery(),
+        role: this.roleFilter(),
+        sort: this.sortFilter(),
+        limit: this.limit(),
+        page: this.page(),
+      })
+      .pipe(
+        switchMap((res) => {
+          const users = res.data.users ?? [];
+          if (users.length === 0) return of(users);
+
+          return this.usersService.getSubscriptions({}).pipe(
+            map((subsRes) => {
+              const subs = subsRes.subscriptions ?? [];
+              return users.map((user) => {
+                const sub = subs.find(
+                  (s) => (typeof s.user === 'string' ? s.user : s.user?._id) === user._id,
+                );
+                if (sub) {
+                  return { ...user, subscription: sub.planName };
+                }
+                return user;
+              });
+            }),
+            catchError(() => of(users)),
+          );
+        }),
+      )
+      .subscribe({
+        next: (users) => {
+          this.users.set(users);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.showToast('Failed to load users', 'danger');
+          this.isLoading.set(false);
+        },
+      });
   }
 
   onSearchChange(event: Event): void {
@@ -142,13 +172,13 @@ export class UsersComponent implements OnInit {
   }
 
   nextPage(): void {
-    this.page.update(current => current + 1);
+    this.page.update((current) => current + 1);
     this.loadUsers();
   }
 
   prevPage(): void {
     if (this.page() > 1) {
-      this.page.update(current => current - 1);
+      this.page.update((current) => current - 1);
       this.loadUsers();
     }
   }
@@ -183,11 +213,11 @@ export class UsersComponent implements OnInit {
         this.closeAllModals();
         this.loadUsers();
       },
-      error: err => {
+      error: (err) => {
         const errorMsg = err.error?.message ?? 'Failed to create user';
         this.showToast(errorMsg, 'danger');
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -202,18 +232,19 @@ export class UsersComponent implements OnInit {
         this.closeAllModals();
         this.loadUsers();
       },
-      error: err => {
+      error: (err) => {
         const errorMsg = err.error?.message ?? 'Failed to delete user';
         this.showToast(errorMsg, 'danger');
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
   onExport(): void {
     const header = 'Name,Email,Role,Subscription,Saved Trips';
-    const rows = this.users().map(user =>
-      `"${user.name}","${user.email}","${user.role}","${user.subscription ?? 'free'}","${this.getUserTripsCount(user)}"`
+    const rows = this.users().map(
+      (user) =>
+        `"${user.name}","${user.email}","${user.role}","${getSubscriptionLabel(getUserPlanName(user))}","${this.getUserTripsCount(user)}"`,
     );
     const csvContent = `data:text/csv;charset=utf-8,${header}\n${rows.join('\n')}`;
 
@@ -227,33 +258,33 @@ export class UsersComponent implements OnInit {
     this.showToast('CSV export downloaded successfully', 'success');
   }
 
-private generateSlug(name: string): string {
-  return name
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9_-]/g, '')
-    .replace(/-+/g, '-');
-}
+  private generateSlug(name: string): string {
+    return name
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9_-]/g, '')
+      .replace(/-+/g, '-');
+  }
 
   viewUserDetails(user: User): void {
-  const userSlug = this.generateSlug(user.name);
+    const userSlug = this.generateSlug(user.name);
 
-  void this.router.navigate(['/dashboard/users', userSlug], {
-    state: { id: user._id }
-  });
-}
+    void this.router.navigate(['/dashboard/users', userSlug], {
+      state: { id: user._id },
+    });
+  }
 
-// viewUserDetails(user: User): void {
-//     void this.router.navigate(['/dashboard/users', user._id]);
-//   }
+  // viewUserDetails(user: User): void {
+  //     void this.router.navigate(['/dashboard/users', user._id]);
+  //   }
 
   getInitials(name: string): string {
     if (!name) return 'U';
 
     return name
       .split(' ')
-      .map(part => part[0])
+      .map((part) => part[0])
       .join('')
       .slice(0, 2)
       .toUpperCase();
@@ -261,6 +292,18 @@ private generateSlug(name: string): string {
 
   getUserTripsCount(user: User): number {
     return user.savedTrips?.length ?? 0;
+  }
+
+  getUserPlanName(user: User): string {
+    return getUserPlanName(user);
+  }
+
+  getSubscriptionLabel(user: User): string {
+    return getSubscriptionLabel(getUserPlanName(user));
+  }
+
+  isPremiumUser(user: User): boolean {
+    return isPremiumPlan(getUserPlanName(user));
   }
 
   formatDate(dateStr?: string): string {
@@ -272,7 +315,7 @@ private generateSlug(name: string): string {
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
   }
 

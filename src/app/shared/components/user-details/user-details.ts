@@ -7,6 +7,11 @@ import { EMPTY, forkJoin, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { UsersService } from '../../../core/users/users.service';
 import { Booking, Trip, User, UserSubscription } from '../../../models/auth.models';
+import {
+  getSubscriptionLabel,
+  getUserPlanName,
+  isPremiumPlan,
+} from '../../utils/subscription.utils';
 
 import {
   matSettingsOutline,
@@ -19,7 +24,7 @@ import {
   matTravelExploreOutline,
   matMoreVertOutline,
   matChevronLeftOutline,
-  matChevronRightOutline
+  matChevronRightOutline,
 } from '@ng-icons/material-icons/outline';
 
 const OBJECT_ID_PATTERN = /^[0-9a-fA-F]{24}$/;
@@ -42,9 +47,9 @@ const BOOKINGS_PAGE_SIZE = 2;
       matTravelExploreOutline,
       matMoreVertOutline,
       matChevronLeftOutline,
-      matChevronRightOutline
-    })
-  ]
+      matChevronRightOutline,
+    }),
+  ],
 })
 export class UserDetailsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -66,8 +71,8 @@ export class UserDetailsComponent implements OnInit {
 
   totalSpend = computed(() =>
     this.bookings()
-      .filter(booking => !this.isCanceledBooking(booking))
-      .reduce((sum, booking) => sum + this.getBookingAmount(booking), 0)
+      .filter((booking) => !this.isCanceledBooking(booking))
+      .reduce((sum, booking) => sum + this.getBookingAmount(booking), 0),
   );
 
   paginatedTrips = computed(() => {
@@ -75,23 +80,20 @@ export class UserDetailsComponent implements OnInit {
     return this.trips().slice(start, start + TRIPS_PAGE_SIZE);
   });
 
-  totalTripsPages = computed(() =>
-    Math.max(1, Math.ceil(this.trips().length / TRIPS_PAGE_SIZE))
-  );
+  totalTripsPages = computed(() => Math.max(1, Math.ceil(this.trips().length / TRIPS_PAGE_SIZE)));
 
   paginatedBookings = computed(() => {
-  const start = (this.bookingsPage() - 1) * BOOKINGS_PAGE_SIZE;
-  return this.bookings().slice(start, start + BOOKINGS_PAGE_SIZE);
-});
+    const start = (this.bookingsPage() - 1) * BOOKINGS_PAGE_SIZE;
+    return this.bookings().slice(start, start + BOOKINGS_PAGE_SIZE);
+  });
 
-totalBookingsPages = computed(() =>
-  Math.max(1, Math.ceil(this.bookings().length / BOOKINGS_PAGE_SIZE))
-);
+  totalBookingsPages = computed(() =>
+    Math.max(1, Math.ceil(this.bookings().length / BOOKINGS_PAGE_SIZE)),
+  );
 
   maxTokens = computed(() => {
     const plan = this.subscription()?.planName;
     if (plan === 'pro') return 300_000;
-    if (plan === 'enterprise') return 1_000_000;
     return 100_000;
   });
 
@@ -154,25 +156,26 @@ totalBookingsPages = computed(() =>
     //   takeUntilDestroyed(this.destroyRef)
     // ).subscribe();
 
-    this.route.paramMap.pipe(
-      map(params => params.get('name')?.trim() ?? ''),
-      distinctUntilChanged(),
-      switchMap(name => {
+    this.route.paramMap
+      .pipe(
+        map((params) => params.get('name')?.trim() ?? ''),
+        distinctUntilChanged(),
+        switchMap((name) => {
+          const navigation = this.router.getCurrentNavigation();
+          const userId = navigation?.extras.state?.['id'] || history.state?.['id'];
 
-        const navigation = this.router.getCurrentNavigation();
-        const userId = navigation?.extras.state?.['id'] || history.state?.['id'];
+          if (!userId || !OBJECT_ID_PATTERN.test(userId)) {
+            this.showToast('Invalid or missing user identifier', 'danger');
+            void this.router.navigate(['/dashboard/users']);
+            return EMPTY;
+          }
 
-        if (!userId || !OBJECT_ID_PATTERN.test(userId)) {
-          this.showToast('Invalid or missing user identifier', 'danger');
-          void this.router.navigate(['/dashboard/users']);
-          return EMPTY;
-        }
-
-    this.isLoading.set(true);
-    return this.loadUserData(userId);
-  }),
-  takeUntilDestroyed(this.destroyRef)
-).subscribe();
+          this.isLoading.set(true);
+          return this.loadUserData(userId);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
   }
 
   private loadUserData(userId: string) {
@@ -181,17 +184,17 @@ totalBookingsPages = computed(() =>
         catchError(() => {
           this.showToast('Failed to load user profile', 'danger');
           return of(null);
-        })
+        }),
       ),
-      tripsRes: this.usersService.getTrips({ user: userId, limit: 100 }).pipe(
-        catchError(() => of({ data: [] as Trip[] }))
-      ),
-      bookingsRes: this.usersService.getBookings({ user: userId, limit: 100 }).pipe(
-        catchError(() => of({ data: [] as Booking[] }))
-      ),
-      subsRes: this.usersService.getSubscriptions({ user: userId, limit: 100 }).pipe(
-        catchError(() => of({ subscriptions: [] as UserSubscription[] }))
-      )
+      tripsRes: this.usersService
+        .getTrips({ user: userId })
+        .pipe(catchError(() => of({ data: [] as Trip[] }))),
+      bookingsRes: this.usersService
+        .getBookings({ user: userId })
+        .pipe(catchError(() => of({ data: [] as Booking[] }))),
+      subsRes: this.usersService
+        .getSubscriptions({ user: userId })
+        .pipe(catchError(() => of({ subscriptions: [] as UserSubscription[] }))),
     }).pipe(
       map(({ userRes, tripsRes, bookingsRes, subsRes }) => {
         const user = userRes?.data?.user;
@@ -215,17 +218,17 @@ totalBookingsPages = computed(() =>
         this.isLoading.set(false);
         void this.router.navigate(['/dashboard/users']);
         return of(void 0);
-      })
+      }),
     );
   }
 
   private resolveSubscription(
     userId: string,
     user: User,
-    subscriptions: UserSubscription[]
+    subscriptions: UserSubscription[],
   ): UserSubscription {
-    const existing = subscriptions.find(sub =>
-      (typeof sub.user === 'string' ? sub.user : sub.user?._id) === userId
+    const existing = subscriptions.find(
+      (sub) => (typeof sub.user === 'string' ? sub.user : sub.user?._id) === userId,
     );
 
     if (existing) {
@@ -233,22 +236,27 @@ totalBookingsPages = computed(() =>
     }
 
     return {
-      planName: user.subscription ?? 'free',
+      planName: getUserPlanName(user),
       status: 'active',
       startDate: user.createdAt,
       usage: {
         tokensUsedThisMonth: 0,
         requestsToday: 0,
-        tripsThisMonth: user.savedTrips?.length ?? 0
-      }
+        tripsThisMonth: user.savedTrips?.length ?? 0,
+      },
     };
   }
 
   getTierLabel(): string {
-    const tier = this.user()?.subscription;
-    if (tier === 'pro') return 'Traveler Pro';
-    if (tier === 'enterprise') return 'Enterprise';
-    return 'Explorer Free';
+    const plan =
+      this.subscription()?.planName ?? getUserPlanName(this.user() ?? { subscription: undefined });
+    return getSubscriptionLabel(plan);
+  }
+
+  isPremiumUser(): boolean {
+    const plan =
+      this.subscription()?.planName ?? getUserPlanName(this.user() ?? { subscription: undefined });
+    return isPremiumPlan(plan);
   }
 
   getDestinationImage(destination: string): string {
@@ -278,7 +286,7 @@ totalBookingsPages = computed(() =>
 
     return name
       .split(' ')
-      .map(part => part[0])
+      .map((part) => part[0])
       .join('')
       .slice(0, 2)
       .toUpperCase();
@@ -293,7 +301,7 @@ totalBookingsPages = computed(() =>
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
   }
 
@@ -311,7 +319,7 @@ totalBookingsPages = computed(() =>
     const end = checkOut.toLocaleDateString('en-US', {
       month: 'short',
       day: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
 
     return `${start} - ${end}`;
@@ -329,26 +337,26 @@ totalBookingsPages = computed(() =>
 
   nextTripsPage(): void {
     if (this.tripsPage() < this.totalTripsPages()) {
-      this.tripsPage.update(page => page + 1);
+      this.tripsPage.update((page) => page + 1);
     }
   }
 
   prevTripsPage(): void {
     if (this.tripsPage() > 1) {
-      this.tripsPage.update(page => page - 1);
+      this.tripsPage.update((page) => page - 1);
     }
   }
-nextBookingsPage(): void {
-  if (this.bookingsPage() < this.totalBookingsPages()) {
-    this.bookingsPage.update(page => page + 1);
+  nextBookingsPage(): void {
+    if (this.bookingsPage() < this.totalBookingsPages()) {
+      this.bookingsPage.update((page) => page + 1);
+    }
   }
-}
 
-prevBookingsPage(): void {
-  if (this.bookingsPage() > 1) {
-    this.bookingsPage.update(page => page - 1);
+  prevBookingsPage(): void {
+    if (this.bookingsPage() > 1) {
+      this.bookingsPage.update((page) => page - 1);
+    }
   }
-}
 
   private showToast(message: string, type: 'success' | 'danger' | 'warning'): void {
     this.toast.set({ message, type });

@@ -42,7 +42,7 @@ export interface UserScopedQueryParams {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UsersService {
   private readonly http = inject(HttpClient);
@@ -88,19 +88,25 @@ export class UsersService {
 
   getTrips(params: UserScopedQueryParams = {}): Observable<TripsResponse> {
     return this.http.get<TripsResponse>(`${environment.apiUrl}/trips/admin/all`, {
-      params: this.buildScopedParams(params)
+      params: this.buildScopedParams(params),
     });
   }
 
   getBookings(params: UserScopedQueryParams = {}): Observable<BookingsResponse> {
     return this.http.get<BookingsResponse>(`${environment.apiUrl}/bookings/admin/all`, {
-      params: this.buildScopedParams(params)
+      params: this.buildScopedParams(params),
     });
   }
 
   getSubscriptions(params: UserScopedQueryParams = {}): Observable<SubscriptionsResponse> {
     return this.http.get<SubscriptionsResponse>(`${environment.apiUrl}/subscriptions/admin/all`, {
-      params: this.buildScopedParams(params)
+      params: this.buildScopedParams(params),
+    });
+  }
+
+  getSubscriptionByUserId(userId: string): Observable<SubscriptionsResponse> {
+    return this.http.get<SubscriptionsResponse>(`${environment.apiUrl}/subscriptions/admin/all`, {
+      params: new HttpParams().set('user', userId),
     });
   }
 
