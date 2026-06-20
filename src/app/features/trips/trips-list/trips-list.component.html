@@ -37,7 +37,7 @@
           placeholder="Search by name, destination, status..." 
         />
         @if (searchQuery()) {
-          <button (click)="searchQuery.set('')" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors cursor-pointer">
+          <button (click)="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors cursor-pointer">
             <span class="material-symbols-outlined text-[16px]">close</span>
           </button>
         }
@@ -96,7 +96,7 @@
       <!-- Reset Filters Button -->
       @if (searchQuery() || selectedType() !== 'All' || selectedBudgetRange() !== 'All') {
         <button 
-          (click)="searchQuery.set(''); selectedType.set('All'); selectedBudgetRange.set('All')" 
+          (click)="resetFilters()" 
           class="px-3 py-1.5 border border-dashed border-border-subtle rounded-lg text-primary hover:bg-surface-container-low text-xs font-bold transition-all cursor-pointer"
         >
           Reset Filters
@@ -122,7 +122,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-border-subtle">
-          @for (trip of filteredTrips(); track trip._id) {
+          @for (trip of trips(); track trip._id) {
             <!-- (click)="navigateToDetails(trip._id) -->
             <tr  class="hover:bg-surface-container-low transition-colors group cursor-pointer">
               <!-- Primary Identifier is Trip Name -->
@@ -153,33 +153,25 @@
               <td class="px-6 py-4 font-body-md text-body-md text-on-surface whitespace-nowrap">{{ trip.destination }}</td>
               <td class="px-6 py-4 font-body-md text-body-md text-on-surface whitespace-nowrap font-medium">{{ trip.estimatedTotalCost | currency:'USD':'symbol':'1.0-0' }}</td>
               <td class="px-6 py-4 font-body-md text-body-md text-on-surface-variant whitespace-nowrap">{{ trip.duration }} Days</td>
-              <td class="px-6 py-4">
-                <!-- Professional colored badges with dot indicators -->
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border"
-                      [class.text-success]="trip.status === 'saved'"
-                      [class.bg-success/10]="trip.status === 'saved'"
-                      [class.border-success/30]="trip.status === 'saved'"
-                      [class.text-warning]="trip.status === 'draft'"
-                      [class.bg-warning/10]="trip.status === 'draft'"
-                      [class.border-warning/30]="trip.status === 'draft'"
-                      [class.text-error]="trip.status === 'archived'"
-                      [class.bg-error/10]="trip.status === 'archived'"
-                      [class.border-error/30]="trip.status === 'archived'">
-                  <span class="w-1.5 h-1.5 rounded-full mr-1.5"
-                        [class.bg-success]="trip.status === 'saved'"
-                        [class.bg-warning]="trip.status === 'draft'"
-                        [class.bg-error]="trip.status === 'archived'"></span>
-                  {{ trip.status }}
-                </span>
-                <!-- <select
-  [value]="trip.status"
-  (change)="updateStatus(trip._id, $event)"
-  class="border rounded px-2 py-1"
->
-  <option value="draft">Draft</option>
-  <option value="saved">Saved</option>
-  <option value="archived">Archived</option>
-</select> -->
+              <td class="px-6 py-4" (click)="$event.stopPropagation()">
+                <select
+                  [value]="trip.status"
+                  (change)="updateStatus(trip._id, $event)"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary pr-7 min-w-[100px]"
+                  [class.text-success]="trip.status === 'saved'"
+                  [class.bg-success/10]="trip.status === 'saved'"
+                  [class.border-success/30]="trip.status === 'saved'"
+                  [class.text-warning]="trip.status === 'draft'"
+                  [class.bg-warning/10]="trip.status === 'draft'"
+                  [class.border-warning/30]="trip.status === 'draft'"
+                  [class.text-error]="trip.status === 'archived'"
+                  [class.bg-error/10]="trip.status === 'archived'"
+                  [class.border-error/30]="trip.status === 'archived'"
+                >
+                  @for (status of statusOptions; track status) {
+                    <option [value]="status">{{ status }}</option>
+                  }
+                </select>
               </td>
               <!-- Action column with visible buttons and custom HTML tooltips -->
               <td class="px-6 py-4 text-right" (click)="$event.stopPropagation()">
@@ -239,13 +231,29 @@
     <!-- Pagination Footer -->
     <div class="px-6 py-4 border-t border-border-subtle bg-surface-bright flex items-center justify-between">
       <span class="font-body-md text-body-md text-on-surface-variant">
-        Showing 1-{{ filteredTrips().length }} of {{ filteredTrips().length }} trips
+        Showing {{ showingFrom() }}-{{ showingTo() }} of {{ total() }} trips
       </span>
       <div class="flex items-center gap-2">
-        <button class="p-1 rounded text-outline-variant cursor-not-allowed focus:outline-none">
+        <button
+          (click)="prevPage()"
+          [disabled]="!canGoPrev()"
+          class="p-1 rounded focus:outline-none transition-colors"
+          [class.text-outline-variant]="!canGoPrev()"
+          [class.cursor-not-allowed]="!canGoPrev()"
+          [class.text-on-surface-variant]="canGoPrev()"
+          [class.hover:bg-surface-container-low]="canGoPrev()"
+        >
           <span class="material-symbols-outlined">chevron_left</span>
         </button>
-        <button class="p-1 rounded text-on-surface-variant hover:bg-surface-container-low transition-colors focus:outline-none">
+        <button
+          (click)="nextPage()"
+          [disabled]="!canGoNext()"
+          class="p-1 rounded focus:outline-none transition-colors"
+          [class.text-outline-variant]="!canGoNext()"
+          [class.cursor-not-allowed]="!canGoNext()"
+          [class.text-on-surface-variant]="canGoNext()"
+          [class.hover:bg-surface-container-low]="canGoNext()"
+        >
           <span class="material-symbols-outlined">chevron_right</span>
         </button>
       </div>
