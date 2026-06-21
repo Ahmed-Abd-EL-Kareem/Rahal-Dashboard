@@ -1,8 +1,11 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Trip } from '../../../models/trip.model';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Trip, TripQueryParams } from '../../../models/trip.model';
 import { TripService } from '../../../core/services/trip.service';
 
 @Component({
@@ -15,11 +18,20 @@ import { TripService } from '../../../core/services/trip.service';
 export class TripsListComponent implements OnInit {
   private router = inject(Router);
   private tripService = inject(TripService);
+  private destroyRef = inject(DestroyRef);
+  private searchSubject = new Subject<string>();
 
   // ── Signals ──────────────────────────────────────────────
   searchQuery = signal<string>('');
   selectedType = signal<'All' | 'AI' | 'Manual'>('All');
   selectedBudgetRange = signal<string>('All');
+
+  // Pagination
+  page = signal(1);
+  limit = signal(10);
+  total = signal(0);
+  totalPages = signal(1);
+  isLoading = signal(false);
 
   // Deletion state
   showDeleteConfirm = signal<boolean>(false);
@@ -29,82 +41,131 @@ export class TripsListComponent implements OnInit {
   toastMessage = signal<string | null>(null);
   toastIsError = signal<boolean>(false);
 
-  // Trips from backend
+  // Trips from backend (current page)
   trips = this.tripService.templatesSignal;
 
-  // Derived filter computation (Search and filters combined reactively)
-  filteredTrips = computed(() => {
-    let list = this.trips();
-    const query = this.searchQuery().toLowerCase().trim();
-    const type = this.selectedType();
-    const budgetRange = this.selectedBudgetRange();
+  readonly statusOptions: Trip['status'][] = ['draft', 'saved', 'archived'];
 
-    // 1. Search Query (Case-insensitive matching title/name, destination, status)
-    if (query) {
-      list = list.filter(t => 
-        t.title.toLowerCase().includes(query) ||
-        t.destination.toLowerCase().includes(query) ||
-        t.status.toLowerCase().includes(query)
-      );
-    }
-
-    // 2. Type Filter (AI vs Manual)
-    if (type !== 'All') {
-      if (type === 'AI') {
-        list = list.filter(t => t.isAIGenerated);
-      } else {
-        list = list.filter(t => !t.isAIGenerated);
-      }
-    }
-
-    // 3. Budget Range Filter
-    if (budgetRange !== 'All') {
-      if (budgetRange === 'under2000') {
-        list = list.filter(t => t.estimatedTotalCost < 2000);
-      } else if (budgetRange === '2000to5000') {
-        list = list.filter(t => t.estimatedTotalCost >= 2000 && t.estimatedTotalCost <= 5000);
-      } else if (budgetRange === 'over5000') {
-        list = list.filter(t => t.estimatedTotalCost > 5000);
-      }
-    }
-
-    return list;
+  showingFrom = computed(() => {
+    if (this.total() === 0) return 0;
+    return (this.page() - 1) * this.limit() + 1;
   });
 
+  showingTo = computed(() =>
+    Math.min(this.page() * this.limit(), this.total())
+  );
+
+  canGoPrev = computed(() => this.page() > 1);
+  canGoNext = computed(() => this.page() < this.totalPages());
+
   getUserInitials(trip: Trip): string {
-    const name = trip.user && typeof trip.user === 'object' && trip.user.name 
-      ? trip.user.name 
+    const name = trip.user && typeof trip.user === 'object' && trip.user.name
+      ? trip.user.name
       : 'Client';
     return name.slice(0, 2).toUpperCase();
   }
 
   getUserName(trip: Trip): string {
-    return trip.user && typeof trip.user === 'object' && trip.user.name 
-      ? trip.user.name 
+    return trip.user && typeof trip.user === 'object' && trip.user.name
+      ? trip.user.name
       : 'Client';
   }
 
   ngOnInit(): void {
-    this.refreshData();
+    this.searchSubject
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.page.set(1);
+        this.loadTrips();
+      });
+
+    this.loadTrips();
+  }
+
+  loadTrips(): void {
+    this.isLoading.set(true);
+
+    const params: TripQueryParams = {
+      page: this.page(),
+      limit: this.limit(),
+    };
+
+    const search = this.searchQuery().trim();
+    if (search) params.search = search;
+
+    const type = this.selectedType();
+    if (type === 'AI') params.isAIGenerated = true;
+    else if (type === 'Manual') params.isAIGenerated = false;
+
+    const budgetRange = this.selectedBudgetRange();
+    if (budgetRange !== 'All') params.budgetRange = budgetRange;
+
+    this.tripService.getTemplates(params).subscribe({
+      next: (res) => {
+        this.total.set(res.pagination.total);
+        this.totalPages.set(res.pagination.totalPages);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      },
+    });
   }
 
   refreshData(): void {
-    this.tripService.getTemplates().subscribe();
+    this.loadTrips();
   }
 
   // ── Search & Filters ──────────────────────────────────────
   onSearchInput(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchQuery.set(target.value);
+    this.searchSubject.next(target.value);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.page.set(1);
+    this.loadTrips();
   }
 
   onTypeSelect(type: 'All' | 'AI' | 'Manual'): void {
     this.selectedType.set(type);
+    this.page.set(1);
+    this.loadTrips();
   }
 
   onBudgetRangeChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedBudgetRange.set(target.value);
+    this.page.set(1);
+    this.loadTrips();
+  }
+
+  resetFilters(): void {
+    this.searchQuery.set('');
+    this.selectedType.set('All');
+    this.selectedBudgetRange.set('All');
+    this.page.set(1);
+    this.loadTrips();
+  }
+
+  prevPage(): void {
+    if (this.canGoPrev()) {
+      this.page.update(p => p - 1);
+      this.loadTrips();
+    }
+  }
+
+  nextPage(): void {
+    if (this.canGoNext()) {
+      this.page.update(p => p + 1);
+      this.loadTrips();
+    }
   }
 
   // ── Navigation ──────────────────────────────────────────
@@ -149,6 +210,23 @@ export class TripsListComponent implements OnInit {
     }
   }
 
+  updateStatus(id: string, event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const status = select.value as Trip['status'];
+    const current = this.trips().find(t => t._id === id);
+    if (!current || current.status === status) return;
+
+    this.tripService.updateTripDetails(id, { status }).subscribe({
+      next: () => {
+        this.showToast('Status updated successfully');
+      },
+      error: () => {
+        select.value = current.status;
+        this.showToast('Failed to update status', true);
+      },
+    });
+  }
+
   showToast(message: string, isError = false): void {
     this.toastMessage.set(message);
     this.toastIsError.set(isError);
@@ -159,10 +237,10 @@ export class TripsListComponent implements OnInit {
 
   exportCsv(): void {
     const headers = 'Title,Destination,Budget,Duration,Status,Estimated Cost\n';
-    const rows = this.filteredTrips().map(t => 
+    const rows = this.trips().map(t =>
       `"${t.title}","${t.destination}","${t.budget}",${t.duration} Days,"${t.status}",$${t.estimatedTotalCost}`
     ).join('\n');
-    
+
     const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -173,17 +251,4 @@ export class TripsListComponent implements OnInit {
     link.click();
     document.body.removeChild(link);
   }
-//   updateStatus(id: string, event: Event) {
-//   const status = (event.target as HTMLSelectElement).value;
-
-//   this.tripService.updateTripDetails(id, { status }).subscribe({
-//     next: () => {
-//       this.showToast('Status updated');
-//       this.refreshData();
-//     },
-//     error: () => {
-//       this.showToast('Failed to update status', true);
-//     }
-//   });
-// }
 }

@@ -167,12 +167,12 @@
 
           <!-- Subscription Tier -->
           <div class="w-40 ag-grid-cell">
-            @if (user.subscription === 'pro') {
+           @if (getUserPlanName(user) === 'pro'){
             <span
               class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary-container/10 text-primary font-semibold font-label-sm text-label-sm border border-primary-container/20">
               <ng-icon name="matStarOutline" class="text-[12px]"></ng-icon> Traveler (Pro)
             </span>
-            } @else if (user.subscription === 'enterprise') {
+            } @else if (getUserPlanName(user) === 'enterprise'){
             <span
               class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold font-label-sm text-label-sm border border-indigo-200">
               <ng-icon name="matCardMembershipOutline" class="text-[12px]"></ng-icon> Enterprise

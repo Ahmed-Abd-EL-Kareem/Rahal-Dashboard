@@ -388,11 +388,11 @@
 
 ///////////
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { Trip } from '../../models/trip.model';
+import { Trip, TripQueryParams, TripsListResponse } from '../../models/trip.model';
 import { MOCK_TRIPS, MOCK_TRIP_BY_ID } from '../mocks/trip.mock';
 
 @Injectable({
@@ -407,23 +407,56 @@ export class TripService {
 
   // ── Trip API Methods ──────────────────────────────────────
 
-  getTemplates(): Observable<Trip[]> {
-    console.log('📡 Fetching trip templates from API...');
-    return this.http.get<{ data: Trip[] }>(`${environment.apiUrl}/trips/admin/all`).pipe(
-        tap(res => console.log("FULL RESPONSE", res)),
-      map(res => res.data || []),
-      tap(data => {
-        console.log('✅ Trip templates loaded successfully:', data);
-        this.templatesSignal.set(data);
-      }),
-      catchError((error: HttpErrorResponse) => {
-        console.warn('❌ Failed to fetch trip templates, using mock data:', error);
-        console.warn('Error status:', error.status, 'Message:', error.message);
-        // Fallback to mock data
-        this.templatesSignal.set(MOCK_TRIPS);
-        return of(MOCK_TRIPS);
-      })
-    );
+  getTemplates(params?: TripQueryParams): Observable<TripsListResponse> {
+    let httpParams = new HttpParams();
+    if (params) {
+      if (params.page != null) httpParams = httpParams.set('page', params.page.toString());
+      if (params.limit != null) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.search?.trim()) httpParams = httpParams.set('search', params.search.trim());
+      if (params.status) httpParams = httpParams.set('status', params.status);
+      if (params.isAIGenerated != null) {
+        httpParams = httpParams.set('isAIGenerated', String(params.isAIGenerated));
+      }
+      if (params.category && params.category !== 'All') {
+        httpParams = httpParams.set('interests', params.category.toLowerCase());
+      }
+      if (params.budgetRange && params.budgetRange !== 'All') {
+        httpParams = httpParams.set('budgetRange', params.budgetRange);
+      }
+    }
+
+    return this.http
+      .get<{ data: Trip[]; pagination?: TripsListResponse['pagination'] }>(
+        `${environment.apiUrl}/trips/admin/all`,
+        { params: httpParams }
+      )
+      .pipe(
+        map((res) => ({
+          data: res.data || [],
+          pagination: res.pagination ?? {
+            total: res.data?.length ?? 0,
+            page: params?.page ?? 1,
+            limit: params?.limit ?? 10,
+            totalPages: 1,
+          },
+        })),
+        tap(({ data }) => {
+          this.templatesSignal.set(data);
+        }),
+        catchError((error: HttpErrorResponse) => {
+          console.warn('Failed to fetch trips, using mock data:', error);
+          this.templatesSignal.set(MOCK_TRIPS);
+          return of({
+            data: MOCK_TRIPS,
+            pagination: {
+              total: MOCK_TRIPS.length,
+              page: 1,
+              limit: params?.limit ?? 10,
+              totalPages: 1,
+            },
+          });
+        })
+      );
   }
 
   createTemplate(templateData: any): Observable<Trip> {
@@ -473,7 +506,7 @@ export class TripService {
   getTripDetails(id: string): Observable<Trip> {
     console.log('📡 Fetching trip details for ID:', id);
     return this.http
-      .get<{ data: Trip }>(`${environment.apiUrl}/trips/${id}`)
+      .get<{ data: Trip }>(`${environment.apiUrl}/trips/admin/${id}`)
 
       .pipe(
         map((res) => res.data),
@@ -524,6 +557,9 @@ export class TripService {
       tap(updated => {
         console.log('✅ Trip details updated successfully:', updated);
         this.detailsSignal.update(curr => ({ ...curr, [id]: updated }));
+        this.templatesSignal.update(curr =>
+          curr.map(t => (t._id === id ? { ...t, ...updated } : t))
+        );
       }),
       catchError((error: HttpErrorResponse) => {
         console.warn('❌ Failed to update trip details:', error);
@@ -532,6 +568,9 @@ export class TripService {
         if (currentTrip) {
           const updatedTrip = { ...currentTrip, ...details, updatedAt: new Date().toISOString() };
           this.detailsSignal.update(curr => ({ ...curr, [id]: updatedTrip }));
+          this.templatesSignal.update(curr =>
+            curr.map(t => (t._id === id ? { ...t, ...updatedTrip } : t))
+          );
           return of(updatedTrip);
         }
         return of({ ...details, _id: id } as Trip);

@@ -1,5 +1,13 @@
 export type SubscriptionPlan = 'free' | 'pro';
 
+export interface PopulatedUserSubscription {
+  _id: string;
+  planName?: SubscriptionPlan | string;
+  status?: string;
+  startDate?: string;
+  usage?: SubscriptionUsage;
+}
+
 export interface User {
   _id: string;
   name: string;
@@ -7,7 +15,7 @@ export interface User {
   role: 'user' | 'admin';
   image?: string;
   provider?: 'local' | 'google';
-  subscription?: SubscriptionPlan | string;
+  subscription?: SubscriptionPlan | string | PopulatedUserSubscription;
   createdAt?: string;
   savedTrips?: string[];
   preferredLanguage?: 'en' | 'ar';

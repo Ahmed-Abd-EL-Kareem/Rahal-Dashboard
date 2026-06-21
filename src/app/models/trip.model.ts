@@ -8,6 +8,28 @@ export interface DayItinerary {
   estimatedCost: number;
 }
 
+export interface TripPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface TripQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  isAIGenerated?: boolean;
+  category?: string;
+  budgetRange?: string;
+}
+
+export interface TripsListResponse {
+  data: Trip[];
+  pagination: TripPagination;
+}
+
 export interface Trip {
   _id: string;
   user?: any;
