@@ -1,246 +1,295 @@
-<div class="trip-templates-container">
+<div class="min-h-screen bg-[#f8f9ff] py-6 px-8 flex flex-col gap-6">
   <!-- Page Header -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
-      <h1 class="font-headline-lg text-headline-lg text-on-surface">Trip Templates</h1>
-      <p class="font-body-lg text-body-lg text-on-surface-variant mt-1">Manage and curate starting points for common travel scenarios.</p>
+      <h1 class="text-3xl font-bold text-[#0b1c30]">Trip Templates</h1>
+      <p class="text-slate-500 mt-1 text-sm">Manage and curate starting points for common travel scenarios.</p>
     </div>
-    <button (click)="navigateToCreate()" class="bg-primary hover:bg-secondary text-white font-label-md text-label-md px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap shadow-sm cursor-pointer active:opacity-90">
-      <span class="material-symbols-outlined text-[18px]">add</span>
-      Create New Template
-    </button>
+
+    <div class="flex items-center gap-3">
+      <!-- Search Input -->
+      <div class="relative w-72">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </span>
+        <input type="text" (input)="onSearchInput($event)" [value]="searchQuery()" placeholder="Search templates..."
+          class="w-full pl-10 pr-10 py-2 border border-slate-200 rounded-xl bg-white text-sm outline-none focus:border-[#005c55] focus:ring-1 focus:ring-[#005c55] transition duration-150">
+        @if (searchQuery()) {
+          <button (click)="clearSearch()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer border-none bg-transparent">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        }
+      </div>
+
+      <!-- New Template Button -->
+      <button (click)="navigateToCreate()"
+        class="bg-[#005c55] hover:bg-[#0f766e] text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm hover:shadow transition duration-150 cursor-pointer active:opacity-90">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        New Template
+      </button>
+    </div>
   </div>
 
-  <!-- Search & Category Filter Section -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-border-subtle pb-4">
-    <!-- Categories (Horizontal Scroll on Mobile) -->
-    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 shrink-0">
-      @for (cat of categories; track cat.name) {
-        <button 
-          (click)="onCategorySelect(cat.name)"
-          [class.active-category]="selectedCategory() === cat.name"
-          [class.inactive-category]="selectedCategory() !== cat.name"
-          class="px-4 py-2 rounded-full font-label-md text-label-md whitespace-nowrap flex items-center gap-2 transition-all duration-200 cursor-pointer"
-        >
-          <span class="material-symbols-outlined text-[16px]">{{ cat.icon }}</span>
-          {{ cat.label }}
+  <!-- Filters Bar -->
+  <div
+    class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+        Filters:
+      </span>
+
+      <!-- Category dropdown -->
+      <div class="relative">
+        <select (change)="onCategorySelect($any($event.target).value)" [value]="selectedCategory()"
+          class="appearance-none pl-3 pr-8 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#005c55] cursor-pointer text-slate-700 font-medium">
+          <option value="All">Category: All</option>
+          @for (cat of categories; track cat.name) {
+            @if (cat.name !== 'All') {
+              <option [value]="cat.name">{{ cat.label }}</option>
+            }
+          }
+        </select>
+        <div class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Reset Filters Button -->
+      @if (searchQuery() || selectedCategory() !== 'All') {
+        <button (click)="resetFilters()"
+          class="px-2.5 py-1.5 border border-dashed border-slate-300 rounded-lg text-[#005c55] hover:bg-[#e6f4f2] text-xs font-bold transition duration-150 cursor-pointer">
+          Reset Filters
         </button>
       }
     </div>
-
-    <!-- Search Input -->
-    <div class="relative w-full md:w-80">
-      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-      <input 
-        type="text" 
-        [value]="searchQuery()" 
-        (input)="onSearchInput($event)"
-        class="w-full bg-surface-light border border-border-subtle rounded-lg pl-10 pr-4 py-2 font-body-md text-body-md focus:outline-none focus:border-primary transition-colors text-on-surface" 
-        placeholder="Search templates by title, destination, status..."
-      />
-      @if (searchQuery()) {
-        <button (click)="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
-          <span class="material-symbols-outlined text-[16px]">close</span>
-        </button>
-      }
-    </div>
   </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="py-12 flex flex-col items-center justify-center gap-3">
+      <span class="w-10 h-10 border-4 border-[#005c55] border-t-transparent rounded-full animate-spin"></span>
+      <span class="text-sm text-slate-500 font-medium">Loading templates...</span>
+    </div>
+  }
 
   <!-- Empty State -->
   @if (templates().length === 0 && !isLoading()) {
-    <div class="flex flex-col items-center justify-center py-16 px-4 bg-surface-light rounded-2xl border border-dashed border-border-subtle shadow-sm text-center">
-      <span class="material-symbols-outlined text-outline text-6xl mb-4 select-none">travel_explore</span>
-      <h3 class="text-title-lg font-semibold text-on-surface mb-2">No templates found</h3>
-      <p class="text-body-md text-on-surface-variant max-w-md">
-        We couldn't find any templates matching your criteria. Try adjusting your search keywords or checking a different category.
-      </p>
-      <button (click)="resetFilters()" class="mt-6 px-4 py-2 border border-border-subtle rounded-lg text-primary hover:bg-surface-container-low transition-colors text-label-md font-semibold cursor-pointer">
-        Reset filters
+    <div class="border border-dashed border-slate-200 rounded-2xl py-16 px-4 bg-white flex flex-col items-center justify-center text-slate-400 gap-3">
+      <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div class="text-center">
+        <span class="text-sm font-semibold text-slate-700 block">No templates found</span>
+        <span class="text-xs text-slate-400 mt-1 block">Try adjusting your search filters.</span>
+      </div>
+      <button (click)="resetFilters()" class="mt-2 px-4 py-2 border border-slate-200 rounded-xl text-[#005c55] hover:bg-[#e6f4f2] transition text-sm font-semibold cursor-pointer">
+        Reset Filters
       </button>
     </div>
-  } @else {
-    <!-- Template Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+  }
+
+  <!-- Grid Container -->
+  @if (templates().length > 0 && !isLoading()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       @for (template of templates(); track template._id) {
-        <div (click)="navigateToDetails(template._id)" class="card bg-surface-light rounded-xl border border-border-subtle overflow-hidden hover:shadow-md transition-all duration-300 group flex flex-col relative cursor-pointer"
-             [class.ai-card]="template.isAIGenerated">
+        <div (click)="navigateToDetails(template._id)" class="group bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition duration-200 flex flex-col relative">
           
-          <!-- AI Background Glow effect -->
-          @if (template.isAIGenerated) {
-            <div class="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-secondary to-primary-container opacity-40 blur-[2px] -z-10 group-hover:opacity-60 transition-opacity duration-300"></div>
-            <div class="absolute top-2 right-2 m-1 z-20 text-secondary bg-surface-light/95 backdrop-blur-sm rounded-full p-1.5 shadow-sm flex items-center justify-center" title="AI Generated">
-              <span class="material-symbols-outlined text-[16px] animate-pulse">auto_awesome</span>
-            </div>
-          }
+          <!-- Card Image -->
+          <div class="relative w-full h-48 bg-slate-100 overflow-hidden cursor-pointer">
+            <img [src]="template.imageUrl || 'https://res.cloudinary.com/dczf74z1r/image/upload/v1718000000/family-classic.jpg'" [alt]="template.title"
+              class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
 
-          <!-- Image Container -->
-          <div class="h-44 relative overflow-hidden bg-surface-container-low">
-            <img 
-              [src]="template.imageUrl || 'https://res.cloudinary.com/dczf74z1r/image/upload/v1718000000/family-classic.jpg'" 
-              [alt]="template.title" 
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-            />
-            
             <!-- Category Badge -->
-            <div 
-              [ngClass]="getCategoryClass(template)"
-              class="absolute top-3 left-3 backdrop-blur-sm px-2.5 py-1 rounded text-xs font-semibold tracking-wide uppercase flex items-center gap-1.5 shadow-sm"
-            >
-              <span class="material-symbols-outlined text-[14px]">{{ getCategoryIcon(template) }}</span>
+            <span
+              class="absolute bottom-3 left-3 px-2.5 py-1 rounded text-[10px] font-bold tracking-wider uppercase text-white shadow-sm"
+              [ngClass]="{
+                'bg-[#005c55]': getCategoryName(template) === 'Family',
+                'bg-purple-600': getCategoryName(template) === 'Luxury',
+                'bg-amber-600': getCategoryName(template) === 'Adventure',
+                'bg-cyan-500': getCategoryName(template) === 'Weekend'
+              }">
               {{ getCategoryName(template) }}
-            </div>
+            </span>
 
-            <!-- Action Buttons on Card (Only for manual templates) -->
-            @if (!template.isAIGenerated) {
-              <div class="absolute top-3 right-3 flex items-center gap-1.5 z-20">
-                <!-- Edit Action -->
-                <button 
-                  (click)="navigateToEdit(template._id, $event)"
-                  class="edit-btn p-1.5 bg-surface-light/90 backdrop-blur-sm rounded-full text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all duration-200 cursor-pointer shadow-sm relative group/btn"
-                  title="Edit Template"
-                >
-                  <span class="material-symbols-outlined text-[16px]">edit</span>
-                  <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-0.5 bg-surface-dark text-on-primary text-[9px] rounded opacity-0 pointer-events-none group-hover/btn:opacity-100 transition-opacity z-30 whitespace-nowrap">
-                    Edit
-                  </span>
-                </button>
-                
-                <!-- Delete Action -->
-                <button 
-                  (click)="triggerDelete(template._id, $event)"
-                  class="delete-btn p-1.5 bg-surface-light/90 backdrop-blur-sm rounded-full text-on-surface-variant hover:text-error hover:bg-error-container/20 transition-all duration-200 cursor-pointer shadow-sm relative group/btn"
-                  title="Delete Template"
-                >
-                  <span class="material-symbols-outlined text-[16px]">delete</span>
-                  <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-0.5 bg-error text-white text-[9px] rounded opacity-0 pointer-events-none group-hover/btn:opacity-100 transition-opacity z-30 whitespace-nowrap">
-                    Delete
-                  </span>
-                </button>
-              </div>
+            <!-- AI Sparkle Badge -->
+            @if (template.isAIGenerated) {
+               <span class="absolute top-3 right-3 text-secondary bg-white/95 backdrop-blur-sm rounded-full p-1.5 shadow-sm flex items-center justify-center" title="AI Generated">
+                 <svg class="w-4 h-4 text-purple-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                   <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM14 1a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0V7h-3a1 1 0 110-2h3V2a1 1 0 011-1z" clip-rule="evenodd"/>
+                 </svg>
+               </span>
             }
           </div>
 
-          <!-- Card Content -->
-          <div class="p-5 flex-1 flex flex-col bg-surface-light z-10">
-            <h3 class="font-title-lg text-title-lg text-on-surface mb-2 flex items-center flex-wrap gap-1.5 font-bold">
-              {{ template.title }}
-              @if (template.isAIGenerated) {
-                <span class="text-[10px] font-semibold tracking-wider text-secondary uppercase bg-secondary-container/20 px-2 py-0.5 rounded-full">AI</span>
-              }
-            </h3>
-            
-            <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4 leading-relaxed font-normal">
-              {{ template.summary || 'Enjoy a curated, custom itinerary optimized for your group.' }}
-            </p>
+          <!-- Card Body -->
+          <div class="p-5 flex-1 flex flex-col justify-between gap-4">
+            <div>
+              <!-- Title & Actions Row -->
+              <div class="flex justify-between items-start gap-2">
+                <h3 class="font-bold text-slate-800 text-lg group-hover:text-[#005c55] transition duration-150 leading-snug cursor-pointer flex-1 line-clamp-2">
+                  {{ template.title }}
+                </h3>
 
-            <!-- Duration & Cost metrics -->
-            <div class="mt-auto grid grid-cols-2 gap-y-3 gap-x-4 border-t border-border-subtle pt-4 text-sm font-semibold">
-              <div>
-                <div class="text-[10px] font-semibold text-outline mb-1 uppercase tracking-wider">Duration</div>
-                <div class="font-semibold text-on-surface flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-[16px] text-primary">calendar_today</span> 
-                  {{ template.duration }} {{ template.duration === 1 ? 'Day' : 'Days' }}
-                </div>
+                <!-- Actions Menu for Manual templates -->
+                @if (!template.isAIGenerated) {
+                  <div class="flex items-center gap-1.5 shrink-0" (click)="$event.stopPropagation()">
+                    <!-- Edit -->
+                    <button (click)="navigateToEdit(template._id, $event)" 
+                      class="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-slate-50 transition cursor-pointer" 
+                      title="Edit Template">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    
+                    <!-- Delete -->
+                    <button (click)="triggerDelete(template._id, $event)" 
+                      class="text-slate-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-slate-50 transition cursor-pointer" 
+                      title="Delete Template">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                }
               </div>
-              <div>
-                <div class="text-[10px] font-semibold text-outline mb-1 uppercase tracking-wider">Budget</div>
-                <div class="font-semibold text-on-surface flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-[16px] text-primary">payments</span> 
-                  <span class="capitalize text-xs">{{ template.budget }}</span>
+
+              <!-- Summary -->
+              <p class="text-slate-500 text-xs mt-2 leading-relaxed line-clamp-2">
+                {{ template.summary || 'Enjoy a curated, custom itinerary optimized for your group.' }}
+              </p>
+
+              <!-- Duration & Budget Metrics -->
+              <div class="mt-4 flex flex-col gap-2 text-xs text-slate-500 font-medium">
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Duration: <span class="font-semibold text-slate-700">{{ template.duration }} {{ template.duration === 1 ? 'Day' : 'Days' }}</span></span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 14a2 2 0 110-4h2.5" />
+                  </svg>
+                  <span>Budget: <span class="capitalize font-semibold text-slate-700">{{ template.budget }}</span></span>
                 </div>
               </div>
             </div>
 
-            <!-- Interests (Tags) -->
-            <div class="mt-4 flex flex-wrap gap-1.5">
+            <!-- Card Footer (Interests Tags) -->
+            <div class="flex flex-wrap gap-1 border-t border-slate-100 pt-3 mt-auto">
               @for (tag of template.interests; track tag) {
-                <span class="px-2 py-1 bg-surface-container-low text-on-surface-variant rounded font-label-sm text-label-sm border border-outline-variant/10">
+                <span class="px-2 py-0.5 bg-slate-50 text-slate-500 rounded text-[9px] font-semibold uppercase tracking-wider border border-slate-100">
                   {{ tag }}
                 </span>
-              }
+               }
             </div>
           </div>
 
         </div>
       }
     </div>
+  }
 
-    <!-- Pagination Footer -->
-    @if (total() > 0) {
-      <div class="mt-6 px-2 py-4 border-t border-border-subtle flex items-center justify-between">
-        <span class="font-body-md text-body-md text-on-surface-variant">
-          Showing {{ showingFrom() }}-{{ showingTo() }} of {{ total() }} templates
-        </span>
-        <div class="flex items-center gap-2">
-          <button
-            (click)="prevPage()"
-            [disabled]="!canGoPrev()"
-            class="p-1 rounded focus:outline-none transition-colors"
-            [class.text-outline-variant]="!canGoPrev()"
-            [class.cursor-not-allowed]="!canGoPrev()"
-            [class.text-on-surface-variant]="canGoPrev()"
-            [class.hover:bg-surface-container-low]="canGoPrev()"
-          >
-            <span class="material-symbols-outlined">chevron_left</span>
+  <!-- Pagination Footer -->
+  @if (total() > 0 && !isLoading()) {
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+      
+      <div class="text-xs font-semibold text-slate-500">
+        Showing <span class="text-slate-800">{{ showingFrom() }}</span> to
+        <span class="text-slate-800">{{ showingTo() }}</span> of
+        <span class="text-slate-800">{{ total() }}</span> templates
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-1">
+          <!-- Prev Button -->
+          <button type="button" (click)="prevPage()" [disabled]="!canGoPrev()"
+            class="p-2 rounded-lg border border-slate-200 hover:border-[#005c55] hover:bg-[#e6f4f2] hover:text-[#005c55] text-slate-500 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-slate-200 disabled:hover:text-slate-500 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
-          <button
-            (click)="nextPage()"
-            [disabled]="!canGoNext()"
-            class="p-1 rounded focus:outline-none transition-colors"
-            [class.text-outline-variant]="!canGoNext()"
-            [class.cursor-not-allowed]="!canGoNext()"
-            [class.text-on-surface-variant]="canGoNext()"
-            [class.hover:bg-surface-container-low]="canGoNext()"
-          >
-            <span class="material-symbols-outlined">chevron_right</span>
+
+          <span class="px-3 py-1.5 rounded-lg bg-[#005c55] text-white text-xs font-bold">
+            {{ page() }} / {{ totalPages() }}
+          </span>
+
+          <!-- Next Button -->
+          <button type="button" (click)="nextPage()" [disabled]="!canGoNext()"
+            class="p-2 rounded-lg border border-slate-200 hover:border-[#005c55] hover:bg-[#e6f4f2] hover:text-[#005c55] text-slate-500 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-slate-200 disabled:hover:text-slate-500 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       </div>
-    }
-  }
 
-  <!-- Delete Confirmation Modal -->
-  @if (showDeleteConfirm()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/50 backdrop-blur-sm transition-opacity duration-300">
-      <div class="bg-surface-light rounded-xl border border-border-subtle shadow-xl w-full max-w-sm overflow-hidden p-6 flex flex-col gap-4 scale-100 transition-transform duration-300">
-        
-        <div class="flex items-center gap-3 text-error">
-          <span class="material-symbols-outlined text-3xl">warning</span>
-          <h2 class="text-title-lg font-bold text-on-surface">Delete Template</h2>
-        </div>
-
-        <p class="text-body-md text-on-surface-variant">
-          Are you sure you want to delete this trip template? This action is permanent and cannot be undone.
-        </p>
-
-        <div class="flex justify-end gap-3 mt-2">
-          <button 
-            (click)="closeDeleteConfirm()"
-            class="px-4 py-2 border border-border-subtle rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors text-label-md font-semibold cursor-pointer focus:outline-none"
-          >
-            Cancel
-          </button>
-          <button 
-            (click)="confirmDelete()"
-            class="px-4 py-2 bg-error hover:bg-danger text-white rounded-lg transition-colors text-label-md font-semibold cursor-pointer active:opacity-90 shadow-sm focus:outline-none"
-          >
-            Delete
-          </button>
-        </div>
-
-      </div>
-    </div>
-  }
-
-  <!-- Custom Toast Notification -->
-  @if (toastMessage()) {
-    <div 
-      [class.bg-success]="!toastIsError()" 
-      [class.bg-error]="toastIsError()"
-      class="fixed bottom-5 right-5 z-50 px-4 py-3 text-white rounded-lg shadow-lg flex items-center gap-2 transition-all duration-300"
-    >
-      <span class="material-symbols-outlined">{{ toastIsError() ? 'error' : 'check_circle' }}</span>
-      <span class="font-semibold text-sm">{{ toastMessage() }}</span>
     </div>
   }
 </div>
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteConfirm()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-sm overflow-hidden p-6 flex flex-col gap-4 scale-100 transition-transform duration-300">
+      
+      <div class="flex items-center gap-3 text-red-600">
+        <svg class="w-8 h-8 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <h2 class="text-lg font-bold text-slate-800">Delete Template</h2>
+      </div>
+
+      <p class="text-sm text-slate-500 leading-relaxed">
+        Are you sure you want to delete this trip template? This action is permanent and cannot be undone.
+      </p>
+
+      <div class="flex justify-end gap-3 mt-2">
+        <button 
+          (click)="closeDeleteConfirm()"
+          class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition text-sm font-semibold cursor-pointer focus:outline-none"
+        >
+          Cancel
+        </button>
+        <button 
+          (click)="confirmDelete()"
+          class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition text-sm font-semibold cursor-pointer active:opacity-90 shadow-sm focus:outline-none"
+        >
+          Delete
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- Custom Toast Notification -->
+@if (toastMessage()) {
+  <div 
+    [class.bg-[#005c55]]="!toastIsError()" 
+    [class.bg-red-600]="toastIsError()"
+    class="fixed bottom-5 right-5 z-50 px-4 py-3 text-white rounded-xl shadow-lg flex items-center gap-2 transition-all duration-300"
+  >
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      @if (toastIsError()) {
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      } @else {
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      }
+    </svg>
+    <span class="font-semibold text-sm">{{ toastMessage() }}</span>
+  </div>
+}

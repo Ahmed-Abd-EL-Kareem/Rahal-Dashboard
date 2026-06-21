@@ -227,9 +227,26 @@ export class UsersComponent implements OnInit {
     this.showToast('CSV export downloaded successfully', 'success');
   }
 
+private generateSlug(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9_-]/g, '')
+    .replace(/-+/g, '-');
+}
+
   viewUserDetails(user: User): void {
-    void this.router.navigate(['/dashboard/users', user._id]);
-  }
+  const userSlug = this.generateSlug(user.name);
+
+  void this.router.navigate(['/dashboard/users', userSlug], {
+    state: { id: user._id }
+  });
+}
+
+// viewUserDetails(user: User): void {
+//     void this.router.navigate(['/dashboard/users', user._id]);
+//   }
 
   getInitials(name: string): string {
     if (!name) return 'U';

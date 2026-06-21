@@ -65,20 +65,20 @@
             >{{ item.label }}</span
           >
 
-          @if (item.badge && !collapsed()) {
+          <!-- @if (item.badge && !collapsed()) {
             <span
               class="ml-auto shrink-0 flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold bg-warning text-on-surface"
             >
               {{ item.badge }}
             </span>
-          }
+          } -->
         </a>
       }
     }
   </div>
 
   <div class="mt-auto pt-4 border-t border-border-subtle flex flex-col gap-1">
-    <a
+    <!-- <a
       [routerLink]="'/dashboard/settings'"
       class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-colors cursor-pointer group"
       [title]="collapsed() ? 'Support' : ''"
@@ -89,7 +89,7 @@
         [class.hidden]="collapsed()"
         >Support</span
       >
-    </a>
+    </a> -->
     <a
       (click)="logout()"
       class="flex items-center gap-3 px-4 py-2 rounded-lg text-danger hover:bg-error-container transition-colors cursor-pointer group"

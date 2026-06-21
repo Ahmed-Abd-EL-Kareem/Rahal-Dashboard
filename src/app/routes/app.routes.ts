@@ -30,9 +30,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: '',
-        loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
-      },
+  path: '',
+  loadComponent: () =>
+    import('../features/Dashboard/dashboard/dashboard')
+      .then(c => c.DashboardComponent)
+},
       {
         path: 'analytics',
         loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
@@ -42,7 +44,7 @@ export const routes: Routes = [
         loadComponent: () => import('../shared/components/user/user').then(c => c.UsersComponent)
       },
       {
-        path: 'users/:id',
+        path: 'users/:name',
         loadComponent: () => import('../shared/components/user-details/user-details').then(c => c.UserDetailsComponent)
       },
       {
@@ -61,12 +63,11 @@ export const routes: Routes = [
         path: 'destinations/:slug',
         loadComponent: () => import('../features/destinations/details/destination-details').then(c => c.DestinationDetailsComponent)
       },
- {
-  path: 'hotels',
-  loadChildren: () =>
-    import('../features/hotels/hotels.routes')
-      .then(r => r.HOTELS_ROUTES)
-},
+      {
+        path: 'hotels',
+        loadChildren: () =>
+          import('../features/hotels/hotels.routes').then(r => r.HOTELS_ROUTES)
+      },
       {
         path: 'trips',
         loadComponent: () => import('../features/trips/trips-list/trips-list.component').then(c => c.TripsListComponent)
@@ -97,21 +98,45 @@ export const routes: Routes = [
         path: 'trip-templates/edit/:id',
         loadComponent: () => import('../features/trips/edit-template/edit-template.component').then(c => c.EditTemplateComponent)
       },
-  {
-  path: 'bookings',
-  loadComponent: () => import('../features/hotels/hotel-bookings/hotel-bookings').then(m => m.HotelBookingsComponent),
-},
+      {
+        path: 'bookings',
+        loadComponent: () => import('../features/hotels/hotel-bookings/hotel-bookings').then(m => m.HotelBookingsComponent),
+      },
       {
         path: 'ai-usage',
         loadComponent: () => import('../features/ai-usage/ai-usage.component').then(c => c.AIUsageComponent)
       },
+
+      // ── Subscriptions ──────────────────────────────────────────────────────
       {
         path: 'subscriptions',
-        loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
+        loadComponent: () =>
+          import('../features/Subscription/pages/admin-subscription-plans/admin-subscription-plans')
+            .then(c => c.AdminSubscriptionsComponent),
       },
+      
+       
+{
+  path: 'subscription',
+  loadComponent: () =>
+    import('../features/Subscription/pages/subscription-plans/subscription-plans')
+      .then(c => c.SubscriptionsComponent),
+},
+      
+  {
+  path: 'admin-plans',
+  loadComponent: () =>
+    import('../features/Subscription/pages/admin-plans-componentmag/admin-plans-componentmag')
+      .then(c => c.AdminPlansComponent),
+},    // ──────────────────────────────────────────────────────────────────────
+
       {
         path: 'payments',
-        loadComponent: () => import('../shared/components/placeholder/placeholder.component').then(c => c.PlaceholderComponent)
+        loadComponent: () => import('../features/payments/payments').then(c => c.Payments)
+      },
+      {
+        path: 'payments/:id',
+        loadComponent: () => import('../features/payments/payment-details/payment-details').then(c => c.PaymentDetails)
       },
       {
         path: 'stripe',
@@ -125,4 +150,3 @@ export const routes: Routes = [
   },
   { path: '**', redirectTo: '/login' }
 ];
-
