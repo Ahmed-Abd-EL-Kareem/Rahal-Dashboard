@@ -178,13 +178,13 @@
 
       </div>
 
-      <!-- STEP 2: LOCATION -->
+  <!-- STEP 2: LOCATION -->
       <div *ngIf="currentStep() === 2" class="p-8 md:p-10 flex flex-col gap-6 animate-fade-in">
         <div class="border-b border-slate-100 pb-4">
           <h2 class="text-xl font-bold text-slate-800">Step 2: Geographic Location</h2>
         </div>
-
-        <!-- Location Presets (Quick Setup) -->
+ 
+        <!-- Location Presets -->
         <div class="flex flex-col gap-3">
           <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Quick Fill Presets</span>
           <div class="flex flex-wrap gap-2">
@@ -195,39 +195,47 @@
             </button>
           </div>
         </div>
-
+ 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- City -->
+ 
+          <!-- City with Local Governorate Search -->
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">City Name *</label>
-            <div class="relative">
-              <input type="text" formControlName="city" placeholder="e.g. Cairo — type to search"
+            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">City / Governorate *</label>
+            <!--  z-50 on wrapper so dropdown floats above map -->
+            <div class="relative z-50">
+              <input
+                type="text"
+                formControlName="city"
+                placeholder="e.g. Cairo — type to search"
                 class="w-full px-4 py-3 rounded-lg border text-sm transition outline-none"
-                [ngClass]="destinationForm.get('city')?.touched && destinationForm.get('city')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'"
-                (input)="onCityInput($event)" (blur)="closeCityDropdown()" autocomplete="off">
-              <!-- Loading spinner -->
-              <div *ngIf="citySearchLoading()" class="absolute inset-y-0 right-3 flex items-center">
-                <span class="w-4 h-4 border-2 border-[#005c55] border-t-transparent rounded-full animate-spin"></span>
-              </div>
-              <!-- Dropdown results -->
-              <ul *ngIf="citySearchOpen() && citySearchResults().length > 0"
-                class="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden max-h-52 overflow-y-auto">
-                <li *ngFor="let r of citySearchResults()" (mousedown)="selectCityResult(r)"
-                  class="px-4 py-2.5 text-sm text-slate-700 hover:bg-[#005c55]/10 hover:text-[#005c55] cursor-pointer flex flex-col gap-0.5 transition">
-                  <span class="font-medium">{{ r.address?.city || r.address?.town || r.address?.village ||
-                    r.address?.county || r.name }}</span>
-                  <span class="text-[11px] text-slate-400 truncate">{{ r.display_name }}</span>
+                [ngClass]="destinationForm.get('city')?.touched && destinationForm.get('city')?.invalid
+                  ? 'border-red-400 focus:border-red-500'
+                  : 'border-slate-200 focus:border-[#005c55]'"
+                (input)="onCityInput($event)"
+                (blur)="closeCityDropdown()"
+                autocomplete="off"
+              />
+              <!--  z-[999] ensures dropdown is always above the Leaflet map -->
+              <ul
+                *ngIf="citySearchOpen() && citySearchResults().length > 0"
+                class="absolute z-[999] left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden max-h-52 overflow-y-auto">
+                <li
+                  *ngFor="let gov of citySearchResults()"
+                  (mousedown)="selectCityResult(gov)"
+                  class="px-4 py-2.5 text-sm text-slate-700 hover:bg-[#005c55]/10 hover:text-[#005c55] cursor-pointer flex items-center justify-between gap-2 transition">
+                  <span class="font-medium">{{ gov.nameEn }}</span>
+                  <span class="text-slate-400 text-xs" dir="rtl">{{ gov.nameAr }}</span>
                 </li>
               </ul>
             </div>
           </div>
-
-          <!-- Region -->
+ 
+          <!-- Region (auto-filled, still editable) -->
           <div class="flex flex-col gap-2">
             <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Region *</label>
             <div class="relative">
               <select formControlName="region"
-                class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm transition outline-none appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em] bg-white cursor-pointer"
+                class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm transition outline-none appearance-none bg-white cursor-pointer"
                 [ngClass]="destinationForm.get('region')?.touched && destinationForm.get('region')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'">
                 <option value="" disabled selected>Select Egyptian region</option>
                 <option *ngFor="let reg of regions" [value]="reg">{{ reg }}</option>
@@ -238,17 +246,14 @@
             </div>
           </div>
         </div>
-
+ 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Latitude -->
           <div class="flex flex-col gap-2">
             <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Latitude *</label>
             <input type="number" step="any" formControlName="latitude" placeholder="e.g. 29.9792"
               class="w-full px-4 py-3 rounded-lg border text-sm transition outline-none"
               [ngClass]="destinationForm.get('latitude')?.touched && destinationForm.get('latitude')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'">
           </div>
-
-          <!-- Longitude -->
           <div class="flex flex-col gap-2">
             <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Longitude *</label>
             <input type="number" step="any" formControlName="longitude" placeholder="e.g. 31.1342"
@@ -256,16 +261,14 @@
               [ngClass]="destinationForm.get('longitude')?.touched && destinationForm.get('longitude')?.invalid ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-[#005c55]'">
           </div>
         </div>
-
-        <!-- Location Picker -->
+ 
+        <!-- Interactive Map Picker —  no overflow-hidden, z-index: 0 keeps it below dropdown -->
         <div class="flex flex-col gap-2">
           <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Interactive Map Picker</label>
           <div #map
-            class="relative w-full h-56 rounded-xl border border-slate-200 bg-slate-100 overflow-hidden flex flex-col justify-end p-4 shadow-inner"
-            style="height: 400px;">
-            <!-- Coordinates overlay -->
-            <div
-              class="flex justify-between items-center bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-slate-200/50 shadow-md">
+            class="relative w-full rounded-xl border border-slate-200 bg-slate-100 flex flex-col justify-end p-4 shadow-inner"
+            style="height: 400px; z-index: 0;">
+            <div class="flex justify-between items-center bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-slate-200/50 shadow-md">
               <div class="flex flex-col">
                 <span class="text-xs font-semibold text-slate-800">Coordinates Loaded</span>
                 <span class="text-[10px] text-slate-500">Auto-resolved destination location.</span>
@@ -281,6 +284,7 @@
           </div>
         </div>
       </div>
+
 
       <!-- STEP 3: CONTENT & ATTRACTIONS -->
       <div *ngIf="currentStep() === 3" class="p-8 md:p-10 flex flex-col gap-6 animate-fade-in">

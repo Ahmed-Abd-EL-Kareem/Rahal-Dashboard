@@ -30,17 +30,12 @@ import { Location } from '@angular/common';
 import { effect } from '@angular/core';
 import * as L from 'leaflet';
 
-// L.Icon.Default.mergeOptions({
-//   iconRetinaUrl: '/assets/marker-icon-2x.png',
-//   iconUrl: '/assets/marker-icon.png',
-//   shadowUrl: '/assets/marker-shadow.png'
-// });
-
 L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
+
 @Component({
   selector: 'app-destination-edit',
   imports: [CommonModule, ReactiveFormsModule, RouterLink, NgIconComponent],
@@ -101,36 +96,44 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
   ];
 
   monthsList = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+
+  egyptianGovernorates = [
+    { nameEn: 'Cairo', nameAr: 'القاهرة', lat: 30.0444, lng: 31.2357, region: 'Lower Egypt' },
+    { nameEn: 'Giza', nameAr: 'الجيزة', lat: 30.0131, lng: 31.2089, region: 'Lower Egypt' },
+    { nameEn: 'Alexandria', nameAr: 'الإسكندرية', lat: 31.2001, lng: 29.9187, region: 'Mediterranean' },
+    { nameEn: 'Luxor', nameAr: 'الأقصر', lat: 25.6872, lng: 32.6396, region: 'Upper Egypt' },
+    { nameEn: 'Aswan', nameAr: 'أسوان', lat: 24.0889, lng: 32.8998, region: 'Upper Egypt' },
+    { nameEn: 'Sohag', nameAr: 'سوهاج', lat: 26.5592, lng: 31.6957, region: 'Upper Egypt' },
+    { nameEn: 'Qena', nameAr: 'قنا', lat: 26.1551, lng: 32.7160, region: 'Upper Egypt' },
+    { nameEn: 'Asyut', nameAr: 'أسيوط', lat: 27.1783, lng: 31.1859, region: 'Upper Egypt' },
+    { nameEn: 'Minya', nameAr: 'المنيا', lat: 28.0871, lng: 30.7618, region: 'Upper Egypt' },
+    { nameEn: 'Beni Suef', nameAr: 'بني سويف', lat: 29.0744, lng: 31.0978, region: 'Upper Egypt' },
+    { nameEn: 'Fayoum', nameAr: 'الفيوم', lat: 29.3084, lng: 30.8428, region: 'Upper Egypt' },
+    { nameEn: 'Qalyubia', nameAr: 'القليوبية', lat: 30.4100, lng: 31.1800, region: 'Delta' },
+    { nameEn: 'Monufia', nameAr: 'المنوفية', lat: 30.5200, lng: 30.9900, region: 'Delta' },
+    { nameEn: 'Gharbia', nameAr: 'الغربية', lat: 30.7900, lng: 31.0000, region: 'Delta' },
+    { nameEn: 'Dakahlia', nameAr: 'الدقهلية', lat: 31.0500, lng: 31.3800, region: 'Delta' },
+    { nameEn: 'Sharqia', nameAr: 'الشرقية', lat: 30.5900, lng: 31.5000, region: 'Delta' },
+    { nameEn: 'Beheira', nameAr: 'البحيرة', lat: 31.0400, lng: 30.4700, region: 'Lower Egypt' },
+    { nameEn: 'Damietta', nameAr: 'دمياط', lat: 31.4175, lng: 31.8144, region: 'Mediterranean' },
+    { nameEn: 'Port Said', nameAr: 'بورسعيد', lat: 31.2653, lng: 32.3019, region: 'Mediterranean' },
+    { nameEn: 'Ismailia', nameAr: 'الإسماعيلية', lat: 30.6044, lng: 32.2742, region: 'Red Sea' },
+    { nameEn: 'Suez', nameAr: 'السويس', lat: 29.9668, lng: 32.5498, region: 'Red Sea' },
+    { nameEn: 'Red Sea', nameAr: 'البحر الأحمر', lat: 26.7292, lng: 33.9365, region: 'Red Sea' },
+    { nameEn: 'Matrouh', nameAr: 'مطروح', lat: 31.3543, lng: 27.2373, region: 'Western Desert' },
+    { nameEn: 'New Valley', nameAr: 'الوادي الجديد', lat: 25.4514, lng: 30.5487, region: 'Western Desert' },
+    { nameEn: 'North Sinai', nameAr: 'شمال سيناء', lat: 30.8000, lng: 33.8000, region: 'Sinai' },
+    { nameEn: 'South Sinai', nameAr: 'جنوب سيناء', lat: 29.3000, lng: 34.0000, region: 'Sinai' },
+    { nameEn: 'Kafr El Sheikh', nameAr: 'كفر الشيخ', lat: 31.1100, lng: 30.9400, region: 'Delta' },
   ];
 
   locationPresets = [
     { name: 'Pyramids of Giza', lat: 29.9792, lng: 31.1342, city: 'Giza', region: 'Lower Egypt' },
-    {
-      name: 'Karnak Temple (Luxor)',
-      lat: 25.7188,
-      lng: 32.6573,
-      city: 'Luxor',
-      region: 'Upper Egypt',
-    },
-    {
-      name: 'Sharm El Sheikh',
-      lat: 27.9158,
-      lng: 34.3299,
-      city: 'Sharm El Sheikh',
-      region: 'Sinai',
-    },
+    { name: 'Karnak Temple (Luxor)', lat: 25.7188, lng: 32.6573, city: 'Luxor', region: 'Upper Egypt' },
+    { name: 'Sharm El Sheikh', lat: 27.9158, lng: 34.3299, city: 'Sharm El Sheikh', region: 'Sinai' },
     { name: 'Aswan High Dam', lat: 23.97, lng: 32.88, city: 'Aswan', region: 'Upper Egypt' },
     { name: 'Siwa Oasis', lat: 29.2032, lng: 25.5189, city: 'Siwa', region: 'Western Desert' },
   ];
@@ -142,12 +145,10 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     isActive: [true],
     taglineEn: ['', Validators.maxLength(60)],
     taglineAr: ['', Validators.maxLength(60)],
-
     city: ['', Validators.required],
     region: ['', Validators.required],
     latitude: [29.9792, [Validators.required, Validators.min(-90), Validators.max(90)]],
     longitude: [31.1342, [Validators.required, Validators.min(-180), Validators.max(180)]],
-
     descriptionEn: ['', Validators.required],
     descriptionAr: ['', Validators.required],
     averageBudgetPerDay: [1200, [Validators.required, Validators.min(0)]],
@@ -160,10 +161,9 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
   galleryUrls = signal<string[]>([]);
   galleryUploading = signal(false);
 
-  citySearchResults = signal<any[]>([]);
-  citySearchLoading = signal(false);
+  // Local search — no API, no loading spinner needed
+  citySearchResults = signal<typeof this.egyptianGovernorates>([]);
   citySearchOpen = signal(false);
-  private cityDebounceTimer: any = null;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -222,8 +222,8 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
       nameAr: destination.name?.ar || '',
       category: destination.category || '',
       isActive: destination.isActive ?? true,
-      taglineEn: taglineEn,
-      taglineAr: taglineAr,
+      taglineEn,
+      taglineAr,
       city: destination.city || '',
       region: destination.region || '',
       latitude: destination.location?.coordinates?.[1] ?? 29.9792,
@@ -251,7 +251,7 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
           this.fb.group({
             nameEn: [att.name?.en || '', Validators.required],
             nameAr: [att.name?.ar || '', Validators.required],
-            type: [att.type || 'historical', Validators.required], // الحفاظ على قيمة الـ Enum الصغيرة
+            type: [att.type || 'historical', Validators.required],
             entryFee: [att.entryFee || 0, [Validators.required, Validators.min(0)]],
           }),
         );
@@ -269,47 +269,33 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
 
+  //  Local filtering — no HTTP call, works from first character
   onCityInput(event: Event): void {
-    const query = (event.target as HTMLInputElement).value.trim();
-    clearTimeout(this.cityDebounceTimer);
-    this.citySearchResults.set([]);
-    this.citySearchOpen.set(false);
-    if (query.length < 2) return;
-    this.citySearchLoading.set(true);
-    this.cityDebounceTimer = setTimeout(() => {
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=6&countrycodes=eg`;
-      this.http.get<any[]>(url, { headers: { 'Accept-Language': 'en' } }).subscribe({
-        next: (results) => {
-          const priority = ['city', 'town', 'village', 'suburb', 'quarter'];
-          const demote = ['administrative', 'boundary'];
-          const rank = (r: any): number => {
-            const t = r.addresstype || r.type || '';
-            if (priority.includes(t)) return 0;
-            if (demote.includes(t)) return 2;
-            return 1;
-          };
-          const sortedResults = [...results].sort((a, b) => rank(a) - rank(b));
-          this.citySearchResults.set(sortedResults);
-          this.citySearchOpen.set(sortedResults.length > 0);
-          this.citySearchLoading.set(false);
-        },
-        error: () => this.citySearchLoading.set(false),
-      });
-    }, 400);
+    const query = (event.target as HTMLInputElement).value.trim().toLowerCase();
+
+    if (query.length < 1) {
+      this.citySearchResults.set([]);
+      this.citySearchOpen.set(false);
+      return;
+    }
+
+    const filtered = this.egyptianGovernorates.filter(
+      (gov) =>
+        gov.nameEn.toLowerCase().startsWith(query) ||
+        gov.nameAr.startsWith(query)
+    );
+
+    this.citySearchResults.set(filtered);
+    this.citySearchOpen.set(filtered.length > 0);
   }
 
-  selectCityResult(result: any): void {
-    const cityName: string =
-      result.address?.city ||
-      result.address?.town ||
-      result.address?.village ||
-      result.address?.county ||
-      result.name ||
-      '';
+  // Auto-fills city, region, lat, lng
+  selectCityResult(gov: (typeof this.egyptianGovernorates)[0]): void {
     this.destinationForm.patchValue({
-      city: cityName,
-      latitude: parseFloat(result.lat),
-      longitude: parseFloat(result.lon),
+      city: gov.nameEn,
+      latitude: gov.lat,
+      longitude: gov.lng,
+      region: gov.region,
     });
     this.citySearchResults.set([]);
     this.citySearchOpen.set(false);
@@ -427,19 +413,16 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
+
     const customIcon = L.icon({
-      // iconUrl: '/assets/marker-icon.png',
-      // iconRetinaUrl: '/assets/marker-icon-2x.png',
-      // shadowUrl: '/assets/marker-shadow.png',
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
       shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       iconSize: [25, 41],
       iconAnchor: [12, 41],
     });
-    this.marker = L.marker(L.latLng(lat, lng), { draggable: true, icon: customIcon }).addTo(
-      this.map,
-    );
+
+    this.marker = L.marker(L.latLng(lat, lng), { draggable: true, icon: customIcon }).addTo(this.map);
     this.marker.on('dragend', () => {
       const pos = this.marker.getLatLng();
       this.destinationForm.patchValue({ latitude: pos.lat, longitude: pos.lng });
@@ -464,13 +447,7 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
 
-  applyPreset(preset: {
-    lat: number;
-    lng: number;
-    city: string;
-    region: string;
-    name?: string;
-  }): void {
+  applyPreset(preset: { lat: number; lng: number; city: string; region: string; name?: string }): void {
     this.destinationForm.patchValue({
       latitude: preset.lat,
       longitude: preset.lng,
@@ -495,11 +472,7 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
 
   isStep1Valid(): boolean {
     const form = this.destinationForm;
-    return !!(
-      form.get('nameEn')?.valid &&
-      form.get('nameAr')?.valid &&
-      form.get('category')?.valid
-    );
+    return !!(form.get('nameEn')?.valid && form.get('nameAr')?.valid && form.get('category')?.valid);
   }
 
   isStep2Valid(): boolean {
@@ -564,9 +537,7 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
         this.destinationForm.get('averageBudgetPerDay')?.markAsTouched();
         this.destinationForm.get('currency')?.markAsTouched();
         this.attractions.markAllAsTouched();
-        this.errorMessage.set(
-          'Please complete the content details and resolve any attraction errors.',
-        );
+        this.errorMessage.set('Please complete the content details and resolve any attraction errors.');
       }
     }
   }
@@ -575,54 +546,30 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    if (!this.isStep1Valid()) {
-      this.currentStep.set(1);
-      this.errorMessage.set('Basic info is incomplete.');
-      return;
-    }
-    if (!this.isStep2Valid()) {
-      this.currentStep.set(2);
-      this.errorMessage.set('Location details are invalid.');
-      return;
-    }
-    if (!this.isStep3Valid()) {
-      this.currentStep.set(3);
-      this.errorMessage.set('Content parameters contain errors.');
-      return;
-    }
+    if (!this.isStep1Valid()) { this.currentStep.set(1); this.errorMessage.set('Basic info is incomplete.'); return; }
+    if (!this.isStep2Valid()) { this.currentStep.set(2); this.errorMessage.set('Location details are invalid.'); return; }
+    if (!this.isStep3Valid()) { this.currentStep.set(3); this.errorMessage.set('Content parameters contain errors.'); return; }
 
     this.loading.set(true);
-
     const fv = this.destinationForm.value;
 
     const generatedSlug = (fv.nameEn || '')
-      .toLowerCase()
-      .trim()
+      .toLowerCase().trim()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-');
 
     const payload = {
-      name: {
-        en: fv.nameEn || '',
-        ar: fv.nameAr || '',
-      },
+      name: { en: fv.nameEn || '', ar: fv.nameAr || '' },
       slug: generatedSlug,
       city: fv.city || '',
       region: fv.region as any,
       category: fv.category as any,
       description: {
-        en: fv.taglineEn
-          ? `${fv.taglineEn.trim()}. ${fv.descriptionEn || ''}`
-          : fv.descriptionEn || '',
-        ar: fv.taglineAr
-          ? `${fv.taglineAr.trim()}. ${fv.descriptionAr || ''}`
-          : fv.descriptionAr || '',
+        en: fv.taglineEn ? `${fv.taglineEn.trim()}. ${fv.descriptionEn || ''}` : fv.descriptionEn || '',
+        ar: fv.taglineAr ? `${fv.taglineAr.trim()}. ${fv.descriptionAr || ''}` : fv.descriptionAr || '',
       },
       attractions: (fv.attractions || []).map((att: any) => ({
-        name: {
-          en: att.nameEn || '',
-          ar: att.nameAr || null,
-        },
+        name: { en: att.nameEn || '', ar: att.nameAr || null },
         type: att.type,
         entryFee: Number(att.entryFee) || 0,
       })),
@@ -639,12 +586,10 @@ export class DestinationEditComponent implements OnInit, AfterViewInit, OnDestro
     };
 
     this.destinationsService.updateDestination(this.destinationId, payload).subscribe({
-      next: (res) => {
+      next: () => {
         this.loading.set(false);
         this.successMessage.set('Destination updated successfully!');
-        setTimeout(() => {
-          this.router.navigate(['/dashboard/destinations']);
-        }, 1500);
+        setTimeout(() => this.router.navigate(['/dashboard/destinations']), 1500);
       },
       error: (err: any) => {
         this.loading.set(false);
